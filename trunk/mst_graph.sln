@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C++ Express 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mst_graph", "mst_graph\mst_graph.vcproj", "{D5C12745-2739-4473-ACCC-CCB0BFB74951}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "analyzer", "..\analyzer\analyzer\analyzer.vcproj", "{8CA6793A-9F6C-4688-9348-45CB287F384E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D5C12745-2739-4473-ACCC-CCB0BFB74951}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D5C12745-2739-4473-ACCC-CCB0BFB74951}.Debug|Win32.Build.0 = Debug|Win32
+		{D5C12745-2739-4473-ACCC-CCB0BFB74951}.Release|Win32.ActiveCfg = Release|Win32
+		{D5C12745-2739-4473-ACCC-CCB0BFB74951}.Release|Win32.Build.0 = Release|Win32
+		{8CA6793A-9F6C-4688-9348-45CB287F384E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8CA6793A-9F6C-4688-9348-45CB287F384E}.Debug|Win32.Build.0 = Debug|Win32
+		{8CA6793A-9F6C-4688-9348-45CB287F384E}.Release|Win32.ActiveCfg = Release|Win32
+		{8CA6793A-9F6C-4688-9348-45CB287F384E}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
