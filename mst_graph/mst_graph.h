@@ -27,6 +27,8 @@
 //using namespace boost::accumulators;
 //typedef accumulator_set<double, stats<boost::accumulators::tag::tail_quantile<left> > > accumulator_t_left;
 //typedef accumulator_set<double, stats<boost::accumulators::tag::tail_quantile<right> > > accumulator_t_right;
+#include <boost/lexical_cast.hpp>
+
 
 using namespace boost;
 using namespace boost::math::policies;

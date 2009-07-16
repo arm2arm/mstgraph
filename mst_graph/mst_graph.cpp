@@ -334,7 +334,29 @@ void read_ascii_vecn(string fname,string fwname, typeVecData *data, int n=6)
 	fwin.close();
 	cout<<"Got Np= "<<(*data).size()<<endl;
 	}
+///////////////////////////////////////////////////////////////////
+void write_catalog(string catfile, TMSTCat *MSTCat)
+	{
+	std::ofstream fout(catfile.c_str());
+	
+	if(fout.bad()){cout<<"cannot open file for catalog:\n"<<catfile<<"\n"<<endl;exit(0);};
+	uint i;
+	for(i=0;i<(*MSTCat).size();i++)
+		fout<<(*MSTCat)[i];
 
+	fout.close();
+	catfile+="_idx";
+	fout.open(catfile.c_str(), std::ios::binary);
+	
+	if(fout.bad()){cout<<"cannot open file for catalog:\n"<<catfile<<"\n"<<endl;exit(0);};
+
+	for(i=0;i<(*MSTCat).size();i++)
+		{
+		fout.write((char*)&(*MSTCat)[i].id[0],(*MSTCat)[i].id.size());
+		}
+	fout.close();
+	}
+///////////////////////////////////////////////////////////////////
 /////////////////////////////
 int rmain()
 	{
@@ -522,8 +544,9 @@ int main()
 	int i,j;
 	int N;
 	const int dim=3;
-	read_ascii_vecn("C:\\arm2arm\\DATA\\MODEL7\\MST_GRAPH\\test_450.ascii", 
-		"C:\\arm2arm\\DATA\\MODEL7\\MST_GRAPH\\test_450.ascii_4_ph.est",&data);	
+	string base="C:\\arm2arm\\DATA\\MODEL7\\MST_GRAPH\\";
+	read_ascii_vecn(base+string("test_450.ascii"), 
+		base+string("test_450.ascii_4_ph.est"),&data);	
 	
 	////////////////////////////////////////////////
 	array2dfloat realdata; 
@@ -637,13 +660,13 @@ int main()
 	cout<<"Number of components:"<<num<<endl;
 cout<<"=========================="<<endl;
 ///////////////////////////////////////////////////////
-typedef std::map<int , CMSTGroup> TMSTCat;
-TMSTCat MSTCat;
+
+
 ///////////////////////////////////////////////////////
-   for(uint i=0;i<WList.size();i++)
+   for(uint iq=0;iq<WList.size();iq++)
 	   {
 		   {
-		   MyFloat meanW=pow(10.0,WList[i]);
+		   MyFloat meanW=pow(10.0,WList[iq]);
 
 		   Remover<weight_map_type>	r(get(edge_weight, graphMST), meanW);
 		   remove_edge_if(r, graphMST);
@@ -654,6 +677,7 @@ TMSTCat MSTCat;
 			cout<<"==============\nTotal Vertexes="<<numvert<<endl;
 		   cout << "Total number of connected components: " <<std::setprecision(5)<< num <<" Wcut="<< meanW<< endl;
 //// make catalogues 	
+		   TMSTCat MSTCat;
 		   for(int comp=0;comp<num;comp++)
 			   {
 			    MSTCat.insert(std::make_pair(comp, CMSTGroup(comp,&data)));
@@ -666,10 +690,11 @@ TMSTCat MSTCat;
 			for(int comp=0;comp<num;comp++)
 				{
 				MSTCat[comp].DoneInsert();
-				if(MSTCat[comp].Ntotal >10)
+				if(MSTCat[comp].Ntotal >50)
 					cout<<MSTCat[comp];
 				}
-
+			string catfile=base+"MSTCat_450_4_00"+boost::lexical_cast<std::string>(iq);
+			write_catalog(catfile, &MSTCat);
 		   /*string fname="test_"+toString(meanW)+".idx";
 		   cut_and_report(meanW,fgmst, fname);	
 		   dump_dot_file("msttest.dot", fgmst);*/

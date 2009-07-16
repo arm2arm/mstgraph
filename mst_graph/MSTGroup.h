@@ -126,6 +126,7 @@ public:
 	int Ntotal;
 	};
 
+typedef std::map<int , CMSTGroup> TMSTCat;
 
 #endif
 
