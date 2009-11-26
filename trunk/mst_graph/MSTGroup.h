@@ -33,7 +33,7 @@ public:
 		for(int i=0,pc=0;i<Ntotal;i++)
 			{
 			pc=id[i]*3;
-			double w=pW[id[i]]*pW[id[i]];
+			double w=pW[id[i]];
 			for(int j=0;j<3;j++)
 				{
 				com[j]+=pPOS[pc+j];
@@ -89,7 +89,7 @@ public:
  void Insert(int i){
 	 id.push_back(i);
 	
-	 double w=(*data)[i].w;
+	 double w=1;//(*data)[i].w;
 	 w*=w;
 	 for(int j=0;j<3;j++)
 		 {
@@ -126,7 +126,7 @@ public:
 	int Ntotal;
 	};
 
-typedef std::map<int , CMSTGroup> TMSTCat;
+typedef std::vector<CMSTGroup> TMSTCat;
 
 #endif
 

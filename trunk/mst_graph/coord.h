@@ -8,7 +8,7 @@ class CCoord
 	{
 	public:
 		CCoord(){};
-		CCoord(int id_,MyFloat x_,MyFloat y_,MyFloat z_, MyFloat w_=0):
+		CCoord(int id_,MyFloat x_,MyFloat y_,MyFloat z_, MyFloat w_=0.0):
 		id(id_), w(w_){
 			pos[0]=x_;
 			pos[1]=y_;
@@ -31,8 +31,14 @@ class CCoord
 			os<<"\t"<<v.pos[1];
 			os.width(8);
 			os<<"\t"<<v.pos[2];
-			os.width(3);			
-			os<<"\t w = "<<v.w<<std::endl;
+			os<<" "<<v.vel[0];
+			os.width(8);
+			os<<"\t"<<v.vel[1];
+			os.width(8);
+			os<<"\t"<<v.vel[2];
+			os.precision(16);
+			os.width(8);			
+			os<<"\t  "<<v.w<<std::endl;
 			return os;
 			}
 
