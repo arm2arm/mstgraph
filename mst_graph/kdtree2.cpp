@@ -2,7 +2,7 @@
 // the density and the volume for the unit less multidimensional analysis
 // Modified by A.Khalatyan 2009, LAM/OAMP, Marseille France
 
- 
+
 /////////////// ORIGINAL KD-Tree FROM ////////////////////////////////////////
 // (c) Matthew B. Kennel, Institute for Nonlinear Science, UCSD (2004)
 //
@@ -25,20 +25,15 @@ using std::min;
 inline MyFloat squared(const MyFloat x) {
 	return(x*x);
 	}
-
-inline void swap(int& a, int&b) {
-	int tmp;
+template<class T>
+inline void swap(T& a, T&b) {
+	T tmp;
 	tmp = a;
 	a = b;
 	b = tmp; 
 	}
 
-inline void swap(MyFloat& a, MyFloat&b) {
-	MyFloat tmp;
-	tmp = a;
-	a = b;
-	b = tmp; 
-	}
+
 
 
 //
@@ -126,7 +121,9 @@ kdtree2::~kdtree2() {
 // building routines
 void kdtree2::build_tree() {
 	for (int i=0; i<N; i++){ ind[i] = i;data_state[i]=true;} 
-	root = build_tree_for_range(0,N-1,NULL); 
+	fdump.open("c:/arm2arm/DATA/kd_dump.txt");
+	root = build_tree_for_range(0,N-1,NULL);
+	fdump.close();
 	}
 
 kdtree2_node* kdtree2::build_tree_for_range(int l, int u, kdtree2_node* parent) {
@@ -152,7 +149,7 @@ kdtree2_node* kdtree2::build_tree_for_range(int l, int u, kdtree2_node* parent) 
 		node->l = l;
 		node->u = u;
 		node->left = node->right = NULL;
-
+		get_metric( l, u, node);
 
 		} else {
 			//
@@ -210,7 +207,7 @@ kdtree2_node* kdtree2::build_tree_for_range(int l, int u, kdtree2_node* parent) 
 			node->cut_dim=c;
 			node->l = l;
 			node->u = u;
-
+			get_metric( l, u, node);
 			node->left = build_tree_for_range(l,m,node);
 			node->right = build_tree_for_range(m+1,u,node);
 
@@ -239,14 +236,37 @@ kdtree2_node* kdtree2::build_tree_for_range(int l, int u, kdtree2_node* parent) 
 
 						node->box[i].lower = min(node->left->box[i].lower,
 							node->right->box[i].lower);
+						/*cout<<i<<" "<< node->box[i].upper<<" "<<
+						node->box[i].lower<<" ";*/
 						}
 					}
 		}
+
+	fdump<<" "<<endl;
+	for (int i=0; i<dim; i++) {
+		fdump<<"  "<<i<<" "<< node->box[i].lower<<" "<<
+			node->box[i].upper<<" ";
+		}
+	fdump<<endl;
 	return(node);
 	}
 
+// this whould calculate adaptive metrics for a given node.
+void kdtree2:: get_metric( int l, int u, kdtree2_node* node)
+	{
+	int np=u-l;
+	boost::numeric::ublas::matrix<MyFloat> ngbGroup(dim,np);
+	for (int i=l,ip=0; i< u; i+=1) 
+		{			 
+		for(int k=0;k<dim;k++)
+			ngbGroup(k,ip)=the_data[ind[i]] [k];			
+		ip++;
+		}
+
+	node->metric.Init(ngbGroup);
 
 
+	}
 void kdtree2:: spread_in_coordinate(int c, int l, int u, interval& interv)
 	{
 	// return the minimum and maximum of the indexed data between l and u in
@@ -265,7 +285,7 @@ void kdtree2:: spread_in_coordinate(int c, int l, int u, interval& interv)
 		lmax = the_data[ind[i]  ] [c];
 
 		if (lmin > lmax) {
-			swap(lmin,lmax); 
+			std::swap(lmin,lmax); 
 			//      MyFloat t = lmin;
 			//      lmin = lmax;
 			//      lmax = t;
@@ -282,7 +302,7 @@ void kdtree2:: spread_in_coordinate(int c, int l, int u, interval& interv)
 		}
 	interv.lower = smin;
 	interv.upper = smax;
-	//  printf("Spread in coordinate %d=[%f,%f]\n",c,smin,smax);
+	//printf("Spread in coordinate %d=[%f,%f]\n",c,smin,smax);
 	}
 
 
@@ -298,10 +318,10 @@ void kdtree2::select_on_coordinate(int c, int k, int l, int u) {
 		for (int i=l+1; i<=u; i++) {
 			if ( the_data[ ind[i] ] [c] < the_data[t][c]) {
 				m++;
-				swap(ind[i],ind[m]); 
+				std::swap(ind[i],ind[m]); 
 				}
 			} // for i 
-		swap(ind[l],ind[m]);
+		std::swap(ind[l],ind[m]);
 
 		if (m <= k) l = m+1;
 		if (m >= k) u = m-1;
@@ -320,7 +340,7 @@ int kdtree2::select_on_coordinate_value(int c, MyFloat alpha, int l, int u) {
 		if (the_data[ind[lb]][c] <= alpha) {
 			lb++; // good where it is.
 			} else {
-				swap(ind[lb],ind[ub]); 
+				std::swap(ind[lb],ind[ub]); 
 				ub--;
 			}
 		}
@@ -445,7 +465,6 @@ void kdtree2::n_nearest(std::vector<MyFloat>& qv, int nn, kdtree2_result_vector&
 // search for n nearest to a given query vector 'qv'.
 void kdtree2::n_density(std::vector<MyFloat>& qv, int nn, kdtree2_result_vector& result, MyFloat &den) {
 	searchrecord sr(qv,*this,result);
-	//std::vector<MyFloat> vdiff(dim,0.0); 
 
 	result.clear(); 
 
@@ -456,9 +475,8 @@ void kdtree2::n_density(std::vector<MyFloat>& qv, int nn, kdtree2_result_vector&
 	root->search(sr); 
 
 	if (sort_results) sort(result.begin(), result.end());
-	
+
 	}
-// get Metric-Free Desity a given query vector 'qv'.
 
 
 void kdtree2::n_nearest_around_point(int idxin, int correltime, int nn,
@@ -663,8 +681,16 @@ inline bool kdtree2_node::box_in_search_range(searchrecord& sr) {
 	int dim = sr.dim;
 	MyFloat dis2 =0.0; 
 	MyFloat ballsize = sr.ballsize; 
-	for (int i=0; i<dim;i++) {
-		dis2 += squared(dis_from_bnd(sr.qv[i],box[i].lower,box[i].upper));
+	if(this->metric.set_flag){
+		vector<float> vec(dim);
+		for (int i=0; i<dim; i++){
+			vec[i]=(float)(dis_from_bnd(sr.qv[i],box[i].lower,box[i].upper));
+			}
+		dis2=this->metric.doDist(vec);
+		}else{
+			for (int i=0; i<dim;i++) {
+				dis2 += squared(dis_from_bnd(sr.qv[i],box[i].lower,box[i].upper));
+				}
 		if (dis2 > ballsize)
 			return(false);
 		}
@@ -698,7 +724,7 @@ void kdtree2_node::process_terminal_node(searchrecord& sr) {
 		int indexofi;  // sr.ind[i]; 
 		MyFloat dis, vol;
 		bool early_exit; 
-        bool is_active;
+		bool is_active;
 		if (rearrange) {
 			early_exit = false;
 			dis = 0.0;
@@ -726,13 +752,26 @@ void kdtree2_node::process_terminal_node(searchrecord& sr) {
 				early_exit = false;
 				dis = 0.0;
 				vol=1.0;
-				for (int k=0; k<dim; k++) {
-					dis += squared(data[indexofi][k] - sr.qv[k]);
-					vol*=(box[k].upper-box[k].lower);
+				//Mahalanobis distance
+				if(this->metric.set_flag){					
+					vector<float> vec(dim);
+					for (int k=0; k<dim; k++){
+						vec[k]=(float)(data[indexofi][k]-sr.qv[k]);
+						}
+					dis=this->metric.doDist(vec);
 					if (dis > ballsize) {
 						early_exit= true; 
 						break;
 						}
+					}else{
+						for (int k=0; k<dim; k++) {
+							dis += squared(data[indexofi][k] - sr.qv[k]);
+							//	vol*=(box[k].upper-box[k].lower);
+							if (dis > ballsize) {
+								early_exit= true; 
+								break;
+								}
+							}
 					}
 				if(early_exit) continue; // next iteration of mainloop
 			} // end if rearrange. 
@@ -752,6 +791,7 @@ void kdtree2_node::process_terminal_node(searchrecord& sr) {
 			e.idx = indexofi;
 			e.dis = dis;
 			e.vol=std::abs(vol);
+			e.metric=&(this->metric);
 			is_active=sr.data_state[indexofi];// if point data is active in NGB searcher then put in result
 			if(dis>0 && is_active)
 				{
@@ -774,6 +814,7 @@ void kdtree2_node::process_terminal_node(searchrecord& sr) {
 				e.idx = indexofi;
 				e.dis = dis;
 				e.vol=std::abs(vol);
+				e.metric=&(this->metric);
 				is_active=sr.data_state[indexofi];// if point data is active in NGB searcher then put in result
 				if(dis>0 && is_active)
 					{
@@ -807,13 +848,26 @@ void kdtree2_node::process_terminal_node_fixedball(searchrecord& sr) {
 			early_exit = false;
 			dis = 0.0;
 			vol=1.0;
-			for (int k=0; k<dim; k++) {
-				dis += squared(data[i][k] - sr.qv[k]);
-				vol*=(box[k].upper-box[k].lower);
+			//Mahalanobis distance
+			if(this->metric.set_flag){					
+				vector<float> vec(dim);
+				for (int k=0; k<dim; k++){
+					vec[k]=(float)(data[indexofi][k]-sr.qv[k]);
+					}
+				dis=this->metric.doDist(vec);
 				if (dis > ballsize) {
-					early_exit=true; 
+					early_exit= true; 
 					break;
 					}
+				}else{
+					for (int k=0; k<dim; k++) {
+						dis += squared(data[i][k] - sr.qv[k]);
+						//vol*=(box[k].upper-box[k].lower);
+						if (dis > ballsize) {
+							early_exit=true; 
+							break;
+							}
+						}
 				}
 			if(early_exit) continue; // next iteration of mainloop
 			// why do we do things like this?  because if we take an early
@@ -830,13 +884,26 @@ void kdtree2_node::process_terminal_node_fixedball(searchrecord& sr) {
 				indexofi = sr.ind[i];
 				early_exit = false;
 				dis = 0.0;
-				for (int k=0; k<dim; k++) {
-					dis += squared(data[indexofi][k] - sr.qv[k]);
-					vol*=(box[k].upper-box[k].lower);
+				//Mahalanobis distance
+				if(this->metric.set_flag){					
+					vector<float> vec(dim);
+					for (int k=0; k<dim; k++){
+						vec[k]=(float)(data[indexofi][k]-sr.qv[k]);
+						}
+					dis=this->metric.doDist(vec);
 					if (dis > ballsize) {
 						early_exit= true; 
 						break;
 						}
+					}else{
+						for (int k=0; k<dim; k++) {
+							dis += squared(data[indexofi][k] - sr.qv[k]);
+							vol*=(box[k].upper-box[k].lower);
+							if (dis > ballsize) {
+								early_exit= true; 
+								break;
+								}
+							}
 					}
 				if(early_exit) continue; // next iteration of mainloop
 			} // end if rearrange. 
@@ -851,6 +918,7 @@ void kdtree2_node::process_terminal_node_fixedball(searchrecord& sr) {
 			e.idx = indexofi;
 			e.dis = dis;
 			e.vol=std::abs(vol);
+			e.metric=&(this->metric);
 			is_active=sr.data_state[indexofi];// if point data is active in NGB searcher then put in result
 			if(dis>0 && is_active)
 				sr.result.push_back(e);

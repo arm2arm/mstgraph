@@ -2,86 +2,30 @@
 // Copyright 2009 Arman Khalatyan, OAMP/LAM  
 // distributed under GPL license
 //=======================================================================
-
-
+#include <utility>
+#include <map>
+#include <set>
+#include <cstring>
 #include "mst_graph.h"
-#include "ranker.h"
+//#include "ranker.h"
 #include "coord.h"
 #include "MSTGroup.h"
 #include "kdtree2.hpp"
+#include <math.h>
+#include "functions.h"
 
+#include "Render.h"
+#include "HOP.h"
 
+/////////////////////////////
+#define ND_GROUPS 2
+#define LOAD_DEBUG 0
+#define SMALL_TEST 0
+#define MIN_NGRP 50
+#define MAXNGB 64.0 
+std::string base;//this is used for outputs
+#define RAND_FRACTION 1.2
 ///////////////////////////////
-
-
-typedef adjacency_list < vecS, vecS, undirectedS,
-no_property, property < edge_weight_t, MyFloat > > Graph;
-typedef property_map<Graph, edge_weight_t>::type EdgeWeightMap;
-typedef property_map<Graph, edge_weight_t>::type	weight_map_type;
-	
-
-typedef graph_traits < Graph >::edge_descriptor Edge;
-typedef graph_traits < Graph >::vertex_descriptor Vertex;
-typedef std::pair<int, int> E;
-
-///////////////////////////////
-// SPH KERNEL///////
-double Wsph(double rr, double h)
-{
-  double retval=0;
-  double u=rr/h;
-  if(0<=u&&u<=1 )
-	  retval=1.0f-3.0f/2.0f*u*u+3.0f/4.0f*u*u*u;
-  else
-	  if(1<u&&u<=2)
-		  retval=1.0f/4.0f*(2.0f-u)*(2.0f-u)*(2.0f-u);
-	  else
-		  return 0;
-  return retval/(3.1456f*h*h*h);
-}
-///////////////////////////////
-///////////////////////////////
-// For Cutter
-template <typename EdgeWeightMap>
-struct positive_edge_weight {
-  positive_edge_weight() {}
-  positive_edge_weight( MyFloat minW, EdgeWeightMap weight) : m_minW(minW),m_weight(weight) { }
-  template <typename Edge>
-  bool operator()(const Edge& e) const {
-	  MyFloat weight=get(m_weight, e);
-	  return m_minW > weight;
-  }
-  EdgeWeightMap m_weight;
-  MyFloat m_minW;
-};
-
-
-template<typename WMap>
-class Remover
-{
-public:
-	Remover(const WMap& weights, MyFloat threshold)
-	: m_weights(weights), m_threshold(threshold) {}
-	
-	template<typename ED>
-	bool operator()(ED w) const { return m_weights[w] > m_threshold; }
-
-private:
-	const WMap&	m_weights;
-	MyFloat			m_threshold;
-};
-
-///////////////////////////////
-template <typename T>
-std::string toString(const T &thing) {
-	std::ostringstream os;
-	os << thing;
-	return os.str();
-	}
-
-
-
-
 
 bool less_coord(CCoord *c1,CCoord *c2)
 	{
@@ -94,10 +38,7 @@ CCoord gencoord(void )
 		rand()/MyFloat(RAND_MAX),
 		rand()/MyFloat(RAND_MAX),
 		rand()/MyFloat(RAND_MAX));
-	/*CCoord loc_coord(counter,
-	counter,
-	counter,
-	counter);*/
+
 	counter++;
 	return loc_coord;
 	};
@@ -110,21 +51,21 @@ void print_data(typeVecData vec)
 //
 // define, for convenience a 2d array of floats. 
 //  
-typedef multi_array<MyFloat,2> array2dfloat;
+typedef boost::multi_array<MyFloat,2> array2dfloat;
 
-template <class Graph>
-void myprint(Graph& g) {
-	typename Graph::vertex_iterator i, end;
-	typename Graph::out_edge_iterator ei, edge_end;
-	for(boost::tie(i,end) = vertices(g); i != end; ++i) {
-		cout << *i << " --> ";
-		for (boost::tie(ei,edge_end) = out_edges(*i, g); ei != edge_end; ++ei)
-			cout << target(*ei, g) << "  ";
-		cout << endl;
-		}
+//This is the main 
+void GetAP(CCoord v1, MyFloat *A)
+	{
+	MyFloat R=std::sqrt(v1.pos[0]*v1.pos[0]+v1.pos[1]*v1.pos[1]);
+	MyFloat cos_phi=v1.pos[0]/R , sin_phi=v1.pos[1]/R;
+
+	//Ar=Ax*cos_phi +Ay*sin_phi;
+	//Ap=-Ax*sin_phi+Ay*cos_phi;
+	A[0]=v1.vel[0]*cos_phi +v1.vel[1]*sin_phi;
+	A[1]=-v1.vel[0]*sin_phi+v1.vel[1]*cos_phi;
 	}
 
-MyFloat CorrdDist(CCoord v1,CCoord v2)
+MyFloat CoordDist(CCoord v1,CCoord v2)
 	{
 	MyFloat ret = 
 		(v1.pos[0]-v2.pos[0])*(v1.pos[0]-v2.pos[0])+
@@ -133,144 +74,29 @@ MyFloat CorrdDist(CCoord v1,CCoord v2)
 	return sqrt(ret);
 	}
 
-/////////////////////////////
-template <class Graph>
-void cut_and_report(MyFloat dW, Graph& g, string fname, bool full_verbose=false) 
-	{
-	if(full_verbose)
-		scoped_timer timemme("Get Components:.....");
-	std::vector<int> component(num_vertices(g));
-	int num = connected_components(g, &component[0]);
-
-	std::vector<int>::size_type i;
-	cout << "Total number of components: " << num <<" Wcut="<< dW<< endl;
-	if(full_verbose)
-		{
-		for (i = 0; i != component.size(); ++i)
-			cout << "Vertex " << i <<" is in component " << component[i] << endl;
-		}
-	cout << endl;
-
-	}
 ///////////////////////////////
-template <class Graph>
-void print_graph_stats(Graph &g)
+#include "readers.h"
+void read_gadget(string fname, typeVecData *data)
 	{
-/*	typedef typename graph_traits<Graph>::edge_iterator edge_iterator;
-	for (edge_iterator e = edges(g).first; e != edges(g).second; ++e) {
-		out << get(edge_weight, source(*e, g))<<"\n"; // HACK!
-		}
-		*/
-	}
-///////////////////////////////
-template <class Graph>
-void dump_dot_file(string fname, Graph &graphFOF)
-	{
-	if(true)
+	All.ONLY_TYPE=4;
+	read_ic12(fname.c_str());
+	MyFloat COM[]={0.0,0.0,0.0}, totEst=0.0;
+	for(int i=0;i<All.NumPart;i++)
 		{
-		////////////////////////////////////////////////	
-		// write
-		dynamic_properties dp;
-		dp.property("weight", get(edge_weight, graphFOF));
-		dp.property("node_id", get(vertex_index, graphFOF));
-		std::ofstream ofs( fname.c_str());
-		std::cout << "write_graphviz:.....";
-		write_graphviz(ofs, graphFOF, dp);
-		ofs.close();
-		std::cout << "Done" << std::endl;
-		}else
-			////////////////// WRITE BY HAND /////////////
-		{
-		///////////////////////////////////////////
-		property_map < Graph, edge_weight_t >::type weight = get(edge_weight, graphFOF);
-		std::vector < Edge > spanning_tree;
-
-		kruskal_minimum_spanning_tree(graphFOF, std::back_inserter(spanning_tree));
-		std::cout << "Print the edges in the MST:" << std::endl;
-		for (std::vector < Edge >::iterator ei = spanning_tree.begin();
-			ei != spanning_tree.end(); ++ei) {
-				std::cout << source(*ei, graphFOF) << " <--> " << target(*ei, graphFOF)
-					<< " with weight of " << weight[*ei]
-				<< std::endl;
-			}
-
-////////////////////////////////////////////////////////
-		std::ofstream fout("kruskal.dot");
-		fout << "graph A {\n"
-			<< " rankdir=LR\n"
-			<< " size=\"60,60\"\n"
-			<< " ratio=\"filled\"\n"
-			<< " edge[style=\"bold\"]\n" << " node[shape=\"circle\"]\n";
-		graph_traits<Graph>::edge_iterator eiter, eiter_end;
-		for (tie(eiter, eiter_end) = edges(graphFOF); eiter != eiter_end; ++eiter) {
-			fout << source(*eiter, graphFOF) << " -- " << target(*eiter, graphFOF);
-			if (std::find(spanning_tree.begin(), spanning_tree.end(), *eiter)
-				!= spanning_tree.end())
-				fout << "[color=\"blue\", label=\"" << get(edge_weight, graphFOF, *eiter)
-				<< "\"];\n";
-			else
-				fout << "[color=\"red\", label=\"" << get(edge_weight, graphFOF, *eiter)
-				<< "\"];\n";
-			}
-		fout << "}\n";
-		fout.close();
-			}
-	}
-////////////////////////////////////////
-template <class Graph>
-void write_gts(string fname, typeVecData &data, Graph &g)
-	{
-	  std::ofstream fout(fname.c_str());
-	  fname+="_w";
-	  std::ofstream foutw(fname.c_str());
-      unsigned int i,N=data.size();
-	  assert(N==num_vertices(g));
-	  fout<<num_vertices(g)<<" "<<num_edges(g)<<" "<<0<<
-		  " GtsSurface GtsFace GtsEdge GtsVertex "<<endl;
-	  for(i=0;i<N;i++)
-		  {
-			fout<<data[i].pos[0]<<" "<<
-				data[i].pos[1]<<" "<<
-				data[i].pos[2]<<" "<<endl;
-		  }
-	  //run over all edges and dump
-	  graph_traits<Graph>::edge_iterator eiter, eiter_end;
-	  for (tie(eiter, eiter_end) = edges(g); eiter != eiter_end; ++eiter) {
-		  fout << source(*eiter, g) << "  " << target(*eiter, g)<<endl;
-		  foutw<< get(edge_weight, g, *eiter)<<endl;
-		  }
-	
-	  fout.close();
-	  foutw.close();
-	}
-
-template <class Graph, class MST>
-void write_mst_gts(string fname, typeVecData &data, Graph &g,MST &spanning_tree)
-	{
-	  std::ofstream fout(fname.c_str());
-	  fname+="_w";
-	  std::ofstream foutw(fname.c_str());
-      unsigned int i,N=data.size();
-	  //assert(N==num_vertices(g));
-	  fout<<N<<" "<<spanning_tree.size()<<" "<<0<<
-		  " GtsSurface GtsFace GtsEdge GtsVertex "<<endl;
-	  for(i=0;i<N;i++)
-		  {
-			fout<<data[i].pos[0]<<" "<<
-				data[i].pos[1]<<" "<<
-				data[i].pos[2]<<" "<<endl;
-		  }
-	  //run over all edges and dump
-	 std::cout << "Print the edges in the MST:" << std::endl;
-	 property_map < Graph, edge_weight_t >::type weight = get(edge_weight, g);
-	 for (MST::iterator ei = spanning_tree.begin();
-		ei != spanning_tree.end(); ++ei) {			
-		  fout << source(*ei, g) << "  " << target(*ei, g)<<endl;
-		  foutw<< weight[*ei]<<endl;
+		COM[0]+=Part[i].Pos[0]*Part[i].Est;		
+		COM[1]+=Part[i].Pos[1]*Part[i].Est;		
+		COM[2]+=Part[i].Pos[2]*Part[i].Est;		
+		totEst+=Part[i].Est;
 		}
-	
-	  fout.close();
-	  foutw.close();
+	COM[0]/=totEst;
+	COM[1]/=totEst;
+	COM[2]/=totEst;
+	for(int i=0;i<All.NumPart;i++)
+		{
+		Part[i].Pos[0]-=(float)COM[0];
+		Part[i].Pos[1]-=(float)COM[1];
+		Part[i].Pos[2]-=(float)COM[2];
+		}
 	}
 /////////////////////////////
 void read_ascii(string fname, typeVecData *data)
@@ -284,7 +110,7 @@ void read_ascii(string fname, typeVecData *data)
 		{
 		fin>>x>>y>>z;	
 		if(rand()/MyFloat(RAND_MAX) < 0.20)
-		(*data).push_back(CCoord(i, x, y, z));
+			(*data).push_back(CCoord(i, x, y, z));
 		i++;
 		}
 	fin.close();
@@ -301,7 +127,7 @@ void read_ascii_vec(string fname, vector<MyFloat> *data)
 		{
 		fin>>x;	
 		if(rand()/MyFloat(RAND_MAX) < 0.20)
-		(*data).push_back( x);
+			(*data).push_back( x);
 		i++;
 		}
 	fin.close();
@@ -318,274 +144,194 @@ void read_ascii_vecn(string fname,string fwname, typeVecData *data, int n=6)
 	CCoord t(i,0,0,0);
 	while(!fin.eof())
 		{
-			fin>>t.pos[0];
-			fin>>t.pos[1];
-			fin>>t.pos[2];
-			fin>>t.vel[0];
-			fin>>t.vel[1];
-			fin>>t.vel[2];
-			fwin>>t.w;
-			t.id=i;
-		if(rand()/MyFloat(RAND_MAX) < 1.0)
-		(*data).push_back( t);
+		fin>>t.pos[0];
+		fin>>t.pos[1];
+		fin>>t.pos[2];
+		fin>>t.vel[0];
+		fin>>t.vel[1];
+		fin>>t.vel[2];
+		fwin>>t.w;
+		t.id=i;
+		if(rand()/MyFloat(RAND_MAX) < RAND_FRACTION)
+			(*data).push_back( t);
 		i++;
 		}
 	fin.close();
 	fwin.close();
 	cout<<"Got Np= "<<(*data).size()<<endl;
 	}
-///////////////////////////////////////////////////////////////////
-void write_catalog(string catfile, TMSTCat *MSTCat)
+////////////////////////////////////////////////////
+void DumpVectorEst(string filename, int which=0)
 	{
-	std::ofstream fout(catfile.c_str());
-	
-	if(fout.bad()){cout<<"cannot open file for catalog:\n"<<catfile<<"\n"<<endl;exit(0);};
-	uint i;
-	for(i=0;i<(*MSTCat).size();i++)
-		fout<<(*MSTCat)[i];
+	std::ofstream of(filename.c_str(),std::ios::out | std::ios::binary);
+	if(!of.good())assert("Error");
+	unsigned int i=0, np=All.NumPart;
+	of.write((char*)&np,sizeof(uint));
+	if(which==0)
+		for(i=0;i<np;i++)
+			of.write((char*)(&Part[i].Est),sizeof(float));
+	else
+		for(i=0;i<np;i++)
+			of.write((char*)(&Part[i].Rho),sizeof(float));
 
-	fout.close();
-	catfile+="_idx";
-	fout.open(catfile.c_str(), std::ios::binary);
-	
-	if(fout.bad()){cout<<"cannot open file for catalog:\n"<<catfile<<"\n"<<endl;exit(0);};
-
-	for(i=0;i<(*MSTCat).size();i++)
-		{
-		fout.write((char*)&(*MSTCat)[i].id[0],(*MSTCat)[i].id.size());
-		}
-	fout.close();
+	of.close();
 	}
-///////////////////////////////////////////////////////////////////
-/////////////////////////////
-int rmain()
+void LoadVectorEst(string filename, int which=0)
 	{
+	std::ifstream of(filename.c_str(),std::ios::in | std::ios::binary);
+	if(!of.good())assert("Error");
+	unsigned int i=0, np=All.NumPart;
+	of.read((char*)&np,sizeof(uint));
+	if(which==0)
+		for(i=0;i<np;i++)
+			of.read((char*)(&Part[i].Est),sizeof(float));
+	else
+		for(i=0;i<np;i++)
+			of.read((char*)(&Part[i].Rho),sizeof(float));
 
-	Graph graphFOF;
-	const int num_nodes = 10000;
-	typeVecData data;//(num_nodes);
-	vector<int> idata;
-	int i,j;
-	int N;
-	const int dim=3;
-	//some random data
-	//srand(0);
-	//generate(data.begin(),data.end(),gencoord);
-	//
-	read_ascii("test.txt", &data);
-	//read_ascii("testvel.txt", &data);
-	//read_ascii("RVpVt.txt", &data);
-	
-	////////////////////////////////////////////////
-	array2dfloat realdata; 
-	N=data.size();
-	realdata.resize(extents[data.size()][3]);
-	for (i=0; i<N; i++) {
-		for (int j=0; j<dim; j++) 
-			realdata[i][j] = data[i].pos[j];
-		}
-	kdtree2_result_vector ngblist, ngblistbrut;
-	std::cout << "Build the KD-Tree:" << std::endl;
-	kdtree2*  tree = new kdtree2(realdata);
-	tree->sort_results = true;
-	//////////////////////////////////////////////
-	if(N<20)print_data(data);
-	std::vector<MyFloat> qv;
-	int iq=0,mynum_edges=0;
-	std::cout << "Build Graph:" << std::endl;
-	FILE *fout=fopen("testvol.txt", "w");
-	double fac=1.0/double(N);	
-	for(i=0;i<N;i++)
+	of.close();
+	}
+
+void SmoothSph()
+	{
+	if(LOAD_DEBUG)
 		{
-			iq=i;
-		//if(N<20)
-//			cout<<"# ";
-		qv.clear();
-		qv.push_back(data[iq].pos[0]);
-		qv.push_back(data[iq].pos[1]);
-		qv.push_back(data[iq].pos[2]);
-		tree->n_nearest( qv , 3,ngblist);
-		MyFloat vol=0, vol1=0;
-		//tree->n_nearest_brute_force(qv, 2, ngblistbrut);
-		//if(ngblist.size()>0)
-			{	
+		LoadVectorEst("c:/arm2arm/DATA/smooth64.est");
+		LoadVectorEst("c:/arm2arm/DATA/smooth64.rho",1);
+		}else
+		{
+
+		typedef boost::multi_array<MyFloat,2> array2dfloat;
+
+		array2dfloat realdata; 
+		uint dim=3,N=All.NumPart;
+		realdata.resize(boost::extents[All.NumPart][dim]);
+		for (uint i=0; i<N; i++) {
+			for (uint j=0; j<dim; j++) 
+				realdata[i][j] = Part[i].Pos[j];
+			}
+		kdtree2_result_vector ngblist, ngblistbrut;
+		std::cout << "Build the KD-Tree:.." ;
+		kdtree2*  tree = new kdtree2(realdata);
+		tree->sort_results = true;
+		cout<<".DONE."<< std::endl;
+		///////////////////////////////
+		uint j=0;
+		const MyFloat PI43=MAXNGB/(4.0/3.*M_PI); 
+		MyFloat smEst=0.0, smRho=0.0, hsml, val=0.0;;
+		std::vector<MyFloat> qv;//query vector
+		for(uint i=0;i<N;i++)
+			{
+			uint iq=i, nn=0;
+			qv.clear();
+			qv.push_back(Part[iq].Pos[0]);
+			qv.push_back(Part[iq].Pos[1]);
+			qv.push_back(Part[iq].Pos[2]);
+			tree->n_nearest( qv , (uint)MAXNGB,ngblist);
+			smEst=0.0;smRho=0.0;
+			hsml=ngblist[(uint)MAXNGB-1].dis;
+			Part[i].pNGBR=new int[(uint)(MAXNGB)];
 			BOOST_FOREACH( kdtree2_result ngbNum, ngblist )
 				{
 				j=ngbNum.idx;
-				vol+=ngbNum.vol;
-				add_edge(i,j,CorrdDist(data[i],data[j]),graphFOF);
+				Part[i].pNGBR[nn]=j;
+				val=Wsph<MyFloat>(ngbNum.dis,hsml);
+				smRho+=val;
+				nn++;
 				}
-			//tree->SetIsActive(iq,false);
-			
-			//if(N<20)
-				//cout<<mynum_edges<<" ngbsize("<<ngblist.size()<<") "<<iq<<" ===> "<<j<<endl;			
-			}
-			fprintf(fout,"%g %g %g %g\n", data[i].pos[0], data[i].pos[1], data[i].pos[2],ngblist.size()/vol); 
-		printf("%d \t %f5.3\r", i,i*fac);
-		}
-	fclose(fout);
-///////////// NOW BUILD MST
-	property_map < Graph, edge_weight_t >::type weight = get(edge_weight, graphFOF);
-	std::vector < Edge > spanning_tree;
-	std::cout << "Building MST:." ;	
-	kruskal_minimum_spanning_tree(graphFOF, std::back_inserter(spanning_tree));
-	std::cout << " .. done " << std::endl;
-	/*for (std::vector < Edge >::iterator ei = spanning_tree.begin();
-		ei != spanning_tree.end(); ++ei) {
-			std::cout << source(*ei, graphFOF) << " <--> " << target(*ei, graphFOF)
-				<< " with weight of " << weight[*ei]
-			<< std::endl;
-		}
-		*/
-	//////////////////////////////////////
-	mynum_edges=spanning_tree.size();
-	std::cout << "Graph:" << std::endl;
-	std::cout <<" Num Edges: "<<mynum_edges<<std::endl;
-	if(N<20)
-		print_graph(graphFOF, get(vertex_index, graphFOF));
-	std::cout << std::endl;
-	if(N<20)
-		dump_dot_file("test.dot", graphFOF);
-	delete tree;
-	
-	if(N<20)
-		myprint(graphFOF);
-	print_graph_stats(graphFOF);
-	/////////////////////////////////////////////////
-	//	Cutting Graph
-	//First Get Cuts len
-	//run over all edges 
-	int Nbin=10;
-	vector<int> hist(Nbin, 0);
-	vector<MyFloat> we;
-	MyFloat lw=0.0;
-	graph_traits<Graph>::edge_iterator eiter, eiter_end;
-	for (tie(eiter, eiter_end) = edges(graphFOF); eiter != eiter_end; ++eiter) {
-		  lw=std::log10(get(edge_weight, graphFOF, *eiter));
-			we.push_back(lw);		  
-			
-		  }
-	MyFloat mi=*min_element(we.begin(),we.end());
-	MyFloat ma=*max_element(we.begin(),we.end());
-	for(unsigned int i=0;i<we.size();i++)
-		{
-	     lw=we[i];
-		   if(mi<lw)lw=mi;
-		   if(ma>lw)lw=ma;
-		   hist[(unsigned int)((lw-mi)/(ma-mi)*(Nbin-1))]++;	
-		}
-	//////////////////////////////////////////////////////////
-	MyFloat meanW=(ma-mi)/0.5;
-	{
-	positive_edge_weight<EdgeWeightMap> filter(meanW, get(edge_weight, graphFOF));
-		filtered_graph<Graph, positive_edge_weight<EdgeWeightMap> >
-			fg(graphFOF, filter);
 
-	std::vector<int> component(num_vertices(fg));
-	int num = connected_components(fg, &component[0]);
-
-	
-	cout << "Total number of components: " << num <<" Wcut="<< meanW<< endl;
-
-	Graph graphMST;
-	for (std::vector < Edge >::iterator ei = spanning_tree.begin();
-		ei != spanning_tree.end(); ++ei) {
-			//std::cout << source(*ei, graphFOF) << " <--> " << target(*ei, graphFOF)
-			//	<< " with weight of " << weight[*ei]
-			//<< std::endl;
-			add_edge(source(*ei, graphFOF),target(*ei, graphFOF),get(edge_weight, graphFOF, *ei),graphMST);
-		}
-
-	positive_edge_weight<EdgeWeightMap> filterMST(meanW, get(edge_weight, graphMST));
-		filtered_graph<Graph, positive_edge_weight<EdgeWeightMap> >
-			fgmst(graphMST, filterMST);
-
-		
-		string fname="test_"+toString(meanW)+".idx";
-		cut_and_report(meanW,fgmst, fname);	
-	dump_dot_file("msttest.dot", fgmst);
-	}
- 
-	//////////////////////////////////////////////////////////
-	 // Test real:
-	//////////////////////////////////////////////////////////
-	for(MyFloat dW=mi;dW<ma;dW+=(ma-mi)/10.0)
-		{
-		positive_edge_weight<EdgeWeightMap> filter(dW, get(edge_weight, graphFOF));
-		filtered_graph<Graph, positive_edge_weight<EdgeWeightMap> >
-			fg(graphFOF, filter);
-
-		
-		string fname="test_"+toString(dW)+".idx";
-		cut_and_report(dW,fg, fname);
-  	  
-		if(N<20)  
-		  dump_dot_file("test.dot", fg);
-
-		}
-/////////////////////////////////////////////////
-//visual part
-		{
-	write_gts("test.gts", data, graphFOF);
-	write_mst_gts("MSTtest.gts", data, graphFOF,spanning_tree);
-		}
-	return EXIT_SUCCESS;
-	}
-
-
-
-
-int main()
-	{
-
-	Graph graphFOF;
-	typeVecData data;//(num_nodes);
-	std::vector<MyFloat> fdata;
-	int i,j;
-	int N;
-	const int dim=3;
-	string base="C:\\arm2arm\\DATA\\MODEL7\\MST_GRAPH\\";
-	read_ascii_vecn(base+string("test_450.ascii"), 
-		base+string("test_450.ascii_4_ph.est"),&data);	
-	
-	////////////////////////////////////////////////
-	array2dfloat realdata; 
-	N=data.size();
-	realdata.resize(extents[data.size()][3]);
-	for (i=0; i<N; i++) {
-		for (int j=0; j<dim; j++) 
-			realdata[i][j] = data[i].pos[j];
-		}
-	kdtree2_result_vector ngblist, ngblistbrut;
-	std::cout << "Build the KD-Tree:.." ;
-	kdtree2*  tree = new kdtree2(realdata);
-	tree->sort_results = true;
-	cout<<".DONE."<< std::endl;
-	//////////////////////////////////////////////
-	std::vector<MyFloat> qv;
-	int iq=0,mynum_edges=0;
-	std::cout << "Build Graph:" << realdata.size()<<" particles"<<std::endl;
-	for(i=0;i<N;i++)
-		{
-		iq=i;
-		qv.clear();
-		qv.push_back(data[iq].pos[0]);
-		qv.push_back(data[iq].pos[1]);
-		qv.push_back(data[iq].pos[2]);
-		tree->n_nearest( qv , 10,ngblist);		
-			{	
 			BOOST_FOREACH( kdtree2_result ngbNum, ngblist )
 				{
-				j=ngbNum.idx;				
-				add_edge(i,j,(data[i].w+data[j].w)*0.5,graphFOF);
-				}	
-			tree->SetIsActive(iq,false);
-			}
+				j=ngbNum.idx;
+				smEst+=(Part[j].Est/smRho*Wsph<MyFloat>(ngbNum.dis,hsml));
+				}
+
+			Part[iq].Rho=(float)smRho;
+			Part[iq].Est=(float)smEst;
 			if(i%10 ==0)
 				{
-				    std::cout<<std::setprecision(2)<<std::fixed;
-					std::cout<<i/double(N)*100.0<<"%"<<"\r";
+				std::cout<<std::setprecision(2)<<std::fixed;
+				std::cout<<i/double(N)*100.0<<"%"<<"\r";
+				std::cout<<std::setprecision(16)<<std::fixed;
 				}
+
+			}
+		DumpVectorEst("c:/arm2arm/DATA/smooth64.est");
+		DumpVectorEst("c:/arm2arm/DATA/smooth64.rho",1);
+			}//end for SmoothSph() 
+	}
+template<class T>
+void fill_EST_group(boost::numeric::ublas::matrix<T> &ngbGroup, int nmax=20000)
+	{
+	int j=0;
+	int maxnp=std::min(All.NumPart,nmax);
+	ngbGroup.resize(ND_GROUPS, maxnp);
+	for(int i=0;i<maxnp;i++)
+		{	
+		j=isortEst[i];
+		 for(int idx=0;idx<ND_GROUPS;idx++)
+			 ngbGroup(idx,i)=Part[j].Pos[idx];			
+		}
+	}
+template<class T>
+void fill_ngb_group(int i,boost::numeric::ublas::matrix<T> &ngbGroup)
+	{
+	int j=0;
+	for(int ingb=0;ingb<All.DesNumNgb;ingb++)
+		{	
+		 j=Part[i].getNGB(ingb);
+		 for(int idx=0;idx<ND_GROUPS;idx++)
+			 ngbGroup(idx,ingb)=Part[j].Pos[idx];			
+		}
+	}
+void MahalanobisFOF()
+	{
+	using namespace boost;
+	typedef adjacency_list < vecS, vecS, undirectedS,
+		no_property, property < edge_weight_t, MyFloat > > Graph;
+	typedef property_map<Graph, edge_weight_t>::type EdgeWeightMap;
+	typedef property_map<Graph, edge_weight_t>::type	weight_map_type;
+	typedef graph_traits < Graph >::edge_descriptor Edge;
+	typedef graph_traits < Graph >::vertex_descriptor Vertex;
+	typedef std::pair<int, int> E;
+	cout<<"Starting to build FOF Graph based on adaptive Ngb list"<<endl;
+	Graph graphFOF;
+	int j=0;
+	boost::numeric::ublas::matrix<double> ngbGroup(ND_GROUPS,All.DesNumNgb);	
+	std::ofstream fout("c:/arm2arm/DATA/edge_len.txt");
+	fill_EST_group<double>(ngbGroup);
+	Metrics::MahalDistance<double> Mahal(ngbGroup);
+	boost::numeric::ublas::vector<double> p(ND_GROUPS);
+	for(int i=0;i<All.NumPart;i++)
+		{
+	
+		fill_ngb_group(i,ngbGroup);
+		Metrics::MahalDistance<double> Mahal(ngbGroup);
+
+		for(int ingb=0;ingb<All.DesNumNgb;ingb++)//
+			{
+
+			j=Part[i].getNGB(ingb);
+			//if(j!=i)
+				{
+				
+				for(int idx=0;idx<ND_GROUPS;idx++)p(idx)=Part[j].Pos[idx];
+
+				add_edge(i,j,Mahal.doDist(p),graphFOF);
+				}//else
+				//	Mahal.last_dist=0.0;
+			//cout<<Mahal.last_dist<<" Est="<<Part[j].get()<<endl;
+			}
+
+		for(int idx=0;idx<ND_GROUPS;idx++)p(idx)=Part[i].Pos[idx];
+		fout<<i<<" "<<j<<" "<<Mahal.doDist(p)<<endl;
+		if(i%10 ==0)
+			{
+			std::cout<<std::setprecision(2)<<std::fixed;
+			std::cout<<i/double(All.NumPart)*100.0<<"%"<<"\r";
+			std::cout<<std::setprecision(16)<<std::fixed;
+			}
+
 		}
 
 	cout<<"Num Forest edges: "<<num_edges(graphFOF)<<endl;
@@ -593,114 +339,280 @@ int main()
 	int num = connected_components(graphFOF, &component[0]);
 	cout<<"Number of components:"<<num<<endl;
 	cout<<"======================="<<endl;
-/////////////// BUILD The MST tree
-    weight_map_type weight = get(edge_weight, graphFOF);
+	/////////////// BUILD The MST tree
+	weight_map_type weight = get(edge_weight, graphFOF);
 	std::vector < Edge > spanning_tree;
-
+	Graph graphMST;
 	std::cout << "Building MST:." ;	
 	kruskal_minimum_spanning_tree(graphFOF, std::back_inserter(spanning_tree));
 	std::cout <<"MST num edges="<< spanning_tree.size()<<" .. done " << std::endl;
+	cout<<"Make graphMST from Spanning Edges"<<endl;
+	for (std::vector < Edge >::iterator ei = spanning_tree.begin();
+			ei != spanning_tree.end(); ++ei) {
+				//if(get(edge_weight, graphFOF, *ei)<1.0)
+			add_edge(source(*ei, graphFOF),target(*ei, graphFOF),get(edge_weight, graphFOF, *ei),graphMST);
+//			fout<<source(*ei, graphFOF)<<" "<<target(*ei, graphFOF)<<" "<<get(edge_weight, graphFOF, *ei)<<endl;
+		}
+	fout.close();
+	/////////////////////////////////////////////////////////
+	cout<<"Getting connected components"<<endl;
+	num = connected_components(graphMST, &component[0]);
+	cout<<"After MST: number of components:"<<num<<endl;
+	cout<<"======================="<<endl;
+exit(0);
+
+	}
+///////////////////////////////////////////////////////////////////
+void read_ascii_n(string fname, array2dfloat &data, uint dim, int &ip)
+	{
+	std::ifstream fin(fname.c_str());
+	unsigned int i=0,np;
+	float tf;
+	ip=0;
+	fin>>np;
+	data.resize(boost::extents[np][dim]);
+	for(uint il=0;il<np;il++)
+		{	
+		for(i=0;i<dim;i++)
+			{fin>>tf;data[ip][i]=tf;}
+		ip++;
+		}
+	fin.close();
+	cout<<"Got Np= "<<data.size()<<endl;
+	}
+#include <boost/format.hpp>
+void dumpNgbTofile(const std::string file, const int *pNGB,const int NUM_NGB)
+	{	
+	using boost::format;
+	using boost::io::group;
+	std::ofstream of(file.c_str());
+	for(int i=0;i<NUM_NGB;i++)
+		of<< pNGB[i]<< "  ";
+	of.close();
 	
-////////////////////////////////////
-	//get quantile for Edge weigth
-	const int Nbin=200;
-	vector<MyFloat> WHist(Nbin+1), WHistX(Nbin+1);
-	vector<MyFloat> tvec;
+	}
+using namespace boost;
+	typedef adjacency_list < vecS, vecS, undirectedS,
+		no_property, property < edge_weight_t, MyFloat > > Graph;
+	typedef property_map<Graph, edge_weight_t>::type EdgeWeightMap;
+	typedef property_map<Graph, edge_weight_t>::type	weight_map_type;
+	typedef graph_traits < Graph >::edge_descriptor Edge;
+	typedef graph_traits < Graph >::vertex_descriptor Vertex;
+	typedef std::pair<int, int> E;
+	
+	void DumpEdges(Graph &g, std::string name="c:/arm2arm/DATA/edge_test.txt")
+	{
+	std::ofstream fout(name.c_str());
+	//run over all edges and dump
+	graph_traits<Graph>::edge_iterator eiter, eiter_end;
+	for (tie(eiter, eiter_end) = edges(g); eiter != eiter_end; ++eiter) {
+		fout << source(*eiter, g) << "  " << target(*eiter, g)<<" "<<get(edge_weight, g, *eiter)<<endl;
+		}
+	fout.close();
+	};
+
+template <typename EdgeWeightMap>
+struct less_edge_weight {
+  less_edge_weight() { }
+  less_edge_weight(EdgeWeightMap weight,MyFloat thr=5.0) : m_weight(weight),m_threshold(thr) { }
+  template <typename Edge>
+  bool operator()(const Edge& e) const {
+    return m_threshold > get(m_weight, e);
+  }
+  EdgeWeightMap m_weight;
+  MyFloat m_threshold;
+};
+
+
+void init_test_data()
+	{
+	cout<<"Starting to build FOF Graph based on adaptive Ngb list"<<endl;
+	Graph graphFOF;
+	int ntest=10;
+	int i;
+	array2dfloat realdata;
+	read_ascii_n("c:/arm2arm/DATA/test_mahal.txt",realdata,ND_GROUPS,ntest); 
+	
+		All.DesNumNgb=3;
+		All.NumPart=ntest;
+		All.MaxPart=ntest;
+		allocate_memory();
+		for(i=0;i<ntest;i++)
+			{
+			 Part[i].id=i;
+			 memset(&Part[i].Pos[0], 0, sizeof(Part[i].Pos[0])*6);
+			}
+		if(true)
+			{
+			for(int i=0;i<ntest;i++)
+				{
+				for(int j=0;j<ND_GROUPS; j++)
+					{
+					 Part[i].Pos[j]=(float)realdata[i][j];
+					}
+				}
+			}else{
+		Part[0].Pos[0]=-1.3557630f;Part[0].Pos[1]=-47.625917f;
+		Part[1].Pos[0]=-1.7062211f;Part[1].Pos[1]=-63.574198f;
+		Part[2].Pos[0]=-1.8655050f;Part[2].Pos[1]=-75.086588f;
+		Part[3].Pos[0]=-1.0181101f;Part[3].Pos[1]=-16.815058f;
+		Part[4].Pos[0]=1.3764034f;Part[4].Pos[1]=53.766238f;
+		Part[5].Pos[0]=2.4233045f;Part[5].Pos[1]=49.306687f;
+		Part[6].Pos[0]=2.1975691f;Part[6].Pos[1]=61.207182f;
+		Part[7].Pos[0]=0.99472014f;Part[7].Pos[1]=60.852764f;
+		Part[8].Pos[0]=-2.1623941f;Part[8].Pos[1]=-46.242952f;
+		Part[9].Pos[0]=1.1159960f;Part[9].Pos[1]=24.211842f;
+			}
+		int dim=ND_GROUPS;
+		realdata.resize(boost::extents[All.NumPart][dim]);
+		for (i=0; i<All.NumPart; i++) {
+			for (int j=0; j<dim; j++) 
+				realdata[i][j] = Part[i].Pos[j];
+			}
+		std::vector<MyFloat> qv;
+		int iq;
+		const int NUM_NGB=15;
+		kdtree2_result_vector ngblist, ngblistbrut;
+		std::cout << "Build the KD-Tree:.." ;
+		kdtree2*  tree = new kdtree2(realdata);
+		tree->sort_results=true;
+
+		boost::numeric::ublas::matrix<float> ngbGroup(ND_GROUPS,NUM_NGB);	
+		CKernel<float> *pKernel=new CEpanechikov<float>(ND_GROUPS);
+		int j=0;
+		for(i=0;i<All.NumPart;i++)
+			{
+			iq=i;
+			qv.clear();
+			qv.push_back(Part[iq].Pos[0]);
+			qv.push_back(Part[iq].Pos[1]);
+			Part[i].pNGB=new int[NUM_NGB];
+			tree->n_nearest( qv , NUM_NGB,ngblist);		
+			int ingb=0;
+			BOOST_FOREACH( kdtree2_result ngbNum, ngblist )
+				{	
+				j=ngbNum.idx;
+				Part[i].pNGB[ingb++]=j;
+				}
+			//fill_ngb_group<float>(i,ngbGroup);
+			//Metrics::MahalDistance<float> Mahal(ngbGroup);
+			
+			float  dist=0.0;
+			
+			//cout<<i<<endl;
+			//cout<<"\t\t";
+			float hsml2=(float)ngblist[NUM_NGB-1].dis;//Mahal.doDist(&Part[i].Pos[0],&Part[ngblist[NUM_NGB-1].idx].Pos[0]);
+			float hsml=std::sqrt(hsml2);
+			float u=0.0f, mahalDet=0.0f;
+			Part[i].Est=0.0;
+			BOOST_FOREACH( kdtree2_result ngbNum, ngblist )
+				{	
+				j=ngbNum.idx;
+				//cout<<ngbNum.idx<<" ("<<ngbNum.dis<<") ";
+				dist=ngbNum.dis;//Mahal.doDist(&Part[i].Pos[0],&Part[j].Pos[0]);
+				Part[i].Est+=(pKernel->W(std::sqrt(dist/hsml2)));
+				add_edge(i,ngbNum.idx,dist,graphFOF);
+				mahalDet+=ngbNum.metric->getDet();
+				}
+			float hd=1.0;
+			for(int idim=0;idim<ND_GROUPS;idim++)
+				{
+				hd*=hsml;
+				}
+				Part[i].Est/=(hd*std::sqrt(mahalDet/(float)NUM_NGB));
+			
+				if(i==5)dumpNgbTofile("c:/arm2arm/DATA/ngb.txt", &Part[i].pNGB[0], NUM_NGB);
+			//cout<<endl;
+			}
+
+/////////////////////////////////////////
+	cout<<"Num Forest edges: "<<num_edges(graphFOF)<<endl;
+	std::vector<int> component(num_vertices(graphFOF));
+	int num = connected_components(graphFOF, &component[0]);
+	cout<<"Number of components:"<<num<<endl;
+	cout<<"======================="<<endl;
+	DumpEdges(graphFOF);
+	/////////////////////////////////
+/////////////// BUILD The MST tree
+	weight_map_type weight = get(edge_weight, graphFOF);
+	std::vector < Edge > spanning_tree;
+	Graph graphMST;
+	std::cout << "Building MST:." ;	
+	kruskal_minimum_spanning_tree(graphFOF, 
+								  std::back_inserter(spanning_tree)
+								  );
+	std::cout <<"MST num edges="<< spanning_tree.size()<<" .. done " << std::endl;
+	cout<<"Make graphMST from Spanning Edges"<<endl;
+	
 	
 	for (std::vector < Edge >::iterator ei = spanning_tree.begin();
-		ei != spanning_tree.end(); ++ei) {
-			tvec.push_back(log10(weight[*ei]));
+			ei != spanning_tree.end(); ++ei) {
+				//if(get(edge_weight, graphFOF, *ei)<1.0)
+			add_edge(source(*ei, graphFOF),target(*ei, graphFOF),get(edge_weight, graphFOF, *ei),graphMST);
+//			fout<<source(*ei, graphFOF)<<" "<<target(*ei, graphFOF)<<" "<<get(edge_weight, graphFOF, *ei)<<endl;
 		}
-	MyFloat ma=*max_element(tvec.begin(), tvec.end());
-	MyFloat mi=*min_element(tvec.begin(), tvec.end());
-	cout<<"WMin="<<mi<<"Wmax="<<ma<<endl;
-	int c=tvec.size();
-    for(uint i=0;i<tvec.size();i++)
-		{
-		 WHist[int((tvec[i]-mi)/(ma-mi)*Nbin)]+=1;		 		 		
-		}
-	for(uint i=0;i<Nbin;i++)
-		WHistX[i]=i*(ma-mi)/MyFloat(Nbin)+mi;
+	DumpEdges(graphMST, "c:/arm2arm/DATA/edge_test_mst.txt");
+//////////////// NEW version for connected components
+	less_edge_weight<EdgeWeightMap> filter(get(edge_weight, graphMST), 200.0);
+	filtered_graph<Graph, less_edge_weight<EdgeWeightMap> > fg(graphMST, filter);
+	component.resize(num_vertices(fg));
+	cout<<"Filtered grapth has a: "<<connected_components(fg, &component[0])<<endl;
+	}
+///////////////////////////////////////////////////////////////////
+//"snap_gal_sfr_0450.ascii"	
+int main(int argc,char **argv) {
 
-		MyFloat Whistsum=accumulate(WHist.begin(), WHist.end(), 0.0);
-		MyFloat psum=0.0;
-		MyFloat aq[]={0.01,0.025,0.05,0.1,0.2,0.4};//PDF quantile in the fraction
-		vector<MyFloat> WList;
-		int aqsize=sizeof(aq)/sizeof(MyFloat);
-		iq=0;
-     	for(int j=WHist.size()-1;j>0;j--)
-		{
-		if((psum+=WHist[j]) >= Whistsum*aq[iq])
-			{
-			cout<<"iq="<<iq<<" j="<<j<<" "<<aq[iq]<<" "<<Whistsum*aq[iq]<<" "<<
-				psum<<" "<<WHistX[j]<<" "<<WHist[j]<< endl;				
-			WList.push_back(WHistX[j]);
-			iq++;
-			if(iq> aqsize-1)break;
-			}
-		}
-	vector<MyFloat> taqvec( aq, &aq[ aqsize] );
-    
-   DumpVector("Whist.txt", WHist, WHist.size());
-   DumpVector("WhistX.txt", WHistX, WHistX.size());
-   DumpVector2("WList.txt", WList, taqvec,taqvec.size());
-///////////////////////////////////////////////////////////////
-// Here we need to cut and store the catalogues
-	//////////////////////////////////////////////////////////
-	 // Test real:
-   //////////////////////////////////////////////////////////
-// Brut force MST graph generation
-   Graph graphMST;
-   for (std::vector < Edge >::iterator ei = spanning_tree.begin();
-	   ei != spanning_tree.end(); ++ei) {
-		   add_edge(source(*ei, graphFOF),target(*ei, graphFOF),get(edge_weight, graphFOF, *ei),graphMST);
-	   }
-   component.resize(num_vertices(graphMST));
-    num = connected_components(graphMST, &component[0]);
-	cout<<"Number of components:"<<num<<endl;
-cout<<"=========================="<<endl;
-///////////////////////////////////////////////////////
+	// Read and check command line parameters.
+	cimg_usage("Compute a HOP over the particles with given Est and Rho files");
+	const char *file_ascii = cimg_option("-ascii_file",(char*)0,"Input in Ascii format");
+	const char *file_gadget2;
+	if( SMALL_TEST)
+		file_gadget2= cimg_option("-gadget2_file","C:\\arm2arm\\DATA\\MODEL7\\MODELS\\MODEL7\\RUNG2\\SNAPS\\test_0450","Input in Gadget-2 format");
+	else
+		file_gadget2= cimg_option("-gadget2_file","C:\\arm2arm\\DATA\\MODEL7\\MODELS\\MODEL7\\RUNG2\\SNAPS\\snap_gal_sfr_0450","Input in Gadget-2 format");
+	const char *file_base  = cimg_option("-base4files","C:/arm2arm/DATA/MODEL7/MST_GRAPH/","Base for input and output");
+	const char *HOP_file  = cimg_option("-hopfile","hop_0450","HOP algorithm output,eg: groups and their IDs.");
+	const bool visu     = cimg_option("-visu",true,"Visualization mode");
+	const int shape  = cimg_option("-s",1,"shape [0,6]");
+	const int profile  = cimg_option("-p",0,"profile [0,7]");
 
+	////////////////////////////////////////////////////////////////////
+	typeVecData data;
 
-///////////////////////////////////////////////////////
-   for(uint iq=0;iq<WList.size();iq++)
-	   {
-		   {
-		   MyFloat meanW=pow(10.0,WList[iq]);
-
-		   Remover<weight_map_type>	r(get(edge_weight, graphMST), meanW);
-		   remove_edge_if(r, graphMST);
+	base=string(file_base);
+	string hopfile=base+string("/")+string(HOP_file);
 	
-		   uint numvert=num_vertices(graphMST);
-		   std::vector<int> component(numvert);
-		   int num = connected_components(graphMST, &component[0]);
-			cout<<"==============\nTotal Vertexes="<<numvert<<endl;
-		   cout << "Total number of connected components: " <<std::setprecision(5)<< num <<" Wcut="<< meanW<< endl;
-//// make catalogues 	
-		   TMSTCat MSTCat;
-		   for(int comp=0;comp<num;comp++)
-			   {
-			    MSTCat.insert(std::make_pair(comp, CMSTGroup(comp,&data)));
-			   }
-		   std::vector<int>::size_type i;
-		   for (i = 0; i != component.size(); ++i)
-			   {
-			   MSTCat[component[i]].Insert(i);
-			   }
-			for(int comp=0;comp<num;comp++)
-				{
-				MSTCat[comp].DoneInsert();
-				if(MSTCat[comp].Ntotal >50)
-					cout<<MSTCat[comp];
-				}
-			string catfile=base+"MSTCat_450_4_00"+boost::lexical_cast<std::string>(iq);
-			write_catalog(catfile, &MSTCat);
-		   /*string fname="test_"+toString(meanW)+".idx";
-		   cut_and_report(meanW,fgmst, fname);	
-		   dump_dot_file("msttest.dot", fgmst);*/
-///////////
-		   }
-	   }
-   ////////////////////////////////
-   return EXIT_SUCCESS;
+	const int dim=3;
+	
+	init_test_data();
+exit(0);
+	if(file_ascii==0)
+		read_gadget(file_gadget2, &data);
+
+	////////////////////////////////////////////////
+	// FOF_6D by Mahalanobis distance;
+	
+	MahalanobisFOF();
+	exit(0);
+	////////////////////////////////////////////////
+	/// Smooth Est with 64 Ngb
+	SmoothSph();
+	/////////////////////// GET setAB This is the HOP stuff based on Enbid Density  one can test also for RHO by SPH//////////////////////////////////////
+
+	MyFloat alpha=0.05;
+	CHOP *hop=new CHOP(alpha, MIN_NGRP);
+
+	int seeds=hop->get_seeds();
+	cout<<"We got "<<seeds<<" seeds out of "<< All.NumPart<<endl;
+
+
+	hop->write_catalogues(hopfile);
+
+	///////////////////////////////////////////////////////////////
+	// Here we need to cut and store the catalogues
+	///////////////////////////////////////////////////////
+
+
+	////////////////////////////////
+	return EXIT_SUCCESS;
 	}
