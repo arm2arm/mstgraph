@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="mst_graph"
-	ProjectGUID="{D5C12745-2739-4473-ACCC-CCB0BFB74951}"
-	RootNamespace="mst_graph"
+	Name="jpegtest"
+	ProjectGUID="{6B67A683-8410-4D3E-AC60-A2FCCDAF4575}"
+	RootNamespace="jpegtest"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -41,8 +41,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;C:\Documents and Settings\arm2arm\Mes documents\Downloads\ann_1.1.1\include&quot;;&quot;C:\Documents and Settings\arm2arm\Mes documents\Visual Studio 2008\Projects\mstgraph\mahanabolis&quot;;&quot;C:\Boost\include\boost-1_39;C:\Program Files\GnuWin32\include&quot;;&quot;C:\arm2arm\progs\CImg_examples_win32\CImg-1.3.2&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS"
+				AdditionalIncludeDirectories="&quot;C:\Program Files\GnuWin32\include&quot;;&quot;C:\arm2arm\progs\CImg_examples_win32\CImg-1.3.2&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -61,9 +61,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="boost_graph-vc90-mt-1_38.lib ANN.lib"
+				AdditionalDependencies="jpeg.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;C:\Documents and Settings\arm2arm\Mes documents\Downloads\ann_1.1.1\MS_Win32\dll\Debug&quot;;&quot;C:\Program Files\boost\boost_1_38\lib&quot;"
+				AdditionalLibraryDirectories="C:\Program Files\GnuWin32\lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -117,8 +117,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="&quot;C:\Documents and Settings\arm2arm\Mes documents\Downloads\ann_1.1.1\include&quot;;&quot;C:\Documents and Settings\arm2arm\Mes documents\Visual Studio 2008\Projects\mstgraph\mahanabolis&quot;;&quot;C:\Boost\include\boost-1_39;C:\Program Files\GnuWin32\include&quot;;&quot;C:\arm2arm\progs\CImg_examples_win32\CImg-1.3.2&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS"
+				AdditionalIncludeDirectories="&quot;C:\Program Files\GnuWin32\include&quot;;&quot;C:\arm2arm\progs\CImg_examples_win32\CImg-1.3.2&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -136,9 +136,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ANN.lib"
+				AdditionalDependencies="jpeg.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;C:\Documents and Settings\arm2arm\Mes documents\Downloads\ann_1.1.1\MS_Win32\dll\Release&quot;"
+				AdditionalLibraryDirectories="C:\Program Files\GnuWin32\lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -177,19 +177,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\GetEst.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\HOP.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\kdtree2.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\mst_graph.cpp"
+				RelativePath=".\jpegtest.cpp"
 				>
 			</File>
 			<File
@@ -197,7 +185,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Render.cpp"
+				RelativePath=".\stdafx.cpp"
 				>
 			</File>
 		</Filter>
@@ -207,67 +195,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\cats.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\..\..\..\arm2arm\progs\CImg_examples_win32\CImg-1.3.2\CImg.h"
-				>
-			</File>
-			<File
-				RelativePath=".\coord.h"
-				>
-			</File>
-			<File
-				RelativePath=".\cycle.h"
-				>
-			</File>
-			<File
-				RelativePath=".\functions.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GetEst.h"
-				>
-			</File>
-			<File
-				RelativePath=".\global_typedefs.h"
-				>
-			</File>
-			<File
-				RelativePath=".\HOP.h"
-				>
-			</File>
-			<File
-				RelativePath=".\kdtree2.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\mahanabolis\matrix_tools.h"
-				>
-			</File>
-			<File
-				RelativePath="..\mahanabolis\metric_factory.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\mst_graph.h"
-				>
-			</File>
-			<File
-				RelativePath=".\MSTGroup.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ranker.h"
-				>
-			</File>
-			<File
 				RelativePath=".\readers.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Render.h"
+				RelativePath=".\stdafx.h"
+				>
+			</File>
+			<File
+				RelativePath=".\targetver.h"
 				>
 			</File>
 		</Filter>
