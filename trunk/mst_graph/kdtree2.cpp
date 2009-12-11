@@ -149,8 +149,14 @@ kdtree2_node* kdtree2::build_tree_for_range(int l, int u, kdtree2_node* parent) 
 		node->l = l;
 		node->u = u;
 		node->left = node->right = NULL;
-		get_metric( l, u, node);
-
+		
+		if(parent->childlist.size() >0)
+			{
+			node->metric=parent->metric;
+			
+			}else
+				get_metric( l, u, node);
+		
 		} else {
 			//
 			// Compute an APPROXIMATE bounding box for this node.
@@ -207,7 +213,7 @@ kdtree2_node* kdtree2::build_tree_for_range(int l, int u, kdtree2_node* parent) 
 			node->cut_dim=c;
 			node->l = l;
 			node->u = u;
-			get_metric( l, u, node);
+			//get_metric( l, u, node);// we dont calculate metric for all nodes.. only for terminal one generated once
 			node->left = build_tree_for_range(l,m,node);
 			node->right = build_tree_for_range(m+1,u,node);
 
@@ -242,29 +248,39 @@ kdtree2_node* kdtree2::build_tree_for_range(int l, int u, kdtree2_node* parent) 
 					}
 		}
 
-	fdump<<" "<<endl;
-	for (int i=0; i<dim; i++) {
-		fdump<<"  "<<i<<" "<< node->box[i].lower<<" "<<
-			node->box[i].upper<<" ";
-		}
-	fdump<<endl;
+	//if( std::abs(((u-l)- bucketsize))<2 )
+			{
+			if(false)
+
+				{fdump<<node->cut_dim<<" ";
+			for (int i=0; i<dim; i++) {
+				fdump<<"  "<<i<<" "<< node->box[i].lower<<" "<<
+					node->box[i].upper<<" ";
+				}
+			if(node->left==NULL && node->right==NULL)fdump<<0;else fdump<<1;
+			fdump<<endl;
+				}
+			}
 	return(node);
 	}
 
 // this whould calculate adaptive metrics for a given node.
 void kdtree2:: get_metric( int l, int u, kdtree2_node* node)
 	{
+	static uint times=0;
 	int np=u-l;
 	boost::numeric::ublas::matrix<MyFloat> ngbGroup(dim,np);
+	//cout<<times<<")METRIC: "<<l<<" "<<u<<" on Np=" << np<<endl;
 	for (int i=l,ip=0; i< u; i+=1) 
 		{			 
 		for(int k=0;k<dim;k++)
-			ngbGroup(k,ip)=the_data[ind[i]] [k];			
+			ngbGroup(k,ip)=the_data[ind[i]] [k];
+		node->childlist.push_back(ind[i]);
 		ip++;
 		}
-
+	//cout<<ngbGroup<<endl;
 	node->metric.Init(ngbGroup);
-
+	times++;
 
 	}
 void kdtree2:: spread_in_coordinate(int c, int l, int u, interval& interv)

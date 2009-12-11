@@ -216,7 +216,7 @@ private:
 	std::vector<interval> box; // [min,max] of the box enclosing all points
 	Metrics::MahalDistance<MyFloat> metric;
 	kdtree2_node *left, *right;  // pointers to left and right nodes. 
-
+	std::vector<int> childlist; 
 	void search(searchrecord& sr); 
 	// recursive innermost core routine for searching.. 
 

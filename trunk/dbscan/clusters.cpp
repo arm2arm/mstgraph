@@ -23,7 +23,34 @@ namespace Clustering
 		}
 		
 	}
+void readFromFile(Points & ps, unsigned int &dims, 
+				  std::string file)
+	{
+	std::ifstream fin(file.c_str(),std::ios::binary);
+	unsigned int num_points=0;
+	fin.read((char*)&dims,sizeof(dims));
+	fin.read((char*)&num_points,sizeof(num_points));	
+	std::cout<<"We got a NP["<<dims<<"]="<<num_points<<" particles"<<std::endl;
+	float *RR=new float[num_points];
+	float *Ap=new float[num_points];
+	fin.read((char*)&RR[0],sizeof(float)*num_points);
+	fin.read((char*)&Ap[0],sizeof(float)*num_points);
 
+	for (unsigned int j = 0; j < num_points; j++)
+		{
+		Point p(dims);
+		//for (unsigned int i = 0; i < dims; i++)	
+			{
+			p(0)=RR[j];
+			p(1)=Ap[j];
+			}
+		ps.push_back(p);
+
+		}
+	fin.close();
+	delete  [] RR;
+	delete  [] Ap;
+	}
 	// assign each point to a new cluster
 	void Clusters::uniformPartition()
 	{

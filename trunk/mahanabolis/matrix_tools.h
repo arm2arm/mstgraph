@@ -159,9 +159,12 @@ bool InvertMatrix (const ublas::matrix<T>& input, ublas::matrix<T>& inverse) {
 	matrix<T> A(input);
 	// create a permutation matrix for the LU-factorization
 	pmatrix pm(A.size1());
+
 	// perform LU-factorization
 	int res = lu_factorize(A,pm);
-	if( res != 0 ) return false;
+	
+	if( res != 0 ) 
+		return false;
 	// create identity matrix of "inverse"
 	inverse.assign(ublas::identity_matrix<T>(A.size1()));
 	// backsubstitute to get the inverse

@@ -1,8 +1,11 @@
 #ifndef _METRIC_ND_
 #define _METRIC_ND_
-
+#undef BOOST_UBLAS_TYPE_CHECK
+//we should define this to be able 
+#define BOOST_UBLAS_TYPE_CHECK 0
 #include <boost/numeric/ublas/vector.hpp>
 #include <vector>
+#include <algorithm>
 #include "matrix_tools.h"
 
 namespace Metrics{
@@ -27,23 +30,76 @@ namespace Metrics{
 		typedef boost::numeric::ublas::matrix<T> MatrixT;
 		typedef boost::numeric::ublas::vector<T> VectorT;
 	public:
-		bool set_flag;
-		MahalDistance():last_dist((T)0.0),set_flag(false){};		
-		MahalDistance(MatrixT& G):last_dist((T)0.0){Init(G);};
-		void Init(MatrixT& G){
-			MatrixT Covar;
+
+		static bool set_flag;
+		MahalDistance():last_dist((T)0.0),frac((T)0.5),NSmooth(5){	};		
+		//! A constructor.
+		/*!
+		   It takes as a input the matrix of the D dimensional pointset.
+		   Here the default values for frac and NSmooth
+		   \sa frac  and NSmooth
+		*/
+		MahalDistance(MatrixT& G):last_dist((T)0.0),frac((T)0.5),NSmooth(5){Init(G);};
+		//! A public member function.
+		/*!
+		   This used for setting the Covariance matrix smoothing.
+		   \param frac the fraction of the particles to be used for smoothing
+		   \param NSmooth number of iterations/shuffle to smooth covariance matrix  
+		   \sa frac  and NSmooth
+		*/
+		
+		void SetCovarianceSmoothing(T _frac,int _NSmooth){frac=_frac;NSmooth=_NSmooth;};
+		void GetPartial(MatrixT &Gin, MatrixT &Gout, T frac)
+			{
+			
+			std::random_shuffle(ind.begin(), ind.end());
+			size_t n2=(size_t)(frac*Gin.size2())+1;
+			size_t n1=Gin.size1();
+
+			Gout.resize(Gin.size1(),n2);
+			for(size_t i=0;i<n2;i++)
+				for(size_t j=0;j<n1;j++)
+				Gout(j,i)=Gin(j,ind[i]);
+
+			}
+		void Init(MatrixT& Gin){
+			//cout<<endl;
+			//cout<<G<<endl;
+
+			MatrixT G;
+			MatrixT Covar, partCovar;
+			ind.resize(Gin.size2());
+			for(size_t i=0;i<Gin.size2();i++)
+				ind[i]=i;							
+
+			GetPartial(Gin, G, frac);
 			Covarinace(G, Covar);//Get Covariance			
-			InvertMatrix (Covar, InvCovar);
-			for(size_t i=0;i<meanG.size();i++)
-			meanV.push_back(meanG(i));
 			detCovar=(T)determinant(Covar);
-			//cout<<Covar<<endl;
-			set_flag=true;
+
+			for(int i=0;i<NSmooth-1;i++)
+				{
+				GetPartial(Gin, G, frac);
+				Covarinace(G, partCovar);//Get Covariance
+				Covar+=partCovar;
+				}
+			Covar/=(T)NSmooth;
+			InvertMatrix (Covar, InvCovar);
+			
+			detCovar=(T)determinant(Covar);
+//			cout<<endl;
+//			cout<<InvCovar<<endl;
 			}
 		T doDist(float *V1,float *V2){
 			boost::numeric::ublas::vector<T> p(meanG.size());
 			for(size_t idx=0;idx<meanG.size();idx++)p(idx)=(V1[idx]-V2[idx]);
 			last_dist=getDistance(p);
+			return last_dist;
+			};
+		T doEDist(float *V1,float *V2){
+			last_dist=0.0;
+			for(size_t idx=0;idx<3;idx++)
+				last_dist+=(V1[idx]-V2[idx])*(V1[idx]-V2[idx]);
+			last_dist=std::sqrt(last_dist);
 			return last_dist;
 			};
 		T doDist(float *V){
@@ -64,8 +120,11 @@ namespace Metrics{
 		inline	T getDet(){return detCovar;};
 		T last_dist;
 		T detCovar;
+		std::vector<int> ind;
 	protected:                  
-
+		T frac;// The fraction of neighbor  particles participating in to the Covariance Matrix smoothing
+		int NSmooth;//	How many times select random fractions to smooth the covariance matrix?
+		
 		// this must be not directly accessible 
 		// since we want to provide a rich set of distances	
 
@@ -75,14 +134,14 @@ namespace Metrics{
 			};
 		T getDistance(VectorT &vin)
 			{
-			
-			vin-=meanG;
+//			cout<<vin<<endl;
+			//vin-=meanG;
 			VectorT ab=prod(vin,InvCovar );
-			VectorT res=trans(vin);
-			//cout<<ab<<endl;
+//			cout<<vin<<endl;
+//			cout<<ab<<endl;
 			double dres=0.0;
-			for(size_t i=0;i<res.size();i++)
-				dres+=ab(i)*res(i);
+			for(size_t i=0;i<ab.size();i++)
+				dres+=ab(i)*vin(i);
 			//cout<<InvCovar<<endl;
 			//cout<<"Mean"<<meanG<<endl;
 			return (T)dres;//
@@ -110,7 +169,8 @@ namespace Metrics{
 					{
 					for (size_t i=0; i<maxRows; ++i) temp(j,i) -= meanG(j);
 					}
-				covMatrix = prod(temp,trans(temp)) * (ONE/T(maxRows-1));				
+				MatrixT tr_temp=trans(temp);
+				covMatrix = prod(temp,tr_temp) * (ONE/T(maxRows-1));				
 				}
 			}
 
@@ -118,19 +178,26 @@ namespace Metrics{
 			{
 			// loop over columns getting each row 
 			vout.resize(m.size1());
+			meanV.clear();
+			T mean=0.0;
+			//cout<<m<<endl;
 			for (size_t i = 0; i < m.size1(); ++i) 
 				{ 
-				vout(i)=0.0;		
+				mean=0.0;		
 				for (size_t j = 0; j < m.size2(); ++ j)
-					vout(i) += m(i,j);		
-				vout(i)/=(T)m.size2();
+					mean += m(i,j);		
+				mean/=((T)m.size2());
+				vout(i)=mean;
+				meanV.push_back(mean);
+			//	cout<<vout(i)<<endl;
 				}
 			}
 
 		};	
 
 
-
+template <class T>
+bool MahalDistance<T>::set_flag=true;
 
 
 	/////////////////////////////////////////////////////////////////////////////////

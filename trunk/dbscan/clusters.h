@@ -1,6 +1,8 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
+#include <fstream>
+#include <cstring>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/foreach.hpp>
@@ -23,7 +25,8 @@ namespace Clustering{
 
 	void randomInit	(Points & ps, unsigned int dims = 5, 
 						unsigned int num_points = 10);
-
+	void readFromFile(Points & ps, unsigned int &dims, 
+				  std::string file="c:/arm2arm/DATA/test.u");
 	class Clusters
 	{
 	public:

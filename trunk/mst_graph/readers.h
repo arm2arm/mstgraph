@@ -4,7 +4,7 @@
 #ifndef M_PI
 #define M_PI 3.141592653589793238462643383
 #endif
-#define ND 6
+#define NDIM 6
 
 typedef int int4byte;
 #include <vector>
@@ -12,7 +12,7 @@ typedef int int4byte;
 #define real double
 #define real1 float
 
-void read_ic12(const char *fname);
+void read_ic12(const char *fname, bool ngb_flag=false);
 void read_ic12_est(const char *fname);
 void read_ic12_rho(const char *fname);
 void write_block(std::vector<float> vec,const char *fname, char *TAG_NAME);
@@ -44,7 +44,7 @@ extern struct global_data_all_processes
     /* Cosmology */
 //    double BoxSize, BoxHalf;
     int    MedianSplittingOn;
-    float   hs[ND],hsv;
+    float   hs[NDIM],hsv;
     double  MassTable[6];
     /* File options */
     int   ICFormat;
@@ -69,11 +69,11 @@ extern struct global_data_all_processes
 
 extern std::vector<int> npart,npartc; 
 
-static enum eDOSORT{BY_RHO, BY_EST, BY_POS};
+static enum eDOSORT{BY_RHO, BY_EST,BY_AEST, BY_POS};
 extern struct particle_data
 {	
     int  ID,id,Type;//,NumNgb;           /* unique particle identifier */
-    float     Pos[ND];       // particle position
+    float     Pos[NDIM];       // particle position
 #ifdef DIM3
     float     Vel[3];       // particle velocity
 #endif
@@ -81,12 +81,25 @@ extern struct particle_data
     float     Est;
 	float     Rho;
 	float     Hsml;
-	int  *pNGB;	
+	int  *pNGB;
+	int  *pNGBA;
 	int *pNGBR;
 //	float get(eDOSORT mode=BY_EST);
 //	int getNGB(int i,eDOSORT mode=BY_EST);
-inline float get(eDOSORT mode=BY_EST){ if(mode==BY_EST)return Est;return Rho;};
-inline int   getNGB(int i,eDOSORT mode=BY_EST){if(mode==BY_EST)return pNGB[i];return pNGBR[i];};
+inline float get(eDOSORT mode=BY_EST){ 
+	if(mode==BY_RHO)
+		return Rho;
+	return Est;
+	};
+inline int   getNGB(int i,eDOSORT mode=BY_EST)
+	{
+	if(mode==BY_EST)
+		return pNGB[i];
+	else 
+		if(BY_AEST)
+			return pNGBA[i];
+	return pNGBR[i];
+	};
 
 } *P,*P_data,*Part;//,*P1;
 
