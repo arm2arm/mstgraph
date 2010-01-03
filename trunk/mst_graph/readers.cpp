@@ -350,9 +350,9 @@ void read_ic12(const char *fname, bool ngb_flag)
 	sprintf(&fest[0], "%s%s",fname,"_ph4.est");
 	if(ngb_flag)
 		{
-		read_ic12_est(fest);	
+		//read_ic12_est(fest);	
 		read_ic12_rho(frho);
-		fill_isort_vecs();
+		//fill_isort_vecs();
 		}
 #undef SKIP    
 #undef GETBLKNAME  
@@ -423,12 +423,12 @@ void fill_isort_vecs()
 	isortPos=isortRho;
 	cout<<"Fill the sort vectors"<<endl;
 	///////////////// SORT by Rho ////////////
-	cout<<"Sorting by EST"<<endl;
-	sort(isortEst.begin(),isortEst.end(),setGtEst<struct particle_data>(Part));
+	cout<<"NOT: Sorting by EST"<<endl;
+	//sort(isortEst.begin(),isortEst.end(),setGtEst<struct particle_data>(Part));
 	cout<<"Max:"<<Part[isortEst[0]].Est<<endl;
 	cout<<"Min:"<<Part[isortEst[All.NumPart-1]].Est<<endl;
-	cout<<"Sorting by Rho"<<endl;
-	sort(isortRho.begin(),isortRho.end(),setGtRho<struct particle_data>(P));	
+	cout<<"NOT: Sorting by Rho"<<endl;
+	//sort(isortRho.begin(),isortRho.end(),setGtRho<struct particle_data>(P));	
 	cout<<P[isortRho[0]].Rho<<endl;
 	cout<<P[isortRho[All.NumPart-1]].Rho<<endl;
 
@@ -437,7 +437,7 @@ void fill_isort_vecs()
 	cout<<"Sorting by Ngb lists by Est"<<endl;
 	for(int i=0;i<All.NumPart;i++)
 		{
-		sort(&Part[i].pNGB[0],&Part[i].pNGB[All.DesNumNgb-1],setGtEst<struct particle_data>(Part));
+		//sort(&Part[i].pNGB[0],&Part[i].pNGB[All.DesNumNgb-1],setGtEst<struct particle_data>(Part));
 		for(ii=0;ii<6;ii++)mean[ii]+=Part[i].Pos[ii];
 
 		}
@@ -673,23 +673,21 @@ void read_ic12_rho(const char *fname)
 
 		float *loc_vec=new float[NumPart];
 		int  nread;
-		
-		GETBLKNAME; 
+
+		GETBLKNAME;// ID
 		SKIP;
 		nread=fread((char*)&loc_vec[0], sizeof(float), NumPart, fd);
 		SKIP;
-		
-		GETBLKNAME; 
+
+		GETBLKNAME;//  RHO 
 		SKIP;
 		nread=fread((char*)&loc_vec[0], sizeof(float), NumPart, fd);
-		if(nread!=NumPart)
-			endrun(778);
+		SKIP;
 		for(i=1;i<=NumPart;i++)
 			{	   		
 			P[i].Rho=loc_vec[i-1];		
 			}
-		SKIP;
-		GETBLKNAME; 
+		GETBLKNAME; // HSML
 		SKIP;
 		nread=fread((char*)&loc_vec[0], sizeof(float), NumPart, fd);
 		if(nread!=NumPart)

@@ -39,7 +39,7 @@ namespace Metrics{
 		   Here the default values for frac and NSmooth
 		   \sa frac  and NSmooth
 		*/
-		MahalDistance(MatrixT& G):last_dist((T)0.0),frac((T)0.5),NSmooth(5){Init(G);};
+		MahalDistance(MatrixT& G):last_dist((T)0.0),frac((T)1.0),NSmooth(1){Init(G);};
 		//! A public member function.
 		/*!
 		   This used for setting the Covariance matrix smoothing.
@@ -74,8 +74,8 @@ namespace Metrics{
 
 			GetPartial(Gin, G, frac);
 			Covarinace(G, Covar);//Get Covariance			
-			detCovar=(T)determinant(Covar);
-
+//			detCovar=(T)determinant(Covar);
+#ifdef SMOOTH_COVAR
 			for(int i=0;i<NSmooth-1;i++)
 				{
 				GetPartial(Gin, G, frac);
@@ -83,6 +83,7 @@ namespace Metrics{
 				Covar+=partCovar;
 				}
 			Covar/=(T)NSmooth;
+#endif
 			InvertMatrix (Covar, InvCovar);
 			
 			detCovar=(T)determinant(Covar);

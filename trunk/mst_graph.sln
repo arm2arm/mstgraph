@@ -17,6 +17,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KNN", "KNN\KNN.vcproj", "{A
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ANN", "ANN\ANN.vcproj", "{4380E4C9-B7B0-4EFF-8E1F-C1BDF50A61CF}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sph2grid", "..\..\..\..\..\..\arm2arm\progs\sph2grid\win32\sph2grid\sph2grid.vcproj", "{D41EC832-CBB0-4B64-81F9-565FBF0C7E0A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -55,6 +57,10 @@ Global
 		{4380E4C9-B7B0-4EFF-8E1F-C1BDF50A61CF}.Debug|Win32.Build.0 = Debug|Win32
 		{4380E4C9-B7B0-4EFF-8E1F-C1BDF50A61CF}.Release|Win32.ActiveCfg = Release|Win32
 		{4380E4C9-B7B0-4EFF-8E1F-C1BDF50A61CF}.Release|Win32.Build.0 = Release|Win32
+		{D41EC832-CBB0-4B64-81F9-565FBF0C7E0A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D41EC832-CBB0-4B64-81F9-565FBF0C7E0A}.Debug|Win32.Build.0 = Debug|Win32
+		{D41EC832-CBB0-4B64-81F9-565FBF0C7E0A}.Release|Win32.ActiveCfg = Release|Win32
+		{D41EC832-CBB0-4B64-81F9-565FBF0C7E0A}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
