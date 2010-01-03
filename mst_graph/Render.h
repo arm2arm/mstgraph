@@ -1,6 +1,8 @@
 #ifndef _MYRENDER_
 #define _MYRENDER_
 ////////////////////////////////////////////////////
+#ifdef WITH_CIMG
+
 #define cimg_plugin  "plugins/draw_galaxypoints.h"
 #define cimg_plugin1 "plugins/LUT_ALL.rgb.h"
 #define cimg_plugin2 "plugins/draw_gradient.h"
@@ -41,4 +43,5 @@ class CRender
 	protected:
 		
 	};
+#endif
 #endif

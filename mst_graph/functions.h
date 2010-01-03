@@ -62,6 +62,7 @@ class CEpanechikov : public CKernel<T>
 			}
 		Kernel[KERNEL_TABLE+1] =(T)0.0;
 		};
+	public:
 	virtual T W(T u){
 		int k;
 		T wk=0.0;

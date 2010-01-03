@@ -9,9 +9,12 @@
 #include <boost/graph/connected_components.hpp>
 #include <boost/graph/filtered_graph.hpp>
 
+
+
 #include <boost/numeric/ublas/matrix.hpp>
 #include <cstring>
 #include <ANN/ANN.h>
+#include "functions.h"
 
 extern enum eDOSORT;
 
@@ -62,13 +65,25 @@ class GetEst
 		void makeMSTree();
 		void DumpNgb(std::string fname);
 		void LoadNgb(std::string file);
-
-
+		void AssignOneParticle(std::vector< std::vector<double> > &image,CKernel<double> *pKernel, 
+							   double X, double Y, double Z, double Rho,double Hsml);
+		void PutOnGrid(std::vector< std::vector<double> > &Grid2D, //Out 
+					   std::vector<float> &annEst,//In: What to put on grid
+					   std::vector<double> &Region,// In: CENT[3], R;//size=4 or size=6, eg: XC,YC,ZC,Rx, Ry, Rz;
+					   // or if Size=3; Xc, YC, R
+					   int nsph=0,//Smoothing Neighbours in 3D
+					   bool verbose=true
+					   );
+		void SaveImage(std::string fname,std::vector< std::vector<double> > &Grid2D);
 		void DumpMstCat(Graph &graphFOF,std::vector < Edge > &spanning_tree);
 		int dim;
 		static const int NUM_NGB=10;
-		int Klink; //Ngb numbers used for linking;
+		size_t Klink; //Ngb numbers used for linking;
 		std::vector<float> Rho, myEst;
+		std::vector<float> annRho, annHsml;
+		std::vector<float> annEst;
+		std::vector<float> annSmooth;
+
 		typedef struct tagTNgb{std::vector< std::pair<int, float> > p;} TNgb;
 		std::vector<TNgb> Mngb;
 		/*! ANN structures
@@ -86,10 +101,14 @@ class GetEst
 		ANNkd_tree*			kdTree;					// search structure
 		void AllocateANNTreeStructures(int dim,int nPts, int kd);
 	inline	void DeallocateANN(){	
+		if(nnIdx!=NULL)
+			{
 			delete [] nnIdx;							// clean things up
+			nnIdx=NULL;
 			delete [] dists;
 			delete kdTree;
-			annClose();									// done with ANN
+			annClose();	
+			}// done with ANN
 			};
 	void FillANNData(int dim);
 	

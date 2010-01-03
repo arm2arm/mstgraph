@@ -2,6 +2,7 @@
 #include <utility>
 #include <cstring>
 #include <cmath>
+
 #include "kdtree2.hpp"
 #include "functions.h"
 #include "readers.h"
@@ -12,6 +13,7 @@
 #define ND_GROUPS 6
 GetEst::GetEst()
 	{
+	nnIdx=NULL;
 	dim=ND_GROUPS;
 	}
 
@@ -42,10 +44,10 @@ void GetEst::fill_ngb_group_Ap(int i,boost::numeric::ublas::matrix<T> &ngbGroup,
 		float Ap[4];
 		j=Part[i].getNGB(ingb, which_est);
 		/*for(size_t idx=0;idx<ngbGroup.size1();idx++)
-			{
-			ngbGroup(idx,ingb)=Part[j].Pos[idx];
-			}
-			*/
+		{
+		ngbGroup(idx,ingb)=Part[j].Pos[idx];
+		}
+		*/
 		GetAP(&Part[j].Pos[0], &Ap[0]);
 		for(size_t idx=0;idx<ngbGroup.size1();idx++)
 			ngbGroup(idx,ingb)=Ap[idx];
@@ -196,12 +198,12 @@ void GetEst::run()
 		hsml=Mahal.doDist(&Part[i].Pos[0],&Part[ihsml].Pos[0]);
 		for( int ingb=0;ingb<ngbmax; ingb++)
 			{	
-			 j=Part[i].getNGB(ingb,which_est);
-			 u=Mahal.doDist(&Part[i].Pos[0],&Part[j].Pos[0]);
-			 u/=hsml;
-			 Rho[i] +=  pKernel->W(u);
-			 Est[i] += (pKernel->W(u)*Part[j].Est);
-			 //cout<<j<<" "<<Rho[i]<<" u: "<<u<<" "<<hsml<<endl;
+			j=Part[i].getNGB(ingb,which_est);
+			u=Mahal.doDist(&Part[i].Pos[0],&Part[j].Pos[0]);
+			u/=hsml;
+			Rho[i] +=  pKernel->W(u);
+			Est[i] += (pKernel->W(u)*Part[j].Est);
+			//cout<<j<<" "<<Rho[i]<<" u: "<<u<<" "<<hsml<<endl;
 			}
 		Est[i]=Rho[i];
 		Rho[i]=Part[i].Rho;
@@ -210,8 +212,8 @@ void GetEst::run()
 	DumpVector<float>("c:/arm2arm/DATA/smooth64.est", Est);
 	DumpVector<float>("c:/arm2arm/DATA/smooth64.rho",Rho);
 	/////////////////////////////////////////
-	
-	
+
+
 	}
 
 void GetEst::run_graph_Ap()
@@ -224,7 +226,7 @@ void GetEst::run_graph_Ap()
 	float u=0.0, hsml=0.0;
 	int ngbmax=All.DesNumNgbA;
 	int ngb_for_mahal=All.DesNumNgb;//min(40,All.DesNumNgb);
-//	int jj;
+	//	int jj;
 	float uj=0.0,dist,wl,Thr;
 	dim=3;
 	ARR.resize(All.NumPart);
@@ -242,19 +244,19 @@ void GetEst::run_graph_Ap()
 		ma=max(wl, ma);
 		}
 	meanEst/=(float)All.NumPart;
-	
+
 
 	//boost::numeric::ublas::matrix<float> ngbGroup(dim,ngb_for_mahal);	
-		//fill_ngb_group_Ap<float>(i,ngbGroup,ngb_for_mahal, which_est);
+	//fill_ngb_group_Ap<float>(i,ngbGroup,ngb_for_mahal, which_est);
 	Metrics::MahalDistance<float> Mahal(ngbGroup);
 	int jj=0;	
 	for(i=0;i<All.NumPart;i++)
 		{
-		
+
 		//boost::numeric::ublas::matrix<float> ngbGroup(dim,ngb_for_mahal);	
 		//fill_ngb_group_Ap<float>(i,ngbGroup,ngb_for_mahal, which_est);
 		//Metrics::MahalDistance<float> Mahal(ngbGroup);
-		
+
 		//j=Part[i].getNGB(0,which_est);
 		//cout<<i<<" "<<j<<endl;
 		//cout<<Part[i].Pos[0]<<" "<<Part[i].Pos[1]<<" "<<Part[i].Pos[2]<<endl;
@@ -263,29 +265,29 @@ void GetEst::run_graph_Ap()
 		//jj=j;
 		for( int ingb=0;ingb<ngbmax; ingb++)
 			{	
-			 j=Part[i].getNGB(ingb,BY_AEST);			 
+			j=Part[i].getNGB(ingb,BY_AEST);			 
 			// uj = std::sqrt(Mahal.doDist(&ARR[i].Pos[0],&ARR[j].Pos[0]));	
-			 //uj = Mahal.doEDist(&Part[i].Pos[0],&Part[j].Pos[0]);	
-			 ///if(uj<u && i!=j)
+			//uj = Mahal.doEDist(&Part[i].Pos[0],&Part[j].Pos[0]);	
+			///if(uj<u && i!=j)
 			//	 {
 			//	  u=uj;
 			//	  jj=j;
 			//	 }
-			 uj=Part[j].get();
-			 //if(ARR[i].Pos[0])
+			uj=Part[j].get();
+			//if(ARR[i].Pos[0])
 			//	add_edge(i,j, uj,graphFOF);
-			 dist=abs(ARR[i].Pos[0]-ARR[j].Pos[0]);
-			 Thr=(log10(uj)-meanEst)/(ma-meanEst);
+			dist=abs(ARR[i].Pos[0]-ARR[j].Pos[0]);
+			Thr=(log10(uj)-meanEst)/(ma-meanEst);
 			if( dist<0.1 && Thr>0.2)
-			add_edge(i,j, dist,graphFOF);
+				add_edge(i,j, dist,graphFOF);
 			}
-//		vec[i]=Part[i].get();
-//		if(abs(ARR[i].Pos[0]-ARR[jj].Pos[0])<0.1 && vec[i])
-//			add_edge(i,jj, u,graphFOF);
+		//		vec[i]=Part[i].get();
+		//		if(abs(ARR[i].Pos[0]-ARR[jj].Pos[0])<0.1 && vec[i])
+		//			add_edge(i,jj, u,graphFOF);
 		cout<<i<<"\r";
 		}
 	cout<<endl;
-///////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////
 	cout<<"Num Forest edges: "<<num_edges(graphFOF)<<endl;
 	std::vector<int> component(num_vertices(graphFOF));
 	int num = connected_components(graphFOF, &component[0]);
@@ -298,14 +300,14 @@ void GetEst::run_graph_Ap()
 	std::cout << "Building MST:." ;	
 	kruskal_minimum_spanning_tree(graphFOF, std::back_inserter(spanning_tree));
 	std::cout <<"MST num edges="<< spanning_tree.size()<<" .. done " << std::endl;
-////////////////////////////////////////////////////////////////////
-//start to CUT
-/////////////////////////////	
+	////////////////////////////////////////////////////////////////////
+	//start to CUT
+	/////////////////////////////	
 
 	DumpMstCat(graphFOF, spanning_tree);
 
-//////////////////////////////
-/////////////////////////////////////////////////////////////////////
+	//////////////////////////////
+	/////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////
 	DumpVector<float>("c:/arm2arm/DATA/smooth64.est", Est);
 	DumpVector<float>("c:/arm2arm/DATA/smooth64.rho",Rho);
@@ -317,11 +319,11 @@ void GetEst::run_graph_Ap()
 template <class T>
 T distance(T *P1,T *P2, int dim=3)		 
 	{
-		T dist=0.0;
-		for(int i=0;i<dim;i++)
-			dist+=(P1[i]-P2[i])*(P1[i]-P2[i]);
-		dist=std::sqrt(dist);
-		return dist;
+	T dist=0.0;
+	for(int i=0;i<dim;i++)
+		dist+=(P1[i]-P2[i])*(P1[i]-P2[i]);
+	dist=std::sqrt(dist);
+	return dist;
 	}
 void GetEst::run_graph()
 	{
@@ -344,30 +346,30 @@ void GetEst::run_graph()
 		i=isortEst[ip];
 		esti=Part[i].get(which_est);
 		if(isdone[i]==-1)
-		for(int ingb=0;ingb<ngbmax; ingb++)
-			{	
-			j=Part[i].getNGB(ingb,which_est);
-			if(isdone[j]==-1)
-				{
-				estj=Part[j].get(which_est);
-				dist=distance<float>(&Part[i].Pos[0],&Part[j].Pos[0]);		 
-				if( estj<esti && dist <0.2)
-				 {
-				 add_edge(i,j, dist,graphFOF);
-				 isdone[j]=i;
-				 }
+			for(int ingb=0;ingb<ngbmax; ingb++)
+				{	
+				j=Part[i].getNGB(ingb,which_est);
+				if(isdone[j]==-1)
+					{
+					estj=Part[j].get(which_est);
+					dist=distance<float>(&Part[i].Pos[0],&Part[j].Pos[0]);		 
+					if( estj<esti && dist <0.2)
+						{
+						add_edge(i,j, dist,graphFOF);
+						isdone[j]=i;
+						}
+					}
 				}
-			}
 
-	if(i%10 ==0)
-			{
-			std::cout<<std::setprecision(2)<<std::fixed;
-			std::cout<<ip/double(All.NumPart)*100.0<<"%"<<"\r";
-			std::cout<<std::setprecision(8)<<std::fixed;
-			}
+			if(i%10 ==0)
+				{
+				std::cout<<std::setprecision(2)<<std::fixed;
+				std::cout<<ip/double(All.NumPart)*100.0<<"%"<<"\r";
+				std::cout<<std::setprecision(8)<<std::fixed;
+				}
 		}
 	cout<<endl;
-///////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////
 	cout<<"Num Forest edges: "<<num_edges(graphFOF)<<endl;
 	std::vector<int> component(num_vertices(graphFOF));
 	int num = connected_components(graphFOF, &component[0]);
@@ -380,14 +382,14 @@ void GetEst::run_graph()
 	std::cout << "Building MST:." ;	
 	kruskal_minimum_spanning_tree(graphFOF, std::back_inserter(spanning_tree));
 	std::cout <<"MST num edges="<< spanning_tree.size()<<" .. done " << std::endl;
-////////////////////////////////////////////////////////////////////
-//start to CUT
-/////////////////////////////	
+	////////////////////////////////////////////////////////////////////
+	//start to CUT
+	/////////////////////////////	
 
 	DumpMstCat(graphFOF, spanning_tree);
 
-//////////////////////////////
-/////////////////////////////////////////////////////////////////////
+	//////////////////////////////
+	/////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////
 	//DumpVector<float>("c:/arm2arm/DATA/smooth64.est", Est);
 	//DumpVector<float>("c:/arm2arm/DATA/smooth64.rho",Rho);		
@@ -395,8 +397,8 @@ void GetEst::run_graph()
 	}
 void GetEst::DumpMstCat(Graph &graphFOF,std::vector < Edge > &spanning_tree)
 	{
-	
-		Graph graphMST;
+
+	Graph graphMST;
 	for (std::vector < Edge >::iterator ei = spanning_tree.begin();
 		ei != spanning_tree.end(); ++ei) {
 			add_edge(source(*ei, graphFOF),target(*ei, graphFOF),get(edge_weight, graphFOF, *ei),graphMST);
@@ -424,17 +426,17 @@ void GetEst::DumpMstCat(Graph &graphFOF,std::vector < Edge > &spanning_tree)
 
 #include <ANN/ANN.h>					// ANN declarations
 void printPt(std::ostream &out, ANNpoint p, int dim=2)			// print point
-{
+	{
 	out << "(" << p[0];
 	for (int i = 1; i < dim; i++) {
 		out << ", " << p[i];
-	}
+		}
 	out << ")\n";
-}
+	}
 
 /*	std::ofstream out_dump_file("c:/arm2arm/DATA/kdtree.dmp");
-	kdTree->Dump(ANNtrue, out_dump_file);
-	out_dump_file.close();*/
+kdTree->Dump(ANNtrue, out_dump_file);
+out_dump_file.close();*/
 
 template<class T>
 void fill_ngb_byID(int *id,boost::numeric::ublas::matrix<T> &ngbGroup)
@@ -448,16 +450,16 @@ void fill_ngb_byID(int *id,boost::numeric::ublas::matrix<T> &ngbGroup)
 			ngbGroup(idx,ingb)=Part[j].Pos[idx];
 			}
 		}
-	
+
 	}
 class CCompare{
 public:
 	CCompare(std::vector<double> &vec):myvec(vec){};
 	const	bool operator() ( int& lhs, int& rhs) {
-			return myvec[lhs] < myvec[rhs];
+		return myvec[lhs] < myvec[rhs];
 		}
 private:
-		std::vector<double> &myvec;
+	std::vector<double> &myvec;
 	};
 void GetEst::AllocateANNTreeStructures(int dim,int nPts, int kd)
 	{
@@ -477,14 +479,15 @@ void GetEst::FillANNData(int dim)
 		}
 	};
 void GetEst::run_ANN(std::vector<float> &annRho,int dim,//Dimensions
-	int kd,//Estimation Neighbours
-	int bucketsize,//Tuning parameter for ANN speed
-	bool verbose
-	)
+					 int kd,//Estimation Neighbours
+					 int bucketsize,//Tuning parameter for ANN speed
+					 bool verbose
+					 )
 	{
 	double uj;
 	int			nPts=All.NumPart;					// actual number of data points
-	
+
+	double sc=4.0/3.0*M_PI;
 
 	AllocateANNTreeStructures(dim, nPts, kd);
 	FillANNData(dim);
@@ -500,27 +503,28 @@ void GetEst::run_ANN(std::vector<float> &annRho,int dim,//Dimensions
 		//ANN_KD_SL_MIDPT, sliding midpoint split 
 		//ANN_KD_SL_FAIR, sliding fair-split 
 		//ANN_KD_SUGGEST the authors' suggestion for best
-		
+
 		);
 
-///////// START to search NGBs ////
-	annRho.resize(nPts);
-  	std::vector<double> dist(kd);
-	CKernel<double> *pKernel=new CEpanechikov<double>(dim);// Init Kernel for calculations
+	///////// START to search NGBs ////
+	annRho.resize(nPts, 0.0f);
+	annHsml.resize(nPts, 0.0f);
+	std::vector<double> dist(kd);
+	CEpanechikov<double> *pKernel=new CEpanechikov<double>(dim);// Init Kernel for calculations
 	boost::numeric::ublas::matrix<double> ngbGroup(dim,kd);	
 	Metrics::MahalDistance<double> Mahal;
 	std::vector<int> indns, ind;
 	indns.resize(kd);
 	for(int i=0;i<kd;i++)
-		indns[i]=i;
+		indns[i]=i;// this used for sorting 
 
 	double hsml;
 	if(dim==6)//get 6D NGB
 		{
 		Klink=20;
 		Mngb.resize(nPts);
-		 for(size_t i=0;i<Mngb.size();i++)
-			 Mngb[i].p.resize(Klink);
+		for(size_t i=0;i<Mngb.size();i++)
+			Mngb[i].p.resize(Klink);
 		}
 	for(int i=0;i<All.NumPart;i++)
 		{
@@ -529,109 +533,150 @@ void GetEst::run_ANN(std::vector<float> &annRho,int dim,//Dimensions
 			kd,								// number of near neighbors
 			nnIdx,							// nearest neighbors (returned)
 			dists							// distance (returned)
-			//eps // error bound
 			);								
-		fill_ngb_byID<double>(nnIdx,ngbGroup);
-		Mahal.Init(ngbGroup);
-		
-		for (int j = 0; j < kd; j++) {
-			uj=std::sqrt(Mahal.doDist(&Part[i].Pos[0],&Part[nnIdx[j]].Pos[0]));
-			dist[j]=uj;
+			{
+			fill_ngb_byID<double>(nnIdx,ngbGroup);
+			Mahal.Init(ngbGroup);
+
+
+			for (int j = 0; j < kd; j++) {
+				uj=std::sqrt(Mahal.doDist(&Part[i].Pos[0],&Part[nnIdx[j]].Pos[0]));
+				dist[j]=uj;
+				}
 			}
-		if(dim==6)
 			{
 			CCompare functor_idcomp(dist);
 			ind=indns;
 			std::sort(ind.begin(),ind.end(), functor_idcomp);
-			for(int kl=0;kl<Klink;kl++)
-				Mngb[i].p[kl]=std::make_pair<int, float>(nnIdx[ind[kl]],(float)dist[ind[kl]]);
+			if(dim==6)		
+				for(size_t kl=0;kl<Klink;kl++)
+					Mngb[i].p[kl]=std::make_pair<int, float>(nnIdx[ind[kl]],(float)dist[ind[kl]]);
 			}
-			std::sort(dist.begin(),dist.end());
-
-		hsml=dist[kd-1];
+			hsml=dist[ind[kd-1]];
 		for (int j = 0; j < kd; j++) {
-			uj=dist[j];
-			uj/=hsml;
-			annRho[i]+=(float)pKernel->W(uj);
+				uj=dist[ind[j]];
+				{
+				uj/=hsml;
+				annRho[i]+=(float)(pKernel->W(uj)*3.39014e-006);
+				}
+			//	annRho[i]+=(float)pKernel->W(dists[j]/hsml);//(float)(Wsph<double>(dists[j], hsml)*3.39014e-006);
+
 			}
 		double hd=1.0;
-		for(int idim=0;idim<dim;idim++)
 			{
-			hd*=hsml;
+			for(int idim=0;idim<dim;idim++)
+				{
+				hd*=hsml;
+				}
+			annRho[i]/=float(hd*std::sqrt(Mahal.getDet()));
 			}
 
-		annRho[i]/=float(hd*std::sqrt(Mahal.getDet()));
-	
-		
-			if(verbose && (i%100==0))
-				cout<<i<<"\r";
+		annHsml[i]=(float)hsml;	
+
+		if(verbose && (i%100==0))
+			cout<<i<<"\r";
 		}
-//////////////// DONE analysis  ////////////////////////////
+	//////////////// DONE analysis  ////////////////////////////
 	delete pKernel;
 	DeallocateANN();
 	}
 void GetEst::Run_SPHEst()
 	{
-	vector<float> annRho;
-	vector<float> annEst;
-	vector<float> annSmooth;
-	
-		if(false){ 
+
+	if(false){ 
 		scoped_timer timethis("#GetEst::Run_SPHEst():> 3D density: run_ANN\t"); 
 
 		run_ANN(annRho, 3,//Dimensions
-			40,//Estimation Neighbours
-			3-1,//Tuning parameter for ANN speed
-			true
-			);	
-		}else
-			LoadDumpVector<float>("c:/arm2arm/DATA/smooth64.rho",annRho);
-
-	if(true)
-		{ 
-		scoped_timer timethis("#GetEst::Run_SPHEst():> 6D density: run_ANN\t"); 
-
-		run_ANN(annEst, 6,//Dimensions
 			64,//Estimation Neighbours
-			6-1,//Tuning parameter for ANN speed
+			12,//Tuning parameter for ANN speed
 			true
 			);	
-		DumpNgb("c:/arm2arm/DATA/Mngb.est");
-		}else{
-			LoadDumpVector<float>("c:/arm2arm/DATA/smooth64.est",annEst);
-			//LoadNGB("c:/arm2arm/DATA/Mngb.est");
-			}
-
-		if(false){ 
-		scoped_timer timethis("#GetEst::Run_SPHEst:> Smoothing Est: SmoothByANN\t"); 
-		
-		
-		
-		SmoothByANN(annRho,//Based on what to smooth
-			annEst,//What to smooth
-			annSmooth,//result
-			5//Smoothing Neighbours in 3D
-			);	
-		DumpVector<float>("c:/arm2arm/DATA/smooth64.sme",annSmooth);
-		}
-		
-
 		DumpVector<float>("c:/arm2arm/DATA/smooth64.rho",annRho);
-		DumpVector<float>("c:/arm2arm/DATA/smooth64.est",annEst);
-		
+		DumpVector<float>("c:/arm2arm/DATA/smooth64.hsml",annHsml);
+		}else
+		{
+		LoadDumpVector<float>("c:/arm2arm/DATA/smooth64.rho",annRho);
+		LoadDumpVector<float>("c:/arm2arm/DATA/smooth64.hsml",annHsml);
+		}
+		/////////////////////////////////////////////
+		if(true)
+			for(int i=0;i<All.NumPart;i++)
+				{
+				Part[i].Hsml=annHsml[i];
+				Part[i].Rho=annRho[i];
+				}
+			/////////////////////////////////////////////
 
+			if(true)
+				{ 
+				scoped_timer timethis("#GetEst::Run_SPHEst():> 6D density: run_ANN\t"); 
+
+				run_ANN(annEst, 6,//Dimensions
+					100,//Estimation Neighbours
+					12,//Tuning parameter for ANN speed
+					true
+					);	
+				//DumpNgb("c:/arm2arm/DATA/Mngb.est");
+				DumpVector<float>("c:/arm2arm/DATA/smooth64.est",annEst);
+				}else{
+					LoadDumpVector<float>("c:/arm2arm/DATA/smooth64.est",annEst);
+					//LoadNgb("c:/arm2arm/DATA/Mngb.est");
+				}
+
+			if(false){ 
+				scoped_timer timethis("#GetEst::Run_SPHEst:> Smoothing Est: SmoothByANN\t"); 
+
+				SmoothByANN(annRho,//Based on what to smooth
+					annEst,//What to smooth
+					annSmooth,//result
+					5//Smoothing Neighbours in 3D
+					);	
+				DumpVector<float>("c:/arm2arm/DATA/smooth64.sme",annSmooth);
+				}
+
+
+			if(false)
+				makeMSTree();
+
+			if(false)// Dump 2D Image to file
+				{
+				int Grid=256;
+				std::vector<double> Region(4, 0.0);
+				Region[0]=-9.4345;Region[1]=4.4192;Region[2]=-0.202;
+				Region[3]=6.0;
+
+				std::vector< std::vector<double> > Grid2D(Grid, std::vector<double>(Grid, 0.0) );
+				PutOnGrid(Grid2D, //Out 
+					annEst,//In: What to put on grid
+					Region// In: CENT[3], R;//size=4 or size=6, eg: XC,YC,ZC,Rx, Ry, Rz;
+					// or if Size=3; Xc, YC, R
+					);
+				SaveImage("c:/arm2arm/DATA/image.bin",Grid2D);
+				}
 	}
-
+void GetEst::SaveImage(std::string fname,std::vector< std::vector<double> > &Grid2D)
+	{
+	std::ofstream of(fname.c_str(),std::ios::out | std::ios::binary);
+	if ( !of.is_open() ){std::cout<<"cannot open file:"<<fname<<std::endl;exit(13);}; 
+	int nn[2];
+	nn[0]=Grid2D.size();
+	nn[1]=Grid2D[0].size();
+	of.write((char*)&nn[0], sizeof(int)*2);
+	for(int i=0;i<nn[0];i++)
+		for(int j=0;j<nn[1];j++)
+			of.write((char*)&Grid2D[i][j], sizeof(double));
+	of.close();
+	}
 void GetEst::LoadNgb(string fname)
 	{
 	std::ifstream vec_dump(fname.c_str(), std::ios::binary);
 	size_t np, kl;
-	
+
 	vec_dump.read((char*)&np,sizeof(size_t));
 	vec_dump.read((char*)&kl,sizeof(size_t));
-	
+	Klink=kl;
 	Mngb.resize(np);
-	
+
 	for(size_t i=0;i<np;i++)
 		{
 		Mngb[i].p.resize(kl);
@@ -641,7 +686,7 @@ void GetEst::LoadNgb(string fname)
 			vec_dump.read((char*)&Mngb[i].p[ki].second,sizeof(float));
 			}
 		}
-		vec_dump.close();
+	vec_dump.close();
 	}
 
 void GetEst::DumpNgb(std::string fname)
@@ -656,25 +701,42 @@ void GetEst::DumpNgb(std::string fname)
 			vec_dump.write((char*)&Mngb[i].p[ki].first,sizeof(int));
 			vec_dump.write((char*)&Mngb[i].p[ki].second,sizeof(float));
 			}
-	vec_dump.close();
+		vec_dump.close();
 	}
 void GetEst::makeMSTree()
 	{
 	Graph graphFOF;
 	float dist;
-	int j;
-////////////////////////////////////////////////////////////////////////
-		for(size_t i=0;i<Mngb.size();i++)
-			{
-			for(size_t kl=0;kl<Mngb[i].p.size();kl++)
+	int j,i;
+	std::cout<<endl;
+
+	std::vector<int> isort(Mngb.size());	
+	std::vector<bool> isdone(Mngb.size());
+	for(size_t ip=0;ip<isort.size();ip++)
+		{
+		isort[ip]=ip;	
+		isdone[ip]=false;
+		}
+	////////////////////////////////////////////////////////////////////////
+	for(size_t ii=0;ii<Mngb.size();ii++)
+		{
+		i=isort[ii];
+		for(size_t kl=1;kl<Klink;kl++)
+			{			
+			j=Mngb[i].p[kl].first;
+			dist=Mngb[i].p[kl].second;
+			if(!isdone[j] && annEst[i]>annEst[j] )
 				{
-				dist=Mngb[i].p[kl].second;
-				j=Mngb[i].p[kl].first;
-				if(dist<1.1)
-					add_edge(i,j, dist,graphFOF);
+				add_edge(i,j, dist,graphFOF);
+				isdone[j]=true;
 				}
-			}
-////////////////////////////////////////////////////////////////////////
+			isdone[i]=true;
+			} 
+		if(i%100 ==0)
+			std::cout<<i<<"\r";
+		}
+	std::cout<<endl;
+	////////////////////////////////////////////////////////////////////////
 
 	cout<<"Num Forest edges: "<<num_edges(graphFOF)<<endl;
 	std::vector<int> component(num_vertices(graphFOF));
@@ -694,7 +756,7 @@ void GetEst::makeMSTree()
 
 	DumpMstCat(graphFOF, spanning_tree);
 
-	
+
 	}
 void GetEst::SmoothByANN(std::vector<float> &annRho, std::vector<float> &annEst,//What to smooth
 						 std::vector<float> &annSmooth,//result
@@ -703,7 +765,7 @@ void GetEst::SmoothByANN(std::vector<float> &annRho, std::vector<float> &annEst,
 						 )
 	{
 	int			nPts=All.NumPart;// actual number of data points
-	int dim=3;//dims
+	int dim=6;//dims
 	annSmooth.resize(nPts);
 	AllocateANNTreeStructures(dim, nPts, nsph);
 	FillANNData(dim);
@@ -723,7 +785,7 @@ void GetEst::SmoothByANN(std::vector<float> &annRho, std::vector<float> &annEst,
 		);
 
 	CKernel<double> *pKernel=new CEpanechikov<double>(dim);// Init Kernel for calculations	
-		
+
 	double hsml=0.0,uj=0.0;
 	double hd;
 	double sumR=0.0;
@@ -738,7 +800,7 @@ void GetEst::SmoothByANN(std::vector<float> &annRho, std::vector<float> &annEst,
 			nnIdx,							// nearest neighbors (returned)
 			dists							// distance (returned)			
 			);								
-	
+
 		hsml=dists[nsph-1];
 		sumR=0.0;
 		sumRho=0.0;
@@ -753,6 +815,90 @@ void GetEst::SmoothByANN(std::vector<float> &annRho, std::vector<float> &annEst,
 		if(verbose && (i%100==0))
 			cout<<i<<"\r";
 		}
+	//////////////// DONE analysis  ////////////////////////////
+	delete pKernel;
+	DeallocateANN();
+	};	
+
+void GetEst::AssignOneParticle(std::vector< std::vector<double> > &image,CKernel<double> *pKernel, 
+							   double X, double Y, double Z, double Rho,double Hsml)
+	{
+	double  i, j, jj, ii;
+	double k, kk;
+	double r,h, w=0.0;
+	h=Hsml;
+	i=X;
+	j=Y;
+	k=(Z);
+	if(i+h<image.size() && i-h >0 && j+h<image[0].size() && j-h >0 /*&& k+h<Grid && k-h >0*/)
+		{
+		for(kk=int(k-h)+1;kk<int(k+h)+1;kk+=1)
+			{
+			for(jj=(j-h)+1;jj<(j+h);jj+=1.0)
+				for(ii=(i-h)+1;ii<(i+h);ii+=1.0)
+					{		      
+					r=sqrt((i-ii)*(i-ii)+(j-jj)*(j-jj)+(k-kk)*(k-kk));	       
+					w=pKernel->W(r/h);	
+					image[int(jj)][int(ii)] += w;		      
+					}
+
+			}
+
+		}
+	}
+void GetEst::PutOnGrid(std::vector< std::vector<double> > &Grid2D, //Out 
+					   std::vector<float> &annEst,//In: What to put on grid
+					   std::vector<double> &Region,// In: CENT[3], R;//size=4 or size=6, eg: XC,YC,ZC,Rx, Ry, Rz;
+					   // or if Size=3; Xc, YC, R
+					   int nsph,//Smoothing Neighbours in 3D
+					   bool verbose
+					   )
+	{
+	////////////////////////////////////////////////////////////////////////
+	if(Region.size()!=4){std::cout<<"Error Region.size!=4; This is not implemented yet..."<<std::endl;exit(0);};
+	std::cout<<"Writing 2D image to file"<<std::endl;
+	size_t nx=Grid2D.size();
+	size_t ny=Grid2D[0].size();
+	size_t nz=nx;	
+	double XC=Region[0],YC=Region[1],ZC=Region[2],RC=Region[3];
+	double RC2=RC*2;//
+	double X, Y, Z;
+	int nc=0;
+	int dim=2;
+	// Setup the kernel
+	CKernel<double> *pKernel=new CEpanechikov<double>(dim);// Init Kernel for calculations	
+	double rho, hsml;
+	for(int i=0;i<All.NumPart;i++)
+		{
+		X=(Part[i].Pos[0]-XC);
+		Y=(Part[i].Pos[1]-YC);
+		Z=(Part[i].Pos[2]-ZC);
+		if(X <RC && X >-RC &&
+			Y <RC && Y >-RC &&
+			Z <RC && Z >-RC
+			){
+				X+=RC;
+				Y+=RC;
+				Z+=RC;
+				X*=nx/RC2;
+				Y*=ny/RC2;
+				Z*=nz/RC2;
+				rho=Part[i].Rho;
+				hsml=Part[i].Hsml*nx/RC2;
+				///////////////////////////////////////////
+				//Assign One Particle
+				if(hsml >0)
+					AssignOneParticle(Grid2D, pKernel,X,Y,Z,rho, hsml);
+				///////////////////////////////////////////
+				if((i%1000) == 0)std::cout<<int(100.0*i/float(All.NumPart))<<"%    \r";
+				///////////////////////////////////////////
+				nc++;
+			}
+
+
+		}
+	std::cout<<std::endl;
+
 	//////////////// DONE analysis  ////////////////////////////
 	delete pKernel;
 	DeallocateANN();

@@ -2,7 +2,7 @@
 #include "Render.h"
 #include <cmath>
 #include <algorithm>
-
+#ifdef WITH_CIMG
 CRender::CRender(void)
 	{
 	}
@@ -154,5 +154,5 @@ void CRender::PlotData(std::vector<MyFloat>  &vec)
 	values.spectrum();
 	values.display_graph(0,3);
 	}
-
+#endif
 ///////////////////////////////
