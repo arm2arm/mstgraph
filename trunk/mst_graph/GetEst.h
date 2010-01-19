@@ -13,9 +13,9 @@
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <cstring>
-#include <ANN/ANN.h>
+#include "include/ANN/ANN.h"
 #include "functions.h"
-
+#include "program_settings.h"
 extern enum eDOSORT;
 
 using namespace boost;
@@ -33,7 +33,7 @@ class GetEst
 	public:
 		typedef struct{float Pos[3];} tARR;
 		std::vector<tARR> ARR;
-		GetEst(void);
+		GetEst();
 		~GetEst(void);
 		void run();
 		void run_byKdTree();

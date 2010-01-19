@@ -8,6 +8,7 @@
 #include "Render.h"
 #include "HOP.h"
 #include "GetEst.h"
+#include "program_settings.h"
 /////////////////////////////
 //#define ND_GROUPS 2
 #define LOAD_DEBUG 0
@@ -48,92 +49,7 @@ void read_gadget(string fname)
 		*/
 	}
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ini_parser.hpp>
-#include <boost/property_tree/xml_parser.hpp>
-#include <exception>
-struct programm_settings
-{
-    std::string m_snap_file;               // file name to analyse
-    std::string m_path;                    // output path;
-	int m_test_type; // is small test enabled?
-	std::string m_HOP_file;
 
-//////////////////////////////////
-	struct TPathMask{
-		std::string path; 
-		std::string mask;
-		std::string name;
-		TPathMask(std::string n,std::string p, std::string m):name(n),path(p), mask(m){};
-		};
-	std::set<std::string> m_snapvec;
-	std::vector<TPathMask> m_modelvec;
-	////////////////////////////////
-	programm_settings():m_test_type(false){};
-    void load(const std::string &filename);
-	void save(const std::string &filename){};
-	void print(){
-		BOOST_FOREACH(TPathMask &v,
-			m_modelvec)
-			cout<<
-			"MODEL: "<<v.name<<
-			"\nPATH: "<<v.path<<
-			"\nMASK: "<<v.mask<<
-			endl;
-		};
-} pset;
-void programm_settings::load(const std::string &filename)
-	{
-	using boost::property_tree::ptree;
-	ptree pt;
-	std::string ext(filename.end()-3,filename.end());
-	if(ext=="ini")
-		{
-		read_ini(filename, pt);
-		m_test_type = pt.get<int>("OPTIONS.test_flag");
-		if(m_test_type==1)
-			m_snap_file = pt.get<std::string>("OPTIONS.test_file");
-		else
-			m_snap_file = pt.get<std::string>("OPTIONS.file");
-
-		m_path = pt.get<std::string>("OPTIONS.path");
-		m_HOP_file = pt.get<std::string>("OPTIONS.HOP_file");
-		}
-	else
-		{
-		
-		read_xml(filename, pt);
-		int test_flag = pt.get("OPTIONS.test_flag", 0);
-
-		BOOST_FOREACH(ptree::value_type &v,
-			pt.get_child("OPTIONS.snaps"))
-			m_snapvec.insert(v.second.data());
-	
-		BOOST_FOREACH(ptree::value_type &m,
-			pt.get_child("OPTIONS.models"))
-			{
-			m_modelvec.push_back(TPathMask(m.second.data(),"",""));
-			}
-		if(m_modelvec.size() > 0)
-			{
-			int imodel=0;
-			BOOST_FOREACH(ptree::value_type &p,
-				pt.get_child("OPTIONS.paths"))
-				{
-				m_modelvec[imodel++].path=p.second.data();
-				}
-			imodel=0;
-			BOOST_FOREACH(ptree::value_type &p,
-				pt.get_child("OPTIONS.masks"))
-				{
-				m_modelvec[imodel++].mask=p.second.data();
-				}
-
-			}
-		
-		}
-	print();
-	}
 
 void myreadini(string fini)
 	{
@@ -168,6 +84,11 @@ int main(int argc,char **argv) {
 
 	if(argc==2)
 		myreadini(argv[1]);
+	else
+		{
+		std::cout<<"Usage:\n "<<argv[0]<<" param.xml"<<std::endl;
+		exit(0);
+		}
 	// Read and check command line parameters.
 //	cimg_usage("Compute a HOP over the particles with given Est and Rho files");
 //	const char *file_ascii = cimg_option("-ascii_file",(char*)0,"Input in Ascii format");
@@ -183,11 +104,17 @@ int main(int argc,char **argv) {
 	const int profile  = cimg_option("-p",0,"profile [0,7]");
 */
 	////////////////////////////////////////////////////////////////////
-
-	base=pset.m_path;
-	string hopfile=base+string("/")+pset.m_HOP_file;
+	int iMcount=pset.get_ModelCount();
+	if(iMcount==0)
+		{
+		std::cout<<"No Models defined in the "<<argv[1]<<std::endl;
+		exit(0);
+		}
+	int imodel=0;
+	int isnap=0;
+	string hopfile=pset.get_HOPfile(isnap, imodel);
 		
-	read_gadget(pset.m_snap_file);
+	read_gadget(pset.get_SNAPfile(isnap, imodel));
 
 	////////////////////////////////////////////////
 	/// Smooth Est with 64 Ngb
