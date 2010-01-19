@@ -2,6 +2,7 @@
 #include <utility>
 #include <cstring>
 #include <cmath>
+#include <algorithm>
 
 #include "kdtree2.hpp"
 #include "functions.h"
@@ -9,7 +10,8 @@
 
 #include "cats.h"
 
-
+#undef min
+#undef max
 #define ND_GROUPS 6
 
 // // should be GetAp<CCoord, float>(vec, A)
