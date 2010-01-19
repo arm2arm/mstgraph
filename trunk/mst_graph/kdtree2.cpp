@@ -26,7 +26,7 @@ inline MyFloat squared(const MyFloat x) {
 	return(x*x);
 	}
 template<class T>
-inline void swap(T& a, T&b) {
+inline void kd_swap(T& a, T&b) {
 	T tmp;
 	tmp = a;
 	a = b;
@@ -457,7 +457,7 @@ void kdtree2::n_nearest_brute_force(std::vector<MyFloat>& qv, int nn, kdtree2_re
 		e.idx = i;
 		result.push_back(e);
 		}
-	sort(result.begin(), result.end() ); 
+	std::sort(result.begin(), result.end() );
 
 	}
 
@@ -474,11 +474,11 @@ void kdtree2::n_nearest(std::vector<MyFloat>& qv, int nn, kdtree2_result_vector&
 
 	root->search(sr); 
 
-	if (sort_results) sort(result.begin(), result.end());
+	if (sort_results) std::sort(result.begin(), result.end());
 
 	}
 // search for n nearest to a given query vector 'qv'.
-void kdtree2::n_density(std::vector<MyFloat>& qv, int nn, kdtree2_result_vector& result, MyFloat &den) {
+/*void kdtree2::n_density(std::vector<MyFloat>& qv, int nn, kdtree2_result_vector& result, MyFloat &den) {
 	searchrecord sr(qv,*this,result);
 
 	result.clear(); 
@@ -492,7 +492,7 @@ void kdtree2::n_density(std::vector<MyFloat>& qv, int nn, kdtree2_result_vector&
 	if (sort_results) sort(result.begin(), result.end());
 
 	}
-
+*/
 
 void kdtree2::n_nearest_around_point(int idxin, int correltime, int nn,
 									 kdtree2_result_vector& result) 
@@ -515,7 +515,7 @@ void kdtree2::n_nearest_around_point(int idxin, int correltime, int nn,
 		root->search(sr); 
 		}
 
-		if (sort_results) sort(result.begin(), result.end());
+		if (sort_results) std::sort(result.begin(), result.end());
 
 	}
 
@@ -534,7 +534,7 @@ void kdtree2::r_nearest(std::vector<MyFloat>& qv, MyFloat r2, kdtree2_result_vec
 
 	root->search(sr); 
 
-	if (sort_results) sort(result.begin(), result.end());
+	if (sort_results) std::sort(result.begin(), result.end());
 
 	}
 
@@ -578,7 +578,7 @@ void kdtree2::r_nearest_around_point(int idxin, int correltime, MyFloat r2,
 		root->search(sr); 
 		}
 
-		if (sort_results) sort(result.begin(), result.end());
+		if (sort_results) std::sort(result.begin(), result.end());
 
 	}
 

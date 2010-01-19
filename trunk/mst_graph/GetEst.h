@@ -13,13 +13,16 @@
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <cstring>
-#include "include/ANN/ANN.h"
+#include "ANN/ANN.h"
 #include "functions.h"
 #include "program_settings.h"
-extern enum eDOSORT;
+#include "readers.h"
+//extern enum eDOSORT;
+
+//enum eDOSORT{BY_RHO, BY_EST,BY_AEST, BY_POS};
 
 using namespace boost;
-typedef adjacency_list < vecS, vecS, undirectedS,
+typedef adjacency_list < boost::vecS, vecS, undirectedS,
 no_property, property < edge_weight_t, float > > Graph;
 typedef property_map<Graph, edge_weight_t>::type EdgeWeightMap;
 typedef property_map<Graph, edge_weight_t>::type	weight_map_type;

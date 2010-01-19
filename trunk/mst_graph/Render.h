@@ -27,21 +27,25 @@ using std::cerr;
 using std::endl;
 using std::string;
 using std::vector;
-class CRender
-	{
-	public:
-		CRender(void);
-		CRender(int _visu):m_visu(_visu){};
-		~CRender(void);
-		void DoJob();
-		void setup_cic_image();
-		void PlotData(std::vector<MyFloat>  &vec);
-	private:
 
-		CImg<float> img,dest,res; 
-		int m_visu;
-	protected:
-		
-	};
+class CRender {
+public:
+    CRender(void);
+
+    CRender(int _visu) : m_visu(_visu) {
+    };
+    ~CRender(void);
+    void DoJob();
+    void setup_cic_image();
+    void PlotData(std::vector<MyFloat> &vec);
+private:
+
+    CImg<float> img, dest, res;
+    int m_visu;
+protected:
+
+};
 #endif
 #endif
+
+
