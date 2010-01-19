@@ -496,11 +496,11 @@ void GetEst::run_ANN(std::vector<float> &annRho,int dim,//Dimensions
 		nPts,						// number of points
 		dim,						// dimension of space
 		bucketsize,	                // bucket size
-		ANN_KD_SUGGEST              //  Splitting rule
+		//ANN_KD_SUGGEST              //  Splitting rule
 		//ANN_KD_STD, standard kd-splitting rule 
 		//ANN_KD_MIDPT, midpoint split 
 		//ANN_KD_FAIR, fair-split 
-		//ANN_KD_SL_MIDPT, sliding midpoint split 
+		ANN_KD_SL_MIDPT//, sliding midpoint split 
 		//ANN_KD_SL_FAIR, sliding fair-split 
 		//ANN_KD_SUGGEST the authors' suggestion for best
 
@@ -521,7 +521,7 @@ void GetEst::run_ANN(std::vector<float> &annRho,int dim,//Dimensions
 	double hsml;
 	if(dim==6)//get 6D NGB
 		{
-		Klink=20;
+		
 		Mngb.resize(nPts);
 		for(size_t i=0;i<Mngb.size();i++)
 			Mngb[i].p.resize(Klink);
@@ -549,8 +549,8 @@ void GetEst::run_ANN(std::vector<float> &annRho,int dim,//Dimensions
 			ind=indns;
 			std::sort(ind.begin(),ind.end(), functor_idcomp);
 			if(dim==6)		
-				for(size_t kl=0;kl<Klink;kl++)
-					Mngb[i].p[kl]=std::make_pair<int, float>(nnIdx[ind[kl]],(float)dist[ind[kl]]);
+				for(size_t kl=1;kl<=Klink;kl++)
+					Mngb[i].p[kl-1]=std::make_pair<int, float>(nnIdx[ind[kl]],(float)dist[ind[kl]]);
 			}
 			hsml=dist[ind[kd-1]];
 		for (int j = 0; j < kd; j++) {
@@ -585,7 +585,7 @@ void GetEst::Run_SPHEst()
 
 	if(false){ 
 		scoped_timer timethis("#GetEst::Run_SPHEst():> 3D density: run_ANN\t"); 
-
+		Klink=10;
 		run_ANN(annRho, 3,//Dimensions
 			64,//Estimation Neighbours
 			12,//Tuning parameter for ANN speed
@@ -599,7 +599,7 @@ void GetEst::Run_SPHEst()
 		LoadDumpVector<float>("c:/arm2arm/DATA/smooth64.hsml",annHsml);
 		}
 		/////////////////////////////////////////////
-		if(true)
+		if(false)
 			for(int i=0;i<All.NumPart;i++)
 				{
 				Part[i].Hsml=annHsml[i];
@@ -607,20 +607,21 @@ void GetEst::Run_SPHEst()
 				}
 			/////////////////////////////////////////////
 
-			if(true)
+			if(false)
 				{ 
+				Klink=10;
 				scoped_timer timethis("#GetEst::Run_SPHEst():> 6D density: run_ANN\t"); 
 
 				run_ANN(annEst, 6,//Dimensions
 					100,//Estimation Neighbours
-					12,//Tuning parameter for ANN speed
+					1,//Tuning parameter for ANN speed
 					true
 					);	
-				//DumpNgb("c:/arm2arm/DATA/Mngb.est");
+				DumpNgb("c:/arm2arm/DATA/Mngb.est");
 				DumpVector<float>("c:/arm2arm/DATA/smooth64.est",annEst);
 				}else{
 					LoadDumpVector<float>("c:/arm2arm/DATA/smooth64.est",annEst);
-					//LoadNgb("c:/arm2arm/DATA/Mngb.est");
+					LoadNgb("c:/arm2arm/DATA/Mngb.est");
 				}
 
 			if(false){ 
@@ -633,9 +634,22 @@ void GetEst::Run_SPHEst()
 					);	
 				DumpVector<float>("c:/arm2arm/DATA/smooth64.sme",annSmooth);
 				}
+			if(true)//smooth by Mngb
+				{	double rho=0;
+			std::vector<float> annEstSM=annEst;
+					for(int i=0;i<Mngb.size();i++)
+						{
+						rho=0.0;
+						for(int k=0;k<Mngb[i].p.size();k++)
+							{
+							 rho+=annEst[Mngb[i].p[k].first];
+							}
+						annEstSM[i]=rho/Mngb[i].p.size();
+						}
+				DumpVector<float>("c:/arm2arm/DATA/smooth64SM.est",annEstSM);
+				}
 
-
-			if(false)
+			if(true)
 				makeMSTree();
 
 			if(false)// Dump 2D Image to file
@@ -721,7 +735,7 @@ void GetEst::makeMSTree()
 	for(size_t ii=0;ii<Mngb.size();ii++)
 		{
 		i=isort[ii];
-		for(size_t kl=1;kl<Klink;kl++)
+		for(size_t kl=0;kl<Klink;kl++)
 			{			
 			j=Mngb[i].p[kl].first;
 			dist=Mngb[i].p[kl].second;

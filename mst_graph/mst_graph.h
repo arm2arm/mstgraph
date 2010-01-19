@@ -61,7 +61,7 @@ void DumpVector(std::string filename, std::vector<T> vec, unsigned int n=0,bool 
 	{
 	std::ofstream of(filename.c_str());
 	if(!of.good())assert("Error");
-	unsigned int i=0, np=min(n,(unsigned int )vec.size());
+	unsigned int i=0, np=std::min(n,(unsigned int )vec.size());
 	for(i=0;i<np;i++)
 		{
 		if(verbose)cout<<std::setprecision(2)<<std::fixed<<i<<") "<<vec[i]<<endl;
@@ -74,7 +74,7 @@ void DumpVector2(string filename, std::vector<T> vec,std::vector<T> vec1, unsign
 	{
 	std::ofstream of(filename.c_str());
 	if(!of.good())assert("Error");
-	unsigned int i=0, np=min(n,(unsigned int )vec.size());
+	unsigned int i=0, np=std::min(n,(unsigned int )vec.size());
 	for(i=0;i<np;i++)
 		{
 		if(verbose)cout<<std::setprecision(2)<<std::fixed<<i<<") "<<vec[i]<<endl;
@@ -87,7 +87,7 @@ void DumpVectorPos(string filename, std::vector<T> vec, unsigned int n=0,bool ve
 	{
 	std::ofstream of(filename.c_str());
 	if(!of.good())assert("Error");
-	unsigned int i=0, np=min(n,(unsigned int )vec.size());
+	unsigned int i=0, np=std::min(n,(unsigned int )vec.size());
 	for(i=0;i<np;i++)
 		{
 		if(verbose)cout<<std::setprecision(2)<<std::fixed<<i<<") "<<vec[i]<<endl;

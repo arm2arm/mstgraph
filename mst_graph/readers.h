@@ -69,7 +69,7 @@ extern struct global_data_all_processes
 
 extern std::vector<int> npart,npartc; 
 
-static enum eDOSORT{BY_RHO, BY_EST,BY_AEST, BY_POS};
+enum eDOSORT{BY_RHO, BY_EST,BY_AEST, BY_POS};
 extern struct particle_data
 {	
     int  ID,id,Type;//,NumNgb;           /* unique particle identifier */
@@ -131,3 +131,4 @@ extern struct io_header_1
 } header1;
 
 #endif
+

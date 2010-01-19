@@ -403,9 +403,8 @@ int kdtree2::select_on_coordinate_value(int c, MyFloat alpha, int l, int u) {
 // this holds useful information  to be used
 // during the search
 
-
-
-static const MyFloat infinity = FLT_MAX;
+#include <limits>
+static const MyFloat kd_infinity = std::numeric_limits<MyFloat>::max() ;
 
 class searchrecord {
 
@@ -437,8 +436,8 @@ public:
 		{
 		dim = tree_in.dim;
 		rearrange = tree_in.rearrange;
-		ballsize = infinity; 
-		nn = 0; 
+		ballsize = kd_infinity;
+		nn = 0;
 		};
 
 	};

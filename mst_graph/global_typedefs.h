@@ -5,3 +5,4 @@ typedef unsigned int uint;
 typedef double MyFloat;
 
 #endif
+
