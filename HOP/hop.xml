@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<?xml-stylesheet type="text/xsl" href="http://195.221.212.246:4780/arm2arm/DATA/hop.xsl"?>
+<!--
+This is the mst_graph init file format.
+Copyright (C) 2010 Arman Khalatyan
+Distrubuted under GPL v3.0
+-->
+<OPTIONS>
+  <test_flag>0</test_flag>
+  <snaps>
+    <snap>0450</snap>
+  </snaps>
+  <models>
+    <model>MODEL7</model>
+  </models>
+  <paths>
+    <path>C:\\arm2arm\\DATA\\MODEL7\\MODELS\\MODEL7\\RUNG2\\SNAPS\\</path>
+  </paths>
+  <masks>
+    <mask>snap_gal_sfr</mask>
+  </masks>
+
+  <!-- we are doing test run. this is useful for debuging default is 0 -->
+  <test>
+    <path>C:\\arm2arm\\DATA\\MODEL7\\MODELS\\MODEL7\\RUNG2\\SNAPS\\</path>
+    <!-- if test_flag=1 the file assumes in the test_path-->
+    <file>test</file>
+  </test>
+  <HOP>
+    <!-- HOP output -->
+    <path>C:/arm2arm/DATA/MODEL7/MODELS/MODEL7/ANALYSIS/HOP/</path>
+    <!-- this will be path+model.file+_file -->
+    <file>hop</file>
+  </HOP>
+  <!-- Estimator output -->
+  <EST>
+    <ANNtuning>12</ANNtuning>
+    <ndims>
+      <ndim>3</ndim>
+      <ndim>6</ndim>
+    </ndims>
+    <ngbs>
+      <ngb>64</ngb>
+      <ngb>100</ngb>
+    </ngbs>
+    <files>
+      <rhofiles>
+        <rhofile>rho3D64.rho</rhofile>
+        <rhofile>rho6D100.rho</rhofile>
+      </rhofiles>
+      <hsmlfiles>
+        <hsmlfile>hsml3D64.hsml</hsmlfile>
+        <hsmlfile>hsml6D100.hsml</hsmlfile>
+      </hsmlfiles>
+      <ngbfiles>
+        <ngbfile>mngb3D64.ngb</ngbfile>
+        <ngbfile>mngb6D64.ngb</ngbfile>
+      </ngbfiles>
+    </files>
+  </EST>
+
+  <TREE>
+    <!-- enable the tree -->
+    <make_tree_flag>0</make_tree_flag>
+    <path>C:\arm2arm\DATA\MODEL7\MODELS\MODEL7\ANALYSIS\HOP</path>
+    <!-- This will be used for outputs: path+mst_tree+_snap -->
+    <file>mst_tree</file>
+  </TREE>
+
+</OPTIONS>
