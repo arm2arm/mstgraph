@@ -132,19 +132,22 @@ void GetEst::run_byKdTree() {
 }
 
 template <class T>
-void GetEst::DumpVector(std::string fname, std::vector<T> &vec) {
+void GetEst::DumpVector(std::string fname, std::vector<T> &tvec) {
     std::ofstream vec_dump(fname.c_str(), std::ios::binary);
-    size_t np = vec.size();
-    vec_dump.write((char*) & np, sizeof (size_t));
-    for (size_t i = 0; i < np; i++)
-        vec_dump.write((char*) & vec[i], sizeof (T));
+    unsigned int np = tvec.size();
+    vec_dump.write((char*) & np, sizeof (np));
+    T temp=tvec[0];
+    std::cout<<fname<<std::endl;
+    std::cout << "Zero element:"<<tvec[0]<< std::endl;
+    for (unsigned int i = 0; i < np; i++)
+        vec_dump.write((char*) & tvec[i], sizeof (T));
     vec_dump.close();
 }
 
 template <class T>
 void GetEst::LoadDumpVector(std::string fname, std::vector<T> &vec) {
     std::ifstream vec_dump(fname.c_str(), std::ios::binary);
-    size_t np = 0;
+    unsigned int np = 0;
     vec_dump.read((char*) & np, sizeof (np));
     vec.resize(np);
     for (size_t i = 0; i < np; i++)
@@ -298,7 +301,7 @@ void GetEst::run_graph_Ap() {
     DumpVector<float>("c:/arm2arm/DATA/smooth64.est", Est);
     DumpVector<float>("c:/arm2arm/DATA/smooth64.rho", Rho);
     DumpVector<float>("c:/arm2arm/DATA/mahal.u", vec);
-    DumpVector<tARR > ("c:/arm2arm/DATA/Arr.u", ARR);
+//    DumpVector<tARR > ("c:/arm2arm/DATA/Arr.u", ARR);
     /////////////////////////////////////////
 }
 
@@ -487,6 +490,8 @@ void GetEst::run_ANN(std::vector<float> &annRho, int dim, //Dimensions
     ///////// START to search NGBs ////
     annRho.resize(nPts, 0.0f);
     annHsml.resize(nPts, 0.0f);
+    std::fill(annRho.begin(), annRho.end(),0.0f);
+    std::fill(annHsml.begin(), annHsml.end(),0.0f);
     std::vector<double> dist(kd);
     CEpanechikov<double> *pKernel = new CEpanechikov<double>(dim); // Init Kernel for calculations
     boost::numeric::ublas::matrix<double> ngbGroup(dim, kd);
@@ -530,6 +535,7 @@ void GetEst::run_ANN(std::vector<float> &annRho, int dim, //Dimensions
                 Mngb[i].p[kl - 1] = std::make_pair<int, float>(nnIdx[ind[kl]], (float) dist[ind[kl]]);
         }
         hsml = dist[ind[kd - 1]];
+
         for (int j = 0; j < kd; j++) {
             uj = dist[ind[j]];
             {
@@ -549,8 +555,11 @@ void GetEst::run_ANN(std::vector<float> &annRho, int dim, //Dimensions
 
         annHsml[i] = (float) hsml;
 
-        if (verbose && (i % 100 == 0))
+        if (verbose && (i % 100 == 0)) {
             cout << i << "\r";
+            cout.flush();
+        }
+        if (i == 0)cout << "\n\n\n<<<" << annRho[0] << " " << annHsml[i] << ">>>" << "\n\n" << endl;
     }
     cout << endl;
     cout << endl;
@@ -573,16 +582,21 @@ void GetEst::Run_SPHEst() {
                     pset.m_AnnTune, //Tuning parameter for ANN speed
                     true
                     );
+            cout << "Dumping files:" << endl;
             DumpVector<float>(pset.m_estvec[iest].rhofile, annRho);
+            cout << pset.m_estvec[iest].rhofile << endl;
             DumpVector<float>(pset.m_estvec[iest].hsmlfile, annHsml);
+            cout << pset.m_estvec[iest].hsmlfile << endl;
             DumpNgb(pset.m_estvec[iest].ngbfile);
+            cout << pset.m_estvec[iest].ngbfile << endl;
+
         } else {
             LoadDumpVector<float>(pset.m_estvec[iest].rhofile, annRho);
             LoadDumpVector<float>(pset.m_estvec[iest].hsmlfile, annHsml);
             LoadNgb(pset.m_estvec[iest].ngbfile);
         }
 
-        if (pset.m_estvec[iest].smooth_flag >0) {
+        if (pset.m_estvec[iest].smooth_flag > 0) {
             scoped_timer timethis("#GetEst::Run_SPHEst:> Smoothing Est: SmoothByANN\t");
             SmoothByANN(pset.m_estvec[iest].dim, //Based on what to smooth, this is unused in this version
                     annRho, //What to smooth
@@ -646,7 +660,7 @@ void GetEst::SaveImage(std::string fname, std::vector< std::vector<double> > &Gr
 
 void GetEst::LoadNgb(string fname) {
     std::ifstream vec_dump(fname.c_str(), std::ios::binary);
-    size_t np, kl;
+    unsigned int np, kl;
 
     vec_dump.read((char*) & np, sizeof (size_t));
     vec_dump.read((char*) & kl, sizeof (size_t));
@@ -665,7 +679,7 @@ void GetEst::LoadNgb(string fname) {
 
 void GetEst::DumpNgb(std::string fname) {
     std::ofstream vec_dump(fname.c_str(), std::ios::binary);
-    size_t np = Mngb.size(), kl = Mngb[0].p.size();
+    unsigned int np = Mngb.size(), kl = Mngb[0].p.size();
     vec_dump.write((char*) & np, sizeof (size_t));
     vec_dump.write((char*) & kl, sizeof (size_t));
     for (size_t i = 0; i < np; i++)
@@ -733,7 +747,7 @@ void GetEst::SmoothByANN(int dim, std::vector<float> &annEst, //What to smooth
         bool verbose
         ) {
     int nPts = All.NumPart; // actual number of data points
-    
+
     annSmooth.resize(nPts);
     AllocateANNTreeStructures(dim, nPts, nsph);
     FillANNData(dim);

@@ -1,7 +1,58 @@
+
+pro draw_point_image, xvec, yvec, w, xr, yr , ZMINVAL, ZMAXVAL
+
+loadct, 0
+plot, xvec, yvec, /nodata, xrange=xr, yrange=yr,  BACKGROUND = 255, COLOR=0
+col=alog10(w)
+col=(col-alog10(ZMINVAL))/(alog10(ZMAXVAL)-alog10(ZMINVAL))
+
+idz=where(col lt 0, npc)
+if(npc gt 0)then COL[idz]=0
+idz=where(col gt 1, npc)
+if(npc gt 0)then COL[idz]=1
+
+
+col*=255
+idx=sort(col)
+np= n_elements(xvec)
+
+loadct, 13
+for i=0l,np-1 do begin
+ip=idx(i)
+oplot, [xvec(ip)], [yvec[ip]], psym=3, color=col(ip)
+endfor
+
+end
+
+pro get_new_image, vertx, verty,w,grid, image, xv, yv, nolog=nolog, aver=aver
+
+
+if(not( IS_DEF(grid))) then grid=256.0
+
+mx=[min(vertx),max(vertx)]
+my=[min(verty),max(verty)]
+
+x=(vertx-mx[0])/(mx[1]-mx[0])*0.99*grid
+y=(verty-my[0])/(my[1]-my[0])*0.99*grid
+image=fltarr(grid, grid)
+stop
+;image=cic(w,x, grid, y, grid, /average)*1.0e9
+if(NOT( IS_DEF(aver)))then begin
+    image=cic(w,x, grid, y, grid, /ISOLATED) 
+endif else image=cic(double(w),double(x), grid, double(y), grid, /ISOLATED, /AVERAGE)
+
+if(NOT( IS_DEF(nolog)))then begin
+    image=image/mean(image,/double)
+    image=alog10(image+1)
+endif
+
+xv=findgen(grid)/grid *(mx[1]-mx[0])+mx[0]
+yv=findgen(grid)/grid *(my[1]-my[0])+my[0]
+
+end
+
+
 pro plot_two, pos, RR, Ap,  est, vel, ngbp, range=range
-
-idn1=[600,758,650,778,986,678,890,773,629,711]
-
 
 vrange=500l
 Rplot=5
@@ -78,7 +129,7 @@ dista=(dista-min(dista))/(max(dista)-min(dista))*255.0
 iso=sort(dista)
 plot_by_points, RRs(iso), Aps(iso), dista(iso)
 ;plots,RRs[idn], Aps[idn], psym=2, thick=3,color=fsc_color('green')
-plots,RRs[idn1], Aps[idn1], psym=2, thick=3,color=fsc_color('cyan')
+;plots,RRs[idn1], Aps[idn1], psym=2, thick=3,color=fsc_color('cyan')
 
 loadct, 0
 plot,pos(0,*), pos(1,*),/xs,/ys,/nodata, psym=3, xrange=[-1,1]*Rplot, yrange=[-1,1]*Rplot
@@ -90,8 +141,8 @@ writeu,1, RRs, Aps
 close, 1
 
 
-plots,pos[0,idn1], pos[2,idn1], psym=2, thick=3,color=fsc_color('cyan')
-plots,pos[0,600], pos[2,600], psym=2, thick=3,color=fsc_color('blue')
+;plots,pos[0,idn1], pos[2,idn1], psym=2, thick=3,color=fsc_color('cyan')
+;plots,pos[0,600], pos[2,600], psym=2, thick=3,color=fsc_color('blue')
 
 grid=256.0
 w=dista
@@ -102,16 +153,18 @@ end
 
 pro read_smoothest, file, smest
 close, 2
-np=0l
+np=UINT(0)
 openr, 2, file
 readu, 2, Np
 
 smest=fltarr(Np)
 readu, 2, smest
 close, 2
+
 end
 pro read_ascii_est,  p,est
 base='C:\arm2arm\DATA\MODEL7\MODELS\MODEL7\RUNG2\SNAPS\'
+base='/home/arm2arm/Projects/LIA/BAR_FIND/ENBID/'
 file=base+'snap_gal_sfr_0450.ascii'
 file_est=base+'snap_gal_sfr_0450.ascii_ph4.est'
 p=read_ascii(file)
@@ -144,7 +197,7 @@ readu, 1, ngbt
 ngb(in,*)=ngbt
 
 endfor
-
+return
 if(DensNgbA gt 0)then begin
 
 ngba=lonarr(head.npart(TYPE),DensNgbA)
@@ -180,7 +233,22 @@ endfor
 close, 1
 
 end
+pro read_ANNngb, file, annngb
+close, 2
+np=0l
+kl=0l
+openr, 2, file
+readu, 2,np, kl
+annNgb=Replicate({ip:0l,dist:0.0},np)
+ip=0l
+dist=0.0
+readu, 2, annNgb
 
+
+close, 2
+
+
+end
 pro read_arr, file, arr
  close, 2
  np=0l
@@ -202,77 +270,109 @@ mask='snap_gal_sfr'
 snap='0450'
 ;snap='0303'
 base='C:\arm2arm\DATA\MODEL7\MODELS\MODEL7\RUNG2\SNAPS\'
+base="/net/direct/dnas01/arm2arm/DATA/LIA/SPHBAR/NFW/MODELS/MODEL7/RUNG2/SNAPS/"
 file=base+mask+'_'+snap
 file_est=base+mask+'_'+snap+'_ph4.est'
-fileidx='c:\arm2arm\DATA\test.idx'
+;fileidx='c:\arm2arm\DATA\test.idx'
 
-read_idx, fileidx, grpidx
-
+;read_idx, fileidx, grpidx
+snapfile=file
 readnew, file, pos, 'POS', parttype=TYPE
 readnew, file, vel, 'VEL', parttype=TYPE
 readnew, file, m, 'MASS', parttype=TYPE
 readnew, file+'_rho_4', rho, 'RHO4'
 readnew, file+'_rho_4', hsml, 'H4'
-R=3.44
+get_com_byPot, snapfile, com
+
+R=5.5
 p=pos
-p[0,*]-=pos[0,0]
-p[1,*]-=pos[1,0]
-p[2,*]-=pos[2,0]
+p[0,*]-=COM[0]
+p[1,*]-=COM[1]
+p[2,*]-=COM[2]
 d=sqrt(p[0,*]^2.0+p[1,*]^2.0+p[2,*]^2.0)
-ids=sort(d)
-idd=where(d(ids) lt R, ndd)
+;ids=sort(d)
+idd=where(d lt R, ndd)
 print, ndd
 
+hoppath='/net/direct/dnas01/arm2arm/DATA/LIA/SPHBAR/NFW/MODELS/MODEL7/ANALYSIS/HOP/'
 
-;readnew, base+'test_smooth.est', smage, 'AGE', parttype=TYPE
-file='c:/arm2arm/DATA/smooth64SM.est'
+file=hoppath+'rho6D100.rho'
 read_smoothest, file, smest
-file='c:/arm2arm/DATA/smooth64.rho'
+
+file=hoppath+'rho3D64.rho'
 read_smoothest, file, smrho
 
-file='c:/arm2arm/DATA/smooth64.sme'
+file=hoppath+'rho6D100.rho.sme'
 read_smoothest, file, sme
 
 ;file='c:/arm2arm/DATA/mahal.u'
 ;read_smoothest, file, mahu
 
-file='c:/arm2arm/DATA/smooth64.hsml'
+file=hoppath+'hsml6D100.hsml'
 read_smoothest, file, annhsml
 
+file=hoppath+'mngb6D64.ngb'
+read_ANNngb, file, annngb
 
-;stop
-;read_est, file_est, TYPE, est, ngb, ngba
-;stop
-;est=smest
 
-;est/=max(est)
-;rho=smrho/max(smrho)
-;read_ascii_est, pa,esta
-;mma, est
-;mma, esta
-;est=smage
-;est=smest
-;est=smrho
-;childlist =[155860,168942,159451,41313,44988,163831,162027,155373,144503,149532,172824,149262,179443,197342,127969,42348,164992,117965,121933,172450,174429,161597,153078,161938,163892,143708,134090,129934,49621,173578,143687,42289,44520,296029,132258,119293,147183,159618,201523,164032,149072,46758,151660,55383,203995,173179,145231,135381,154677,162718,180499,43540,115048,180520,130666,116093,131400,16542]
+estfile='/home/arm2arm/Projects/LIA/BAR_FIND/ENBID/snap_gal_sfr_0450_4_na_myph.est'
+read_est, estfile, 4,est, ngb, ngbA
 
-;pos=pa(0:2,*)
-;vel=pa(3:5,*)
 
-;vel=vel(*,0:1000-1)
-;get_w_com, pos,  est, com
+
+
 here_test:
-cent=[-9.4345,4.4192,-0.202]
+cent=COM[0:2];[-9.4345,4.4192,-0.202]
+
 pos(0,*)-=cent[0];mean(pos(0,*), /double)
 pos(1,*)-=cent[1];mean(pos(1,*), /double)
 pos(2,*)-=cent[2];mean(pos(2,*), /double)
 
-vel(0,*)-=mean(vel(0,*), /double)
-vel(1,*)-=mean(vel(1,*), /double)
-vel(2,*)-=mean(vel(2,*), /double)
+vel(0,*)-=mean(vel(0,idd), /double)
+vel(1,*)-=mean(vel(1,idd), /double)
+vel(2,*)-=mean(vel(2,idd), /double)
 sigma=(vel(0,*)^2.0+vel(1,*)^2.0+vel(2,*)^2.0)/3.0
 sigma=sqrt(sigma)
 
 get_velz, pos, vel,  Ar, Ap,Az, RR
+
+
+
+
+
+
+w=rho
+draw_point_image, p[0,*], p[1,*], w, [-1,1]*6, [-1,1]*6 , 10.0^(mean(alog10(w)*1.5)),$
+  max(w)
+
+w=est
+draw_point_image, p[0,*], p[1,*], w, [-1,1]*6, [-1,1]*6 ,  10.0^(mean(alog10(w)*1.5)),$
+  max(w)
+
+
+w=smrho
+draw_point_image, p[0,*], p[1,*], w, [-1,1]*6, [-1,1]*6 , 10.0^(mean(alog10(w)*1.5)),$
+  max(w)
+stop
+w=sme
+draw_point_image, p[0,*], p[1,*], w, [-1,1]*6, [-1,1]*6 , mean(w),$
+  max(w)
+
+draw_point_image, RR[*], Ap[*], w, [0,1]*8, [-1,1]*600 , mean(w),$
+  max(w)
+
+draw_point_image, RR[*], Ar[*], w, [0,1]*8, [-1,1]*600 , mean(w),$
+  max(w)
+
+stop
+
+
+
+
+
+
+
+
 is=sort(RR)
 isEst=reverse(sort(est))
 Vz=abs(vel(2,*))
@@ -285,7 +385,7 @@ range=[1e-10,0.0]
 ;plot_two, pos, RR, Ap,  est,vel, ngbp,range=range
 ;plot_two, pos, RR, Ap,  smrho/max(smrho),vel, ngbp,range=range
 loadct, 39
-Grid=256l
+Grid=256.0
 getidinreg, pos, [0,0,0],6, idinreg, sq=1
 get_image, flatarr(pos[0,idinreg]), flatarr(pos[1,idinreg]),$
   rho(idinreg),grid, image, xv, yv;, nolog=0, aver=1  
@@ -293,15 +393,16 @@ get_image, flatarr(pos[0,idinreg]), flatarr(pos[1,idinreg]),$
 img=smartlog(image)  
 contour, img, xv, yv, /fill, nlevels=100,/xs, /ys, MIN_VAL=mean(img) 
 
-get_image, flatarr(RR[idinreg]), flatarr(Ap[idinreg]),$
-  smest(idinreg),grid, image, xv, yv, nolog=1,aver=1  
+get_new_image, flatarr(RR[idinreg]), flatarr(Ap[idinreg]),$
+  smest(idinreg)*0.0+1,grid, image, xv, yv;, /nolog,/aver  
 
 imgsm=image;smartlog(image)  
 contour, imgsm, xv, yv, /fill, nlevels=100,/xs, /ys, MIN_VAL=mean(imgsm) 
-
+stop
 sme=smest/mean(smest)
 get_image, flatarr(RR[idinreg]), flatarr(Ap[idinreg]),$
-  sme(idinreg),grid, image, xv, yv;, nolog=0, aver=1  
+  sme(idinreg),grid, image, xv, yv, nolog=1, aver=1  
+stop
 img=smartlog(image)  
 contour, img, xv, yv, /fill, nlevels=100,/xs, /ys, MIN_VAL=mean(img), MAX_VAL=max(img) 
 get_image, flatarr(RR[idinreg]), flatarr(Ar[idinreg]),$
