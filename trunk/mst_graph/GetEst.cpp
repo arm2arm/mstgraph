@@ -3,7 +3,7 @@
 #include <cstring>
 #include <cmath>
 #include <algorithm>
-
+#include <boost/lexical_cast.hpp>
 #include "kdtree2.hpp"
 #include "functions.h"
 #include "readers.h"
@@ -29,7 +29,6 @@ void GetAP(T *v, T *A) {
 }
 
 ////////////////////////////////////////////////////
-
 
 GetEst::GetEst() {
     nnIdx = NULL;
@@ -62,7 +61,7 @@ void GetEst::fill_ngb_group_Ap(int i, boost::numeric::ublas::matrix<T> &ngbGroup
         ngbGroup(idx,ingb)=Part[j].Pos[idx];
         }
          */
-        GetAP<T>(&Part[j].Pos[0], &Ap[0]);
+        GetAP<T > (&Part[j].Pos[0], &Ap[0]);
         for (size_t idx = 0; idx < ngbGroup.size1(); idx++)
             ngbGroup(idx, ingb) = Ap[idx];
     }
@@ -131,8 +130,6 @@ void GetEst::run_byKdTree() {
     DumpVectorEst("c:/arm2arm/DATA/smooth64.rho", 1);
     /////////////////////////////////////////
 }
-
-
 
 template <class T>
 void GetEst::DumpVector(std::string fname, std::vector<T> &vec) {
@@ -500,7 +497,7 @@ void GetEst::run_ANN(std::vector<float> &annRho, int dim, //Dimensions
         indns[i] = i; // this used for sorting
 
     double hsml;
-    if (dim == 6)//get 6D NGB
+    //if (dim == 6)//get 6D NGB
     {
 
         Mngb.resize(nPts);
@@ -528,9 +525,9 @@ void GetEst::run_ANN(std::vector<float> &annRho, int dim, //Dimensions
             CCompare functor_idcomp(dist);
             ind = indns;
             std::sort(ind.begin(), ind.end(), functor_idcomp);
-            if (dim == 6)
-                for (size_t kl = 1; kl <= Klink; kl++)
-                    Mngb[i].p[kl - 1] = std::make_pair<int, float>(nnIdx[ind[kl]], (float) dist[ind[kl]]);
+            //    if (dim == 6)
+            for (size_t kl = 1; kl <= Klink; kl++)
+                Mngb[i].p[kl - 1] = std::make_pair<int, float>(nnIdx[ind[kl]], (float) dist[ind[kl]]);
         }
         hsml = dist[ind[kd - 1]];
         for (int j = 0; j < kd; j++) {
@@ -555,6 +552,8 @@ void GetEst::run_ANN(std::vector<float> &annRho, int dim, //Dimensions
         if (verbose && (i % 100 == 0))
             cout << i << "\r";
     }
+    cout << endl;
+    cout << endl;
     //////////////// DONE analysis  ////////////////////////////
     delete pKernel;
     DeallocateANN();
@@ -562,55 +561,38 @@ void GetEst::run_ANN(std::vector<float> &annRho, int dim, //Dimensions
 
 void GetEst::Run_SPHEst() {
 
-    if (false) {
-        scoped_timer timethis("#GetEst::Run_SPHEst():> 3D density: run_ANN\t");
-        Klink = 10;
-        run_ANN(annRho, 3, //Dimensions
-                64, //Estimation Neighbours
-                12, //Tuning parameter for ANN speed
-                true
-                );
-        DumpVector<float>("c:/arm2arm/DATA/smooth64.rho", annRho);
-        DumpVector<float>("c:/arm2arm/DATA/smooth64.hsml", annHsml);
-    } else {
-        LoadDumpVector<float>("c:/arm2arm/DATA/smooth64.rho", annRho);
-        LoadDumpVector<float>("c:/arm2arm/DATA/smooth64.hsml", annHsml);
-    }
-    /////////////////////////////////////////////
-    if (false)
-        for (int i = 0; i < All.NumPart; i++) {
-            Part[i].Hsml = annHsml[i];
-            Part[i].Rho = annRho[i];
+    for (int iest = 0; iest < pset.m_estvec.size(); iest++) {
+        //BOOST_FOREACH()
+        if (pset.m_estvec[iest].flag) {
+            scoped_timer timethis(std::string("#GetEst::Run_SPHEst():> ") +
+                    boost::lexical_cast<std::string > (pset.m_estvec[iest].dim) + std::string(
+                    "D density: run_ANN\t"));
+            Klink = pset.m_estvec[iest].klink;
+            run_ANN(annRho, pset.m_estvec[iest].dim, //Dimensions
+                    pset.m_estvec[iest].ngb, //Estimation Neighbours
+                    pset.m_AnnTune, //Tuning parameter for ANN speed
+                    true
+                    );
+            DumpVector<float>(pset.m_estvec[iest].rhofile, annRho);
+            DumpVector<float>(pset.m_estvec[iest].hsmlfile, annHsml);
+            DumpNgb(pset.m_estvec[iest].ngbfile);
+        } else {
+            LoadDumpVector<float>(pset.m_estvec[iest].rhofile, annRho);
+            LoadDumpVector<float>(pset.m_estvec[iest].hsmlfile, annHsml);
+            LoadNgb(pset.m_estvec[iest].ngbfile);
         }
-    /////////////////////////////////////////////
 
-    if (false) {
-        Klink = 10;
-        scoped_timer timethis("#GetEst::Run_SPHEst():> 6D density: run_ANN\t");
-
-        run_ANN(annEst, 6, //Dimensions
-                100, //Estimation Neighbours
-                1, //Tuning parameter for ANN speed
-                true
-                );
-        DumpNgb("c:/arm2arm/DATA/Mngb.est");
-        DumpVector<float>("c:/arm2arm/DATA/smooth64.est", annEst);
-    } else {
-        LoadDumpVector<float>("c:/arm2arm/DATA/smooth64.est", annEst);
-        LoadNgb("c:/arm2arm/DATA/Mngb.est");
+        if (pset.m_estvec[iest].smooth_flag >0) {
+            scoped_timer timethis("#GetEst::Run_SPHEst:> Smoothing Est: SmoothByANN\t");
+            SmoothByANN(pset.m_estvec[iest].dim, //Based on what to smooth, this is unused in this version
+                    annRho, //What to smooth
+                    annSmooth, //result
+                    5//Smoothing Neighbours in 3D
+                    );
+            DumpVector<float>(pset.m_estvec[iest].rhofile + ".sme", annSmooth);
+        }
     }
-
-    if (false) {
-        scoped_timer timethis("#GetEst::Run_SPHEst:> Smoothing Est: SmoothByANN\t");
-
-        SmoothByANN(annRho, //Based on what to smooth
-                annEst, //What to smooth
-                annSmooth, //result
-                5//Smoothing Neighbours in 3D
-                );
-        DumpVector<float>("c:/arm2arm/DATA/smooth64.sme", annSmooth);
-    }
-    if (true)//smooth by Mngb
+    if (false)//smooth by Mngb
     {
         double rho = 0;
         std::vector<float> annEstSM = annEst;
@@ -624,7 +606,7 @@ void GetEst::Run_SPHEst() {
         DumpVector<float>("c:/arm2arm/DATA/smooth64SM.est", annEstSM);
     }
 
-    if (true)
+    if (false)
         makeMSTree();
 
     if (false)// Dump 2D Image to file
@@ -745,13 +727,13 @@ void GetEst::makeMSTree() {
 
 }
 
-void GetEst::SmoothByANN(std::vector<float> &annRho, std::vector<float> &annEst, //What to smooth
+void GetEst::SmoothByANN(int dim, std::vector<float> &annEst, //What to smooth
         std::vector<float> &annSmooth, //result
         int nsph, //Smoothing Neighbours in 3D
         bool verbose
         ) {
     int nPts = All.NumPart; // actual number of data points
-    int dim = 6; //dims
+    
     annSmooth.resize(nPts);
     AllocateANNTreeStructures(dim, nPts, nsph);
     FillANNData(dim);

@@ -57,7 +57,7 @@ void myreadini(string fini)
 		{
 		pset.load(fini);
 		//pset.save(fini);
-		std::cout << "Success\n";
+		std::cout << "XML parsing: Success\n";
 		}
 	catch (std::exception &e)
 		{
@@ -115,7 +115,8 @@ int main(int argc,char **argv) {
 	string hopfile=pset.get_HOPfile(isnap, imodel);
 		
 	read_gadget(pset.get_SNAPfile(isnap, imodel));
-
+        ///
+        
 	////////////////////////////////////////////////
 	/// Smooth Est with 64 Ngb
 	GetEst est_me;
