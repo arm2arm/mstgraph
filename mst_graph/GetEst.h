@@ -48,7 +48,7 @@ class GetEst
 			);
 
 		void Run_SPHEst();
-		void SmoothByANN(std::vector<float> &annRho,std::vector<float> &annEst,//What to smooth
+		void SmoothByANN(int dim,std::vector<float> &annEst,//What to smooth
 						 std::vector<float> &annSmooth,//result
 						 int nsph,//Smoothing Neighbours in 3D
 						 bool verbose=true

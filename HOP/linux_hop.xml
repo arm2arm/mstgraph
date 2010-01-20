@@ -14,7 +14,7 @@ Distrubuted under GPL v3.0
         <model>MODEL7</model>
     </models>
     <paths>
-        <path>C:\\arm2arm\\DATA\\MODEL7\\MODELS\\MODEL7\\RUNG2\\SNAPS\\</path>
+        <path>/dnas01/arm2arm/DATA/LIA/SPHBAR/NFW/MODELS/MODEL7/RUNG2/SNAPS/</path>
     </paths>
     <masks>
         <mask>snap_gal_sfr</mask>
@@ -28,7 +28,7 @@ Distrubuted under GPL v3.0
     </test>
     <HOP>
         <!-- HOP output -->
-        <path>C:/arm2arm/DATA/MODEL7/MODELS/MODEL7/ANALYSIS/HOP/</path>
+        <path>/dnas01/arm2arm/DATA/LIA/SPHBAR/NFW/MODELS/MODEL7/ANALYSIS/HOP/</path>
         <!-- this will be path+model.file+_file -->
         <file>hop</file>
     </HOP>
@@ -39,10 +39,22 @@ Distrubuted under GPL v3.0
             <ndim>3</ndim>
             <ndim>6</ndim>
         </ndims>
+        <flags>
+            <flag>0</flag>
+            <flag>0</flag>
+        </flags>
+        <smooth_flags>
+            <smooth_flag>1</smooth_flag>
+            <smooth_flag>1</smooth_flag>
+        </smooth_flags>
         <ngbs>
             <ngb>64</ngb>
             <ngb>100</ngb>
         </ngbs>
+        <klinks>
+            <klink>10</klink>
+            <klink>10</klink>
+        </klinks>
         <files>
             <rhofiles>
                 <rhofile>rho3D64.rho</rhofile>
@@ -62,7 +74,7 @@ Distrubuted under GPL v3.0
     <TREE>
         <!-- enable the tree -->
         <make_tree_flag>0</make_tree_flag>
-        <path>C:\arm2arm\DATA\MODEL7\MODELS\MODEL7\ANALYSIS\HOP</path>
+        <path>/dnas01/arm2arm/DATA/LIA/SPHBAR/NFW/MODELS/MODEL7/ANALYSIS/HOP/</path>
         <!-- This will be used for outputs: path+mst_tree+_snap -->
         <file>mst_tree</file>
     </TREE>

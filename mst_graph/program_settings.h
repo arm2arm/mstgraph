@@ -13,6 +13,18 @@ struct programm_settings
 	int m_test_type; // is small test enabled?
 	std::string m_HOP_file;
 
+        struct TEstData{
+            int dim;
+            int ngb;
+            int klink;
+            TEstData(int d):dim(d){};
+            std::string rhofile;
+            std::string hsmlfile;
+            std::string ngbfile;
+            int flag;
+            int smooth_flag;
+        };
+        int m_AnnTune;
 //////////////////////////////////	
 	struct TPathMask{
 		std::string path; 
@@ -25,6 +37,8 @@ struct programm_settings
 		};
 	std::vector<std::string> m_snapvec;
 	std::vector<TPathMask> m_modelvec;
+        std::vector<TEstData> m_estvec;
+
 	TPathMask m_HOPname, m_TESTname;
 	////////////////////////////////
 	programm_settings():m_test_type(false){};
