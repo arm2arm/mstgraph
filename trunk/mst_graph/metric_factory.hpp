@@ -67,23 +67,29 @@ namespace Metrics{
 			//cout<<G<<endl;
 
 			MatrixT G;
-			MatrixT Covar, partCovar;
-			ind.resize(Gin.size2());
-			for(size_t i=0;i<Gin.size2();i++)
-				ind[i]=i;							
+			MatrixT Covar/*, partCovar*/;
+			//ind.resize(Gin.size2());
+			/*for(size_t i=0;i<Gin.size2();i++)
+				ind[i]=i;	*/
+                        //for(int ifr=1;ifr<10;ifr++)
+                        {
 
-			GetPartial(Gin, G, frac);
-			Covarinace(G, Covar);//Get Covariance			
+
+			//GetPartial(Gin, G, frac);
+			Covarinace(Gin, Covar);//Get Covariance
 //			detCovar=(T)determinant(Covar);
 #ifdef SMOOTH_COVAR
 			for(int i=0;i<NSmooth-1;i++)
 				{
-				GetPartial(Gin, G, frac);
+				GetPartial(Gin, G, ifr/10.0);
 				Covarinace(G, partCovar);//Get Covariance
 				Covar+=partCovar;
 				}
 			Covar/=(T)NSmooth;
 #endif
+                       // detCovar=(T)determinant(Covar);
+                        //cout<<i<<" detCovar: "<< detCovar<<endl;
+                        }
 			InvertMatrix (Covar, InvCovar);
 			
 			detCovar=(T)determinant(Covar);
@@ -154,7 +160,7 @@ namespace Metrics{
 		///////////////////////////// GET COVARIANCE of Matrix
 		void Covarinace(const MatrixT& matrix, MatrixT& covMatrix)
 			{
-			const T ZERO(0);
+//			const T ZERO(0);
 			const T ONE(1);
 
 			size_t maxRows = matrix.size2();

@@ -147,7 +147,7 @@ void read_ic12(const char *fname, bool ngb_flag) {
     int pc, type;
     int patternd[] = {4, 3, 0}, patterns[] = {4, 1, 0}, patternh[] = {4, 6, 8, 8, 4, 10, 8, 4, 4, 3, 4, 21, 0};
     int4byte intdummy, blklen;
-    int NumPart, ONLY_TYPE = All.ONLY_TYPE; // this will select only specific type of the particles
+    int NumPart=0, ONLY_TYPE = All.ONLY_TYPE; // this will select only specific type of the particles
 
     All.flag_swap = 0;
 
@@ -259,7 +259,7 @@ void read_ic12(const char *fname, bool ngb_flag) {
 
         /*Compress vectors to select only one type*/
         if (ONLY_TYPE > (-1)) {
-            int Nonly = header1.npart[ONLY_TYPE], pshift = 0, mshift = 0;
+            int Nonly = header1.npart[ONLY_TYPE], pshift = 0;
             for (type = 0; type < ONLY_TYPE; type++) {
                 pshift += header1.npart[type];
 
@@ -483,9 +483,9 @@ void read_ic12_est(const char *fname) {
     FILE *fd;
     int i;
 
-    int patternd[] = {4, 3, 0}, patterns[] = {4, 1, 0}, patternh[] = {4, 6, 8, 8, 4, 10, 8, 4, 4, 3, 4, 21, 0};
+    int  patterns[] = {4, 1, 0}, patternh[] = {4, 6, 8, 8, 4, 10, 8, 4, 4, 3, 4, 21, 0};
     int4byte blklen;
-    int NumPart = 0, ONLY_TYPE = All.ONLY_TYPE; // this will select only specific type of the particles
+    int NumPart = 0; // this will select only specific type of the particles
 
     All.flag_swap = 0;
 
@@ -601,9 +601,9 @@ void read_ic12_rho(const char *fname) {
         int blk2;
     } blkname;
 
-    int patternd[] = {4, 3, 0}, patterns[] = {4, 1, 0}, patternh[] = {4, 6, 8, 8, 4, 10, 8, 4, 4, 3, 4, 21, 0};
+    int patterns[] = {4, 1, 0}, patternh[] = {4, 6, 8, 8, 4, 10, 8, 4, 4, 3, 4, 21, 0};
     int4byte blklen;
-    int NumPart = 0, ONLY_TYPE = All.ONLY_TYPE; // this will select only specific type of the particles
+    int NumPart = 0; // this will select only specific type of the particles
 
     All.flag_swap = 0;
 

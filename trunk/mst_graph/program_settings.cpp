@@ -81,6 +81,13 @@ void programm_settings::load(const std::string &filename) {
         iest = 0;
 
         BOOST_FOREACH(ptree::value_type &m,
+                pt.get_child("OPTIONS.EST.nsmooths")) {
+            m_estvec[iest++].nsmooth = m.second.get_value<int>();
+        }
+
+        iest = 0;
+
+        BOOST_FOREACH(ptree::value_type &m,
                 pt.get_child("OPTIONS.EST.klinks")) {
             m_estvec[iest++].klink = m.second.get_value<int>();
         }

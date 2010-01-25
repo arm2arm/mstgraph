@@ -106,7 +106,7 @@ void GetEst::run_byKdTree() {
         float dist = 0.0;
         float hsml2 = (float) ngblist[NUM_NGB - 1].dis; //Mahal.doDist(&Part[i].Pos[0],&Part[ngblist[NUM_NGB-1].idx].Pos[0]);
         float hsml = std::sqrt(hsml2);
-        float u = 0.0f, mahalDet = 0.0f;
+        float mahalDet = 0.0f;
         Part[i].Est = 0.0;
 
         BOOST_FOREACH(kdtree2_result ngbNum, ngblist) {
@@ -135,10 +135,7 @@ template <class T>
 void GetEst::DumpVector(std::string fname, std::vector<T> &tvec) {
     std::ofstream vec_dump(fname.c_str(), std::ios::binary);
     unsigned int np = tvec.size();
-    vec_dump.write((char*) & np, sizeof (np));
-    T temp=tvec[0];
-    std::cout<<fname<<std::endl;
-    std::cout << "Zero element:"<<tvec[0]<< std::endl;
+    vec_dump.write((char*) & np, sizeof (unsigned int));
     for (unsigned int i = 0; i < np; i++)
         vec_dump.write((char*) & tvec[i], sizeof (T));
     vec_dump.close();
@@ -150,7 +147,7 @@ void GetEst::LoadDumpVector(std::string fname, std::vector<T> &vec) {
     unsigned int np = 0;
     vec_dump.read((char*) & np, sizeof (np));
     vec.resize(np);
-    for (size_t i = 0; i < np; i++)
+    for (unsigned int i = 0; i < np; i++)
         vec_dump.read((char*) & vec[i], sizeof (T));
     vec_dump.close();
 }
@@ -213,11 +210,11 @@ void GetEst::run_graph_Ap() {
     Graph graphFOF;
     int i = 0;
     std::vector<float> Rho(All.NumPart), Est(All.NumPart), vec(All.NumPart);
-    eDOSORT which_est = BY_EST;
-    int j = 0, ihsml = 0;
-    float u = 0.0, hsml = 0.0;
+    //    eDOSORT which_est = BY_EST;
+    int j = 0;
+    //    float u = 0.0, hsml = 0.0;
     int ngbmax = All.DesNumNgbA;
-    int ngb_for_mahal = All.DesNumNgb; //min(40,All.DesNumNgb);
+    //    int ngb_for_mahal = All.DesNumNgb; //min(40,All.DesNumNgb);
     //	int jj;
     float uj = 0.0, dist, wl, Thr;
     dim = 3;
@@ -240,7 +237,7 @@ void GetEst::run_graph_Ap() {
     //boost::numeric::ublas::matrix<float> ngbGroup(dim,ngb_for_mahal);
     //fill_ngb_group_Ap<float>(i,ngbGroup,ngb_for_mahal, which_est);
     Metrics::MahalDistance<float> Mahal(ngbGroup);
-    int jj = 0;
+
     for (i = 0; i < All.NumPart; i++) {
 
         //boost::numeric::ublas::matrix<float> ngbGroup(dim,ngb_for_mahal);
@@ -301,7 +298,7 @@ void GetEst::run_graph_Ap() {
     DumpVector<float>("c:/arm2arm/DATA/smooth64.est", Est);
     DumpVector<float>("c:/arm2arm/DATA/smooth64.rho", Rho);
     DumpVector<float>("c:/arm2arm/DATA/mahal.u", vec);
-//    DumpVector<tARR > ("c:/arm2arm/DATA/Arr.u", ARR);
+    //    DumpVector<tARR > ("c:/arm2arm/DATA/Arr.u", ARR);
     /////////////////////////////////////////
 }
 
@@ -318,10 +315,10 @@ void GetEst::run_graph() {
     Graph graphFOF;
     int i = 0;
     std::vector<float> Rho(All.NumPart), Est(All.NumPart), vec(All.NumPart);
-    std::vector<uint> isdone(All.NumPart);
+    std::vector<int> isdone(All.NumPart);
     eDOSORT which_est = BY_EST;
-    int j = 0, ihsml = 0;
-    float u = 0.0, hsml = 0.0, esti, estj = 0.0, dist;
+    int j = 0;
+    float esti, estj = 0.0, dist;
     int ngbmax = 10; //All.DesNumNgbA;
     cout << "\nWe are linking particles with " << All.DesNumNgbA << endl;
     for (i = 0; i < All.NumPart; i++) {
@@ -468,7 +465,7 @@ void GetEst::run_ANN(std::vector<float> &annRho, int dim, //Dimensions
     double uj;
     int nPts = All.NumPart; // actual number of data points
 
-    double sc = 4.0 / 3.0 * M_PI;
+    //    double sc = 4.0 / 3.0 * M_PI;
 
     AllocateANNTreeStructures(dim, nPts, kd);
     FillANNData(dim);
@@ -478,11 +475,11 @@ void GetEst::run_ANN(std::vector<float> &annRho, int dim, //Dimensions
             dim, // dimension of space
             bucketsize, // bucket size
             //ANN_KD_SUGGEST              //  Splitting rule
-            //ANN_KD_STD, standard kd-splitting rule
-            //ANN_KD_MIDPT, midpoint split
-            //ANN_KD_FAIR, fair-split
-            ANN_KD_SL_MIDPT//, sliding midpoint split
-            //ANN_KD_SL_FAIR, sliding fair-split
+            ANN_KD_STD//, standard kd-splitting rule
+            //ANN_KD_MIDPT//, midpoint split
+            //ANN_KD_FAIR//, fair-split
+            //ANN_KD_SL_MIDPT//, sliding midpoint split ANN_KD_SUGGEST
+            //ANN_KD_SL_FAIR//, sliding fair-split
             //ANN_KD_SUGGEST the authors' suggestion for best
 
             );
@@ -490,8 +487,8 @@ void GetEst::run_ANN(std::vector<float> &annRho, int dim, //Dimensions
     ///////// START to search NGBs ////
     annRho.resize(nPts, 0.0f);
     annHsml.resize(nPts, 0.0f);
-    std::fill(annRho.begin(), annRho.end(),0.0f);
-    std::fill(annHsml.begin(), annHsml.end(),0.0f);
+    std::fill(annRho.begin(), annRho.end(), 0.0f);
+    std::fill(annHsml.begin(), annHsml.end(), 0.0f);
     std::vector<double> dist(kd);
     CEpanechikov<double> *pKernel = new CEpanechikov<double>(dim); // Init Kernel for calculations
     boost::numeric::ublas::matrix<double> ngbGroup(dim, kd);
@@ -502,64 +499,74 @@ void GetEst::run_ANN(std::vector<float> &annRho, int dim, //Dimensions
         indns[i] = i; // this used for sorting
 
     double hsml;
-    //if (dim == 6)//get 6D NGB
+    double mass = 1.0; //3.39014e-006;
+    int kdFrac = kd;
     {
 
         Mngb.resize(nPts);
         for (size_t i = 0; i < Mngb.size(); i++)
             Mngb[i].p.resize(Klink);
     }
+
     for (int i = 0; i < All.NumPart; i++) {
         kdTree->annkSearch(// search
                 &dataPts[i][0], // query point
                 kd, // number of near neighbors
                 nnIdx, // nearest neighbors (returned)
-                dists // distance (returned)
+                dists, // distance (returned)
+                0.1 // error bound
                 );
+        //if (true)
         {
-            fill_ngb_byID<double>(nnIdx, ngbGroup);
-            Mahal.Init(ngbGroup);
-
-
-            for (int j = 0; j < kd; j++) {
-                uj = std::sqrt(Mahal.doDist(&Part[i].Pos[0], &Part[nnIdx[j]].Pos[0]));
-                dist[j] = uj;
-            }
-        }
-        {
-            CCompare functor_idcomp(dist);
-            ind = indns;
-            std::sort(ind.begin(), ind.end(), functor_idcomp);
-            //    if (dim == 6)
-            for (size_t kl = 1; kl <= Klink; kl++)
-                Mngb[i].p[kl - 1] = std::make_pair<int, float>(nnIdx[ind[kl]], (float) dist[ind[kl]]);
-        }
-        hsml = dist[ind[kd - 1]];
-
-        for (int j = 0; j < kd; j++) {
-            uj = dist[ind[j]];
             {
-                uj /= hsml;
-                annRho[i] += (float) (pKernel->W(uj)*3.39014e-006);
+                fill_ngb_byID<double>(nnIdx, ngbGroup);
+                Mahal.Init(ngbGroup);
+
+
+                for (int j = 0; j < kdFrac; j++) {
+                    uj = std::sqrt(Mahal.doDist(&Part[i].Pos[0], &Part[nnIdx[j]].Pos[0]));
+                    dist[j] = uj;
+                    /*  cout<<"DDD "<<j<<" "<<uj<<" "
+                              <<Part[i].Pos[0]<<" "<<Part[i].Pos[1]<<" "<<Part[i].Pos[2]<<" "
+                              <<Part[i].Pos[3]<<" "<<Part[i].Pos[4]<<" "<<Part[i].Pos[5]<<" "
+                              <<endl;*/
+                }
+                //exit(0);
             }
-            //	annRho[i]+=(float)pKernel->W(dists[j]/hsml);//(float)(Wsph<double>(dists[j], hsml)*3.39014e-006);
+            {
+                CCompare functor_idcomp(dist);
+                ind = indns;
+                std::sort(ind.begin(), ind.end(), functor_idcomp);
 
-        }
-        double hd = 1.0;
-        {
-            for (int idim = 0; idim < dim; idim++) {
-                hd *= hsml;
+                for (size_t kl = 1; kl <= Klink; kl++)
+                    Mngb[i].p[kl - 1] = std::make_pair<int, float>(nnIdx[ind[kl]], (float) dist[ind[kl]]);
             }
-            annRho[i] /= float(hd * std::sqrt(Mahal.getDet()));
+            hsml = dist[ind[kdFrac - 1]];
+
+            for (int j = 0; j < kdFrac; j++) {
+                uj = dist[ind[j]];
+                {
+                    uj /= hsml;
+                    annRho[i] += (float) (pKernel->W(uj) * mass);
+                }
+                //	annRho[i]+=(float)pKernel->W(dists[j]/hsml);//(float)(Wsph<double>(dists[j], hsml)*3.39014e-006);
+
+            }
+            double hd = 1.0;
+            {
+                for (int idim = 0; idim < dim; idim++) {
+                    hd *= hsml;
+                }
+                annRho[i] /= float(hd * std::sqrt(Mahal.getDet()));
+            }
+
+            annHsml[i] = (float) hsml;
         }
-
-        annHsml[i] = (float) hsml;
-
         if (verbose && (i % 100 == 0)) {
             cout << i << "\r";
             cout.flush();
         }
-        if (i == 0)cout << "\n\n\n<<<" << annRho[0] << " " << annHsml[i] << ">>>" << "\n\n" << endl;
+
     }
     cout << endl;
     cout << endl;
@@ -570,7 +577,7 @@ void GetEst::run_ANN(std::vector<float> &annRho, int dim, //Dimensions
 
 void GetEst::Run_SPHEst() {
 
-    for (int iest = 0; iest < pset.m_estvec.size(); iest++) {
+    for (size_t iest = 0; iest < pset.m_estvec.size(); iest++) {
         //BOOST_FOREACH()
         if (pset.m_estvec[iest].flag) {
             scoped_timer timethis(std::string("#GetEst::Run_SPHEst():> ") +
@@ -601,7 +608,7 @@ void GetEst::Run_SPHEst() {
             SmoothByANN(pset.m_estvec[iest].dim, //Based on what to smooth, this is unused in this version
                     annRho, //What to smooth
                     annSmooth, //result
-                    5//Smoothing Neighbours in 3D
+                    pset.m_estvec[iest].nsmooth//Smoothing Neighbours in D space
                     );
             DumpVector<float>(pset.m_estvec[iest].rhofile + ".sme", annSmooth);
         }
@@ -610,9 +617,9 @@ void GetEst::Run_SPHEst() {
     {
         double rho = 0;
         std::vector<float> annEstSM = annEst;
-        for (int i = 0; i < Mngb.size(); i++) {
+        for (size_t i = 0; i < Mngb.size(); i++) {
             rho = 0.0;
-            for (int k = 0; k < Mngb[i].p.size(); k++) {
+            for (size_t k = 0; k < Mngb[i].p.size(); k++) {
                 rho += annEst[Mngb[i].p[k].first];
             }
             annEstSM[i] = rho / Mngb[i].p.size();
@@ -754,15 +761,15 @@ void GetEst::SmoothByANN(int dim, std::vector<float> &annEst, //What to smooth
     kdTree = new ANNkd_tree(// build search structure
             dataPts, // the data points
             nPts, // number of points
-            dim//,						// dimension of space
-            //bucketsize,	                // bucket size
+            3, // dimension of space
+            12, //bucketsize,	                // bucket size
             //ANN_KD_SUGGEST              //  Splitting rule
             //ANN_KD_STD, standard kd-splitting rule
             //ANN_KD_MIDPT, midpoint split
             //ANN_KD_FAIR, fair-split
             //ANN_KD_SL_MIDPT, sliding midpoint split
             //ANN_KD_SL_FAIR, sliding fair-split
-            //ANN_KD_SUGGEST the authors' suggestion for best
+            ANN_KD_SUGGEST// the authors' suggestion for best
 
             );
 
@@ -788,11 +795,13 @@ void GetEst::SmoothByANN(int dim, std::vector<float> &annEst, //What to smooth
         for (int j = 0; j < nsph; j++) {
             uj = dists[j];
             uj /= hsml;
-            sumR += (float) pKernel->W(uj) * annEst[nnIdx[j]];
+            sumR += (float)  annEst[nnIdx[j]];
+            /*sumR += (float) pKernel->W(uj) * annEst[nnIdx[j]];*/
             sumRho += (float) pKernel->W(uj);
         }
         hd = hsml * hsml*hsml;
-        annSmooth[i] = (float) (sumR / (hd * PI_COEF * sumRho));
+        //annSmooth[i] = (float) (sumR / (hd * PI_COEF * sumRho));
+        annSmooth[i] = (float) (sumR / nsph);
         if (verbose && (i % 100 == 0))
             cout << i << "\r";
     }

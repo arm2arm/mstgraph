@@ -26,7 +26,7 @@ enum eCOLORS {
 class CHOP {
 public:
 
-    CHOP(MyFloat alpha, int mingrp) : m_alpha(alpha), m_mingrp(mingrp) {
+    CHOP(MyFloat alpha, int mingrp) : m_mingrp(mingrp),m_alpha(alpha) {
         //disp.assign(640*2,640,"Galaxy points",0);
         //m_ctab=GREEN_WHITE_EXP;
         doRun();
@@ -58,9 +58,9 @@ private:
         tagASTR() : mmGrp(0), grpID(-1), i(0) {
         };
         std::vector<uint> setB;
-        int grpID;
-        int i;
         uint mmGrp; //most massive partner group
+        int grpID;
+        int i;        
     } TMyNgb;
 
     vector<TMyNgb> NPart; // Particles linked to Groups
