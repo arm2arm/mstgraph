@@ -23,17 +23,19 @@ struct programm_settings
             std::string ngbfile;
             int flag;
             int smooth_flag;
+            int nsmooth;
+
         };
         int m_AnnTune;
 //////////////////////////////////	
-	struct TPathMask{
-		std::string path; 
-		std::string mask;
-		std::string name;
+	struct TPathMask{		
 		std::string get_Path(){return path;};
 		std::string get_Name(){return path+mask+"_";};
-		TPathMask(std::string n,std::string p, std::string m):name(n),path(p), mask(m){};
+		TPathMask(std::string n,std::string p, std::string m):path(p), mask(m),name(n){};
 		TPathMask(){};
+                std::string path;
+		std::string mask;
+		std::string name;
 		};
 	std::vector<std::string> m_snapvec;
 	std::vector<TPathMask> m_modelvec;

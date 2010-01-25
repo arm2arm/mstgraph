@@ -27,9 +27,10 @@ public:
 			}
 		AllocateTable();
 		};
-	~CKernel(){};
+
+        virtual ~CKernel(){KernelRad.clear();Kernel.clear();};
 	virtual T W(T u)=0;
-protected:
+protected:    	
 	void AllocateTable()
 		{
 		KernelRad.resize(KERNEL_TABLE+2);//+2 allow to go in the loops  KERNEL_TABLE+1;
@@ -116,8 +117,8 @@ public:
 		m_end=getticks();
 		double clock_cycles=elapsed(m_end, m_start);
 		std::cout<<std::setprecision(2)<<std::fixed;
-                
-		std::cout <<" "<<m_text<< " done in " << (mystop-start_).total_milliseconds() << " milli seconds or "<<clock_cycles<<" CPU cycles "<<std::endl;
+                double tot=(mystop-start_).total_milliseconds();
+		std::cout <<" "<<m_text<< " done in " <<tot/1000.0/60.0<<"min("<<  tot<< " milli seconds) or "<<clock_cycles<<" CPU cycles "<<std::endl;
 		std::cout<<std::setprecision(16)<<std::fixed;
 		}
 protected:

@@ -1,3 +1,60 @@
+pro getcicimage, vertx,verty,vertz, wcic, pos, vel,xcic6d
+
+grid=256.0
+
+wcic=vertx*0.0
+np=n_elements(wcic)
+mx=[min(vertx),max(vertx)]
+my=[min(verty),max(verty)]
+mz=[min(vertz),max(vertz)]
+
+x=long((vertx-mx[0])/(mx[1]-mx[0])*(grid-1))
+y=long((verty-my[0])/(my[1]-my[0])*(grid-1))
+z=long((vertz-mz[0])/(mz[1]-mz[0])*(grid-1))
+
+w=wcic+1.0
+image=cic(w,x, grid, y, grid, z, grid) 
+
+dV=((mx[1]-mx[0])*(my[1]-my[0])*(mz[1]-mz[0]))/(grid^3.0)
+smimage=smooth(image, 6)
+for i=0l,np-1 do begin
+    wcic[i]=smimage[x[i],y[i],z[i]]
+endfor
+smimage=0
+;return;
+;;; Do the 6D cic
+gridX=35
+gridV=40
+mx=[min(pos(0,*)),max(pos(0,*))]
+my=[min(pos(1,*)),max(pos(1,*))]
+mz=[min(pos(2,*)),max(pos(2,*))]
+mvx=[min(vel(0,*)),max(vel(0,*))]
+mvy=[min(vel(1,*)),max(vel(1,*))]
+mvz=[min(vel(2,*)),max(vel(2,*))]
+
+x=long((pos(0,*)-mx[0])/(mx[1]-mx[0])*(gridX-1))
+y=long((pos(1,*)-my[0])/(my[1]-my[0])*(gridX-1))
+z=long((pos(2,*)-mz[0])/(mz[1]-mz[0])*(gridX-1))
+
+vx=long((vel(0,*)-mvx[0])/(mvx[1]-mvx[0])*(gridV-1))
+vy=long((vel(1,*)-mvy[0])/(mvy[1]-mvy[0])*(gridV-1))
+vz=long((vel(2,*)-mvz[0])/(mvz[1]-mvz[0])*(gridV-1))
+
+image6d=fltarr(gridX, gridX, gridX, gridV, gridV, gridV)
+for i=0l,np-1 do begin
+ ;   print, i, x[i], y[i], z[i]
+    image6d[x[i],y[i],z[i], vx[i],vy[i],vz[i]]+=1.0
+endfor
+xcic6d=wcic*0.0
+image6d=smooth(image6d,2, /edge_truncate)
+;image6d/=abs((((mx[1]-mx[0])*(my[1]-my[0])*(mz[1]-mz[0])* $
+       ;    (mvx[1]-mvx[0])*(mvy[1]-mvy[0])*(mvz[1]-mvz[0]))/gridV^3.0*gridX^3.0))
+for i=0l,np-1 do begin
+ ;   print, i, x[i], y[i], z[i]
+  xcic6d[i]=image6d[x[i],y[i],z[i], vx[i],vy[i],vz[i]]
+endfor
+
+end
 
 pro draw_point_image, xvec, yvec, w, xr, yr , ZMINVAL, ZMAXVAL
 
@@ -153,7 +210,7 @@ end
 
 pro read_smoothest, file, smest
 close, 2
-np=UINT(0)
+np=0l
 openr, 2, file
 readu, 2, Np
 
@@ -259,16 +316,24 @@ pro read_arr, file, arr
  readu, 2, arr
  close, 2
 end
-device,retain=2,decomposed=0
-window,1, xsize=800, ysize=800
-!P.multi=[0, 4, 4]
 
+function getWmin, w
+
+return ,10.0^(min(alog10(w))/1.1)
+;return ,10.0^(mean(alog10(w)*1.5))
+end 
+
+;;;;;;;;;;;;;;;; MAIN ;;;;;;;;;;
+device,retain=2,decomposed=0
+window,1, xsize=800+400, ysize=800
+!P.multi=[0, 6, 4]
+Rad=20.0
 TYPE=4
 mask='snap_gal_sfr'
 ;mask='snap_gal_0.25_sfr'
 ;mask='test'
 snap='0450'
-;snap='0303'
+snap='0950'
 base='C:\arm2arm\DATA\MODEL7\MODELS\MODEL7\RUNG2\SNAPS\'
 base="/net/direct/dnas01/arm2arm/DATA/LIA/SPHBAR/NFW/MODELS/MODEL7/RUNG2/SNAPS/"
 file=base+mask+'_'+snap
@@ -284,7 +349,7 @@ readnew, file+'_rho_4', rho, 'RHO4'
 readnew, file+'_rho_4', hsml, 'H4'
 get_com_byPot, snapfile, com
 
-R=5.5
+R=Rad
 p=pos
 p[0,*]-=COM[0]
 p[1,*]-=COM[1]
@@ -296,17 +361,25 @@ print, ndd
 
 hoppath='/net/direct/dnas01/arm2arm/DATA/LIA/SPHBAR/NFW/MODELS/MODEL7/ANALYSIS/HOP/'
 
-file=hoppath+'rho6D100.rho'
-read_smoothest, file, smest
+
 
 file=hoppath+'rho3D64.rho'
 read_smoothest, file, smrho
 
+
+file=hoppath+'rho6D100.rho'
+read_smoothest, file, smest
+
 file=hoppath+'rho6D100.rho.sme'
 read_smoothest, file, sme
 
-;file='c:/arm2arm/DATA/mahal.u'
-;read_smoothest, file, mahu
+file=hoppath+'rho6D200.rho'
+read_smoothest, file, smest200
+file=hoppath+'rho6D64.rho'
+read_smoothest, file, smest64
+
+file=hoppath+'rho6D64.rho.sme'
+read_smoothest, file, smest64sme
 
 file=hoppath+'hsml6D100.hsml'
 read_smoothest, file, annhsml
@@ -315,7 +388,7 @@ file=hoppath+'mngb6D64.ngb'
 read_ANNngb, file, annngb
 
 
-estfile='/home/arm2arm/Projects/LIA/BAR_FIND/ENBID/snap_gal_sfr_0450_4_na_myph.est'
+estfile='/home/arm2arm/Projects/LIA/BAR_FIND/ENBID/snap_gal_sfr_'+snap+'_4_na_myph.est'
 read_est, estfile, 4,est, ngb, ngbA
 
 
@@ -337,31 +410,173 @@ sigma=sqrt(sigma)
 get_velz, pos, vel,  Ar, Ap,Az, RR
 
 
+nbins=100.0
+
+getcicimage, flatarr(RR),flatarr( Ar), flatarr(Ap),wcic, p, vel,wcic6d
+;stop
+
+;; ANN
+if(0) then begin
+w=smest
+Wmin=1e-7
+Wmax=0.001
+hist=histogram(nbins=nbins,alog10(w), min= alog10(wmin),max=alog10(wmax))
+plot,hist,$
+  background=fsc_color("white"), color=fsc_color("black"), thick=2
 
 
+draw_point_image, p[0,*], p[1,*], w, [-1,1]*6, [-1,1]*6 , Wmin,$
+  wmax
+draw_point_image, vel[0,*], vel[1,*], w, [-1,1]*600, [-1,1]*600 ,Wmin,$
+  wmax
+draw_point_image, vel[0,*], vel[2,*], w, [-1,1]*600, [-1,1]*600 , Wmin,$
+  wmax
+
+draw_point_image, RR[*], Ap[*], w, [0,1]*8, [-1,1]*600 , wmin,$
+  wmax
+
+draw_point_image, RR[*], Ar[*], w, [0,1]*8, [-1,1]*600 , wmin,$
+  wmax
+endif
+if(0)then begin
+; ANN with smoothing
+w=est
+Wmin=mean(w)
+Wmax=max(w);0.001
+hist=histogram(nbins=nbins,alog10(w), min= alog10(wmin),max=alog10(wmax))
+plot,hist,$
+  background=fsc_color("white"), color=fsc_color("black"), thick=2
 
 
+draw_point_image, p[0,*], p[1,*], w, [-1,1]*6, [-1,1]*6 , Wmin,$
+  wmax
+draw_point_image, vel[0,*], vel[1,*], w, [-1,1]*600, [-1,1]*600 ,Wmin,$
+  wmax
+draw_point_image, vel[0,*], vel[2,*], w, [-1,1]*600, [-1,1]*600 , Wmin,$
+  wmax
+
+draw_point_image, RR[*], Ap[*], w, [0,1]*8, [-1,1]*600 , wmin,$
+  wmax
+
+draw_point_image, RR[*], Ar[*], w, [0,1]*8, [-1,1]*600 , wmin,$
+  wmax
+endif
+;;;;Primitive CIC
+if( 1) then begin
+w=wcic
+
+plot, histogram(nbins=nbins,alog10(w), min= alog10(getWmin(w)),max=alog10(max(w))),$
+  background=fsc_color("white"), color=fsc_color("black"), thick=2
+
+draw_point_image, p[0,*], p[1,*], w, [-1,1]*Rad, [-1,1]*Rad , getWmin(w),$
+  max(w)
+
+
+draw_point_image, vel[0,*], vel[1,*], w, [-1,1]*600, [-1,1]*600 ,  getWmin(w),$
+  max(w)
+draw_point_image, vel[0,*], vel[2,*], w, [-1,1]*600, [-1,1]*600 , getWmin(w),$
+  max(w)
+
+draw_point_image, RR[*], Ap[*], w, [0,1]*1.5*Rad, [-1,1]*600 , getWmin(w),$
+  max(w)
+
+draw_point_image, RR[*], Ar[*], w, [0,1]*1.5*Rad, [-1,1]*600 , getWmin(w),$
+  max(w)
+endif
+if(1)then begin
+;; 6D CIC
+w=wcic6d
+
+plot, histogram(nbins=nbins,alog10(w), min= alog10(getWmin(w)),max=alog10(max(w))),$
+  background=fsc_color("white"), color=fsc_color("black"), thick=2
+
+draw_point_image, p[0,*], p[1,*], w, [-1,1]*Rad, [-1,1]*Rad , getWmin(w),$
+  max(w)
+
+
+draw_point_image, vel[0,*], vel[1,*], w, [-1,1]*600, [-1,1]*600 ,  getWmin(w),$
+  max(w)
+draw_point_image, vel[0,*], vel[2,*], w, [-1,1]*600, [-1,1]*600 , getWmin(w),$
+  max(w)
+
+draw_point_image, RR[*], Ap[*], w, [0,1]*1.5*Rad, [-1,1]*600 , getWmin(w),$
+  max(w)
+
+draw_point_image, RR[*], Ar[*], w, [0,1]*1.5*Rad, [-1,1]*600 , getWmin(w),$
+  max(w)
+endif
+if(1) then begin
+;; Enbid
+w=est
+wmin=1e-5
+hist=histogram(nbins=nbins,alog10(w), min= alog10(wmin),max=alog10(max(w)))
+plot,hist,$
+  background=fsc_color("white"), color=fsc_color("black"), thick=2
+
+
+draw_point_image, p[0,*], p[1,*], w, [-1,1]*Rad, [-1,1]*Rad , Wmin,$
+  max(w)
+draw_point_image, vel[0,*], vel[1,*], w, [-1,1]*600, [-1,1]*600 ,Wmin,$
+  max(w)
+draw_point_image, vel[0,*], vel[2,*], w, [-1,1]*600, [-1,1]*600 , Wmin,$
+  max(w)
+
+draw_point_image, RR[*], Ap[*], w, [0,1]*Rad*1.5, [-1,1]*600 , wmin,$
+  max(w)
+
+draw_point_image, RR[*], Ar[*], w, [0,1]*Rad*1.5, [-1,1]*600 , wmin,$
+  max(w)
+
+endif
+
+stop
+;; SPH Rho
 w=rho
 draw_point_image, p[0,*], p[1,*], w, [-1,1]*6, [-1,1]*6 , 10.0^(mean(alog10(w)*1.5)),$
   max(w)
 
-w=est
-draw_point_image, p[0,*], p[1,*], w, [-1,1]*6, [-1,1]*6 ,  10.0^(mean(alog10(w)*1.5)),$
-  max(w)
 
 
 w=smrho
 draw_point_image, p[0,*], p[1,*], w, [-1,1]*6, [-1,1]*6 , 10.0^(mean(alog10(w)*1.5)),$
   max(w)
-stop
+
 w=sme
-draw_point_image, p[0,*], p[1,*], w, [-1,1]*6, [-1,1]*6 , mean(w),$
+draw_point_image, p[0,*], p[1,*], w, [-1,1]*6, [-1,1]*6 , 10.0^(mean(alog10(w)*1.5)),$
   max(w)
 
-draw_point_image, RR[*], Ap[*], w, [0,1]*8, [-1,1]*600 , mean(w),$
+w=est
+draw_point_image, RR[*], Ap[*], w, [0,1]*8, [-1,1]*600 , 10.0^(mean(alog10(w)*1.5)),$
   max(w)
 
-draw_point_image, RR[*], Ar[*], w, [0,1]*8, [-1,1]*600 , mean(w),$
+draw_point_image, RR[*], Ar[*], w, [0,1]*8, [-1,1]*600 , 10.0^(mean(alog10(w)*1.5)),$
+  max(w)
+;;;; Doing ANNdens test
+w=sme
+draw_point_image, RR[*], Ap[*], w, [0,1]*8, [-1,1]*600 , 10.0^(mean(alog10(w)*1.5)),$
+  max(w)
+
+draw_point_image, RR[*], Ar[*], w, [0,1]*8, [-1,1]*600 , 10.0^(mean(alog10(w)*1.5)),$
+  max(w)
+w=smest
+draw_point_image, RR[*], Ap[*], w, [0,1]*8, [-1,1]*600 , 10.0^(mean(alog10(w)*1.5)),$
+  max(w)
+
+draw_point_image, RR[*], Ar[*], w, [0,1]*8, [-1,1]*600 , 10.0^(mean(alog10(w)*1.5)),$
+  max(w)
+
+
+w=smest64
+draw_point_image, RR[*], Ap[*], w, [0,1]*8, [-1,1]*600 , 10.0^(mean(alog10(w)*1.5)),$
+  max(w)
+
+draw_point_image, RR[*], Ar[*], w, [0,1]*8, [-1,1]*600 , 10.0^(mean(alog10(w)*1.5)),$
+  max(w)
+w=smest64sme
+draw_point_image, RR[*], Ap[*], w, [0,1]*8, [-1,1]*600 , 10.0^(mean(alog10(w)*1.5)),$
+  max(w)
+
+draw_point_image, RR[*], Ar[*], w, [0,1]*8, [-1,1]*600 , 10.0^(mean(alog10(w)*1.5)),$
   max(w)
 
 stop

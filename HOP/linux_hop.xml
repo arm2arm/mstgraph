@@ -34,26 +34,30 @@ Distrubuted under GPL v3.0
     </HOP>
     <!-- Estimator output -->
     <EST>
-        <ANNtuning>2</ANNtuning>
+        <ANNtuning>1</ANNtuning>
         <ndims>
             <ndim>3</ndim>
             <ndim>6</ndim>
         </ndims>
         <flags>
             <flag>0</flag>
-            <flag>1</flag>
+            <flag>0</flag>
         </flags>
         <smooth_flags>
             <smooth_flag>0</smooth_flag>
             <smooth_flag>1</smooth_flag>
         </smooth_flags>
+        <nsmooths>
+            <nsmooth>2</nsmooth>
+            <nsmooth>3</nsmooth>
+        </nsmooths>
         <ngbs>
-            <ngb>20</ngb>
-            <ngb>20</ngb>
+            <ngb>40</ngb>
+            <ngb>100</ngb>
         </ngbs>
         <klinks>
-            <klink>5</klink>
-            <klink>5</klink>
+            <klink>3</klink>
+            <klink>3</klink>
         </klinks>
         <files>
             <rhofiles>
@@ -66,7 +70,7 @@ Distrubuted under GPL v3.0
             </hsmlfiles>
             <ngbfiles>
                 <ngbfile>mngb3D64.ngb</ngbfile>
-                <ngbfile>mngb6D64.ngb</ngbfile>
+                <ngbfile>mngb6D100.ngb</ngbfile>
             </ngbfiles>
         </files>
     </EST>

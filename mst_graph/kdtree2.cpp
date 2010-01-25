@@ -430,9 +430,9 @@ public:
 		kdtree2_result_vector& result_in) :  
 	qv(qv_in),
 		result(result_in),
-		data(tree_in.data),
-		data_state(tree_in.data_state),
-		ind(tree_in.ind) 
+		data(tree_in.data),		
+		ind(tree_in.ind),
+                data_state(tree_in.data_state)
 		{
 		dim = tree_in.dim;
 		rearrange = tree_in.rearrange;
@@ -737,7 +737,7 @@ void kdtree2_node::process_terminal_node(searchrecord& sr) {
 
 	for (int i=l; i<=u;i++) {
 		int indexofi;  // sr.ind[i]; 
-		MyFloat dis, vol;
+		MyFloat dis, vol=1.0;
 		bool early_exit; 
 		bool is_active;
 		if (rearrange) {
@@ -855,7 +855,7 @@ void kdtree2_node::process_terminal_node_fixedball(searchrecord& sr) {
 
 	for (int i=l; i<=u;i++) {
 		int indexofi = sr.ind[i];
-		MyFloat dis, vol;
+		MyFloat dis,vol=1.0;
 		bool early_exit;
 		bool is_active;
 
