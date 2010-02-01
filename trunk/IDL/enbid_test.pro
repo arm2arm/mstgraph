@@ -1,7 +1,17 @@
-pro getcicimage, vertx,verty,vertz, wcic, pos, vel,xcic6d
+pro get_cic_groups, RR, Ap, Ar,w, minw,maxw, grps
 
-grid=256.0
 
+end
+pro dump_wcic,file, vec
+openw, 11, file
+writeu,11,  n_elements(vec)
+writeu, 11, vec
+close, 11
+end
+pro getcicimage, vertx,verty,vertz, wcic, pos, vel,xcic6d, smimage=smimage
+fac=1.
+grid=128.0*fac
+gridv=256.0*fac
 wcic=vertx*0.0
 np=n_elements(wcic)
 mx=[min(vertx),max(vertx)]
@@ -9,22 +19,23 @@ my=[min(verty),max(verty)]
 mz=[min(vertz),max(vertz)]
 
 x=long((vertx-mx[0])/(mx[1]-mx[0])*(grid-1))
-y=long((verty-my[0])/(my[1]-my[0])*(grid-1))
-z=long((vertz-mz[0])/(mz[1]-mz[0])*(grid-1))
+y=long((verty-my[0])/(my[1]-my[0])*(gridv-1))
+z=long((vertz-mz[0])/(mz[1]-mz[0])*(gridv-1))
 
 w=wcic+1.0
-image=cic(w,x, grid, y, grid, z, grid) 
+image=cic(w,x, grid, y, gridv, z, gridv) 
 
 dV=((mx[1]-mx[0])*(my[1]-my[0])*(mz[1]-mz[0]))/(grid^3.0)
-smimage=smooth(image, 6)
+smimage=smooth(image, 2, /EDGE_TRUNCATE)
+print, 'dx=',(mx[1]-mx[0])/grid, 'dV=',(my[1]-my[0])/gridv
 for i=0l,np-1 do begin
     wcic[i]=smimage[x[i],y[i],z[i]]
 endfor
 smimage=0
-;return;
+return;
 ;;; Do the 6D cic
-gridX=35
-gridV=40
+gridX=20
+gridV=20
 mx=[min(pos(0,*)),max(pos(0,*))]
 my=[min(pos(1,*)),max(pos(1,*))]
 mz=[min(pos(2,*)),max(pos(2,*))]
@@ -327,13 +338,13 @@ end
 device,retain=2,decomposed=0
 window,1, xsize=800+400, ysize=800
 !P.multi=[0, 6, 4]
-Rad=20.0
+Rad=10.0
 TYPE=4
 mask='snap_gal_sfr'
 ;mask='snap_gal_0.25_sfr'
 ;mask='test'
 snap='0450'
-snap='0950'
+;snap='0950'
 base='C:\arm2arm\DATA\MODEL7\MODELS\MODEL7\RUNG2\SNAPS\'
 base="/net/direct/dnas01/arm2arm/DATA/LIA/SPHBAR/NFW/MODELS/MODEL7/RUNG2/SNAPS/"
 file=base+mask+'_'+snap
@@ -461,29 +472,36 @@ draw_point_image, RR[*], Ap[*], w, [0,1]*8, [-1,1]*600 , wmin,$
 draw_point_image, RR[*], Ar[*], w, [0,1]*8, [-1,1]*600 , wmin,$
   wmax
 endif
+
 ;;;;Primitive CIC
 if( 1) then begin
 w=wcic
-
-plot, histogram(nbins=nbins,alog10(w), min= alog10(getWmin(w)),max=alog10(max(w))),$
+Rad=5
+Wmin=0.1
+;get_cic_groups, RR[*], Ap[*], Ar[*],w, 0.1,alog10(max(w))), grp
+dump_wcic, '/home/arm2arm/Projects/LIA/BAR_FIND/ENBID/dump.est', w
+plot, histogram(nbins=nbins,alog10(w), min= alog10(wmin),max=alog10(max(w))),$
   background=fsc_color("white"), color=fsc_color("black"), thick=2
 
-draw_point_image, p[0,*], p[1,*], w, [-1,1]*Rad, [-1,1]*Rad , getWmin(w),$
+draw_point_image, p[0,*], p[1,*], w, [-1,1]*Rad, [-1,1]*Rad , Wmin,$
   max(w)
 
 
-draw_point_image, vel[0,*], vel[1,*], w, [-1,1]*600, [-1,1]*600 ,  getWmin(w),$
+draw_point_image, vel[0,*], vel[1,*], w, [-1,1]*600, [-1,1]*600 , Wmin,$
   max(w)
-draw_point_image, vel[0,*], vel[2,*], w, [-1,1]*600, [-1,1]*600 , getWmin(w),$
-  max(w)
-
-draw_point_image, RR[*], Ap[*], w, [0,1]*1.5*Rad, [-1,1]*600 , getWmin(w),$
+draw_point_image, vel[0,*], vel[2,*], w, [-1,1]*600, [-1,1]*600 , Wmin,$
   max(w)
 
-draw_point_image, RR[*], Ar[*], w, [0,1]*1.5*Rad, [-1,1]*600 , getWmin(w),$
+draw_point_image, RR[*], Ap[*], w, [0,1]*1.5*Rad, [-1,1]*600 , Wmin,$
   max(w)
+
+draw_point_image, RR[*], Ar[*], w, [0,1]*1.5*Rad, [-1,1]*600 , Wmin,$
+  max(w)
+
+
 endif
-if(1)then begin
+
+if(0)then begin
 ;; 6D CIC
 w=wcic6d
 
@@ -505,7 +523,7 @@ draw_point_image, RR[*], Ap[*], w, [0,1]*1.5*Rad, [-1,1]*600 , getWmin(w),$
 draw_point_image, RR[*], Ar[*], w, [0,1]*1.5*Rad, [-1,1]*600 , getWmin(w),$
   max(w)
 endif
-if(1) then begin
+if(0) then begin
 ;; Enbid
 w=est
 wmin=1e-5
