@@ -66,6 +66,7 @@ class GetEst
 		void LoadDumpVector(std::string fname, std::vector<T> &vec);
 		void run_graph();
 		void makeMSTree();
+                void makeMSTreeForPaper();
 		void DumpNgb(std::string fname);
 		void LoadNgb(std::string file);
 		void AssignOneParticle(std::vector< std::vector<double> > &image,CKernel<double> *pKernel, 

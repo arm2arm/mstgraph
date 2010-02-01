@@ -398,7 +398,7 @@ void GetEst::DumpMstCat(Graph &graphFOF, std::vector < Edge > &spanning_tree) {
         c.cats[component[i]].m_Np = c.cats[component[i]].id.size();
 
     c.sort();
-    c.SaveCats("c:/arm2arm/DATA/test.idx");
+    c.SaveCats("/home/arm2arm/Projects/LIA/BAR_FIND/ENBID/dump_test.idx");
 }
 
 
@@ -891,3 +891,71 @@ void GetEst::PutOnGrid(std::vector< std::vector<double> > &Grid2D, //Out
     delete pKernel;
     DeallocateANN();
 };
+/////////////////////////
+void GetEst::makeMSTreeForPaper() {
+    Graph graphFOF;
+    float dist;
+    int j, i;
+    std::cout << endl;
+    std::vector<float> est;
+    LoadDumpVector<float>(string("/home/arm2arm/Projects/LIA/BAR_FIND/ENBID/dump.est"), est);
+    int nsph=3;
+    AllocateANNTreeStructures(3, All.NumPart, nsph);
+    FillANNData(3);
+    kdTree = new ANNkd_tree(// build search structure
+            dataPts, // the data points
+            All.NumPart, // number of points
+            3, // dimension of space
+            12, //bucketsize,	                // bucket size
+            //ANN_KD_SUGGEST              //  Splitting rule
+            //ANN_KD_STD, standard kd-splitting rule
+            //ANN_KD_MIDPT, midpoint split
+            //ANN_KD_FAIR, fair-split
+            //ANN_KD_SL_MIDPT, sliding midpoint split
+            //ANN_KD_SL_FAIR, sliding fair-split
+            ANN_KD_SUGGEST// the authors' suggestion for best
+
+            );
+
+    ////////////////////////////////////////////////////////////////////////
+    for (size_t i = 0; i < All.NumPart; i++) {
+        
+        kdTree->annkSearch(// search
+                &dataPts[i][0], // query point
+                nsph, // number of near neighbors
+                nnIdx, // nearest neighbors (returned)
+                dists // distance (returned)
+                );
+
+        for (int j = 0; j < nsph; j++) {
+           
+            if (dists[j]<0.1 && est[j]>0.1) {
+                add_edge(i, j, dists[j], graphFOF);
+            }
+        }
+        if (i % 100 == 0)
+            std::cout << i << "\r";
+    }
+    std::cout << endl;
+    ////////////////////////////////////////////////////////////////////////
+
+    std::cout << "Num Forest edges: " << num_edges(graphFOF) << endl;
+    std::vector<int> component(num_vertices(graphFOF));
+    int num = connected_components(graphFOF, &component[0]);
+    std::cout << "Number of components:" << num << endl;
+    cout << "=======================" << endl;
+    /////////////// BUILD The MST tree
+    weight_map_type weight = get(edge_weight, graphFOF);
+    std::vector < Edge > spanning_tree;
+
+    std::cout << "Building MST:.";
+    kruskal_minimum_spanning_tree(graphFOF, std::back_inserter(spanning_tree));
+    std::cout << "MST num edges=" << spanning_tree.size() << " .. done " << std::endl;
+    ////////////////////////////////////////////////////////////////////
+    //start to CUT
+    /////////////////////////////
+
+    DumpMstCat(graphFOF, spanning_tree);
+
+
+}
