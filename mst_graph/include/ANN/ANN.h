@@ -89,7 +89,8 @@
 
 #include <cmath>			// math includes
 #include <iostream>			// I/O streams
-
+#include <cstdlib>
+#include <cstring>
 //----------------------------------------------------------------------
 // Limits
 // There are a number of places where we use the maximum double value as
