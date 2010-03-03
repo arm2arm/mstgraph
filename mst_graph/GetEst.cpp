@@ -450,9 +450,13 @@ void GetEst::AllocateANNTreeStructures(int dim, int nPts, int kd) {
 };
 
 void GetEst::FillANNData(int dim) {
+    MyFloat scVec[] = {-30, 30, -600, 600};
+    
     for (int i = 0; i < All.NumPart; i++) {
-        for (int j = 0; j < dim; j++) {
-            dataPts[i][j] = Part[i].Pos[j]; //rand()/(double)RAND_MAX;
+        for (int j = 0; j < dim/2.0; j++) {
+            dataPts[i][j] = (Part[i].Pos[j] - scVec[0]) / (scVec[1] - scVec[0]);
+            dataPts[i][j+dim] =(Part[i].Pos[j + dim] - scVec[2]) / (scVec[3] - scVec[2]);
+
         }
     }
 };
@@ -500,7 +504,7 @@ void GetEst::run_ANN(std::vector<float> &annRho, int dim, //Dimensions
 
     double hsml;
     double mass = 1.0; //3.39014e-006;
-    int kdFrac = kd;
+    int kdFrac = int(kd*0.6);
     {
 
         Mngb.resize(nPts);
@@ -779,7 +783,7 @@ void GetEst::SmoothByANN(int dim, std::vector<float> &annEst, //What to smooth
     double hd;
     double sumR = 0.0;
     double sumRho = 0.0;
-    double PI_COEF = M_PI * 4.0 / 3.0;
+//    double PI_COEF = M_PI * 4.0 / 3.0;
 
     for (int i = 0; i < All.NumPart; i++) {
         kdTree->annkSearch(// search
@@ -894,8 +898,8 @@ void GetEst::PutOnGrid(std::vector< std::vector<double> > &Grid2D, //Out
 /////////////////////////
 void GetEst::makeMSTreeForPaper() {
     Graph graphFOF;
-    float dist;
-    int j, i;
+//    float dist;
+//    int j, i;
     std::cout << endl;
     std::vector<float> est;
     LoadDumpVector<float>(string("/home/arm2arm/Projects/LIA/BAR_FIND/ENBID/dump.est"), est);
@@ -918,7 +922,7 @@ void GetEst::makeMSTreeForPaper() {
             );
 
     ////////////////////////////////////////////////////////////////////////
-    for (size_t i = 0; i < All.NumPart; i++) {
+    for (int i = 0; i < All.NumPart; i++) {
         
         kdTree->annkSearch(// search
                 &dataPts[i][0], // query point
