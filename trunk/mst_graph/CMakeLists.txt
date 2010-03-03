@@ -22,6 +22,9 @@ MESSAGE (STATUS "BOOST I WILL INCLUDE LIB  " ${Boost_LIBRARIES})
 ##############################################
 #find_package (GSL)
 #find_package (GTS)
+find_package(ANN REQUIRED)
+MESSAGE (STATUS "ANN FOUND IN " ${ANN_INCLUDE_DIRS})
+MESSAGE (STATUS "ANN LIB FOUND IN " ${ANN_LIBRARIES})
 #MESSAGE (STATUS "GTS FOUND IN " ${GTS_INCLUDE_DIR})
 #MESSAGE (STATUS "Here GTS has: " ${CMAKE_GTS_CXX_FLAGS})
 ##############################################
@@ -65,10 +68,10 @@ set(EXECUTABLE_OUTPUT_PATH bin)
 MESSAGE( STATUS "EXECUTABLE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH} )
 
 # Make sure the compiler can find include files from our Hello library.
-include_directories (${MSTGRAPH_SOURCE_DIR}/src ${MSTGRAPH_SOURCE_DIR}/include ${MSTGRAPH_SOURCE_DIR}/lib ${Boost_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${CMAKE_GTS_CXX_FLAGS} ${GTS_INCLUDE_DIR}  )
+include_directories (${MSTGRAPH_SOURCE_DIR}/src ${MSTGRAPH_SOURCE_DIR}/include ${MSTGRAPH_SOURCE_DIR}/lib ${Boost_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${CMAKE_GTS_CXX_FLAGS} ${GTS_INCLUDE_DIR} ${ANN_INCLUDE_DIRS} )
 
 # Make sure the linker can find the Hello library once it is built.
-link_directories (${MSTGRAPH_BINARY_DIR}/lib  ${Boost_LIBRARY_DIRS} ${GTS_LIBRARY_DIR} )
+link_directories (${MSTGRAPH_BINARY_DIR}/lib  ${Boost_LIBRARY_DIRS} ${ANN_LIBRARIES} ${GTS_LIBRARY_DIR} )
 
 
 # ----------------------------------------------------------
@@ -85,7 +88,7 @@ FOREACH(exe_cpp ${execpp_sources})
   add_executable (${exe} ${exe_cpp})
 
   # Link the executable to the Hello library.
-  target_link_libraries (${exe} arman-tools ${Boost_LIBRARIES} ${GSL_LIBRARIES} ${GTS_LIBRARIES}  )
+  target_link_libraries (${exe} arman-tools ${Boost_LIBRARIES} ${GSL_LIBRARIES} ${GTS_LIBRARIES} ${ANN_LIBRARIES} )
 
 ENDFOREACH(exe_cpp ${execpp_sources})
 
