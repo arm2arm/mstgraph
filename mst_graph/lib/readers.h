@@ -21,7 +21,7 @@ void fill_isort_vecs();
 void SwapEndian(void* addr, int* pattern);
 void   endrun(int);
 void allocate_memory(void);
-double mydrand48();
+double drand48();
 /* this struct contains mostly code parameters read from the parameter file */
 extern struct global_data_all_processes
 {
@@ -131,4 +131,3 @@ extern struct io_header_1
 } header1;
 
 #endif
-

@@ -153,7 +153,7 @@ public:
 	int r_count_around_point(int idxin, int correltime, MyFloat r2);
 	// like r_count, c
 
-//	void kdtree2::n_density(std::vector<MyFloat>& qv, int nn, kdtree2_result_vector& result, MyFloat &den);
+	//void kdtree2::n_density(std::vector<MyFloat>& qv, int nn, kdtree2_result_vector& result, MyFloat &den);
 	// Get density for the qv point, taking NGB smoothing;
 
 	friend class kdtree2_node;

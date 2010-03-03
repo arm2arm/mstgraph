@@ -7,7 +7,8 @@
 #include "functions.h"
 #include "Render.h"
 #include "HOP.h"
-#include "GetEst.h"
+//#include "GetEst.h"
+
 #include "program_settings.h"
 /////////////////////////////
 //#define ND_GROUPS 2
@@ -99,10 +100,10 @@ int main(int argc, char **argv) {
 
     ////////////////////////////////////////////////
     /// Smooth Est with 64 Ngb
-    GetEst est_me;
+    /*    GetEst est_me;
     //est_me.makeMSTreeForPaper() ;
     est_me.Run_SPHEst();
-    exit(0);
+    */ exit(0);
     //SmoothSph();
     /////////////////////// GET setAB This is the HOP stuff based on Enbid Density  one can test also for RHO by SPH//////////////////////////////////////
     //exit(0);

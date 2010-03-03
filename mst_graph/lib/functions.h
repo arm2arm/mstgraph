@@ -12,9 +12,15 @@
 #include <boost/timer.hpp>
 #include <boost/config.hpp>
 #include <ctime>
+#include <cstring>
+
 #include "cycle.h"
 #include <boost/limits.hpp>
 #include "boost/date_time/posix_time/posix_time.hpp"
+
+using std::endl;
+using std::cout;
+using std::string;
 //using namespace boost;
 template<class T>
 class CKernel{
@@ -22,7 +28,7 @@ public:
 	CKernel(const int dim=3):m_dim(dim){
 		if((m_dim<1)||(m_dim>20))
 			{
-			std::cout<<"Specify the Normalization constant for dimensions > 20"<<std::endl;
+			cout<<"Specify the Normalization constant for dimensions > 20"<<endl;
 			assert(0);
 			}
 		AllocateTable();
@@ -48,13 +54,13 @@ template<class T>
 class CEpanechikov : public CKernel<T>
 	{
 	public:
-		CEpanechikov(int dim):CKernel<T>(dim){this->TypeOfKernel="Epanechikov kernel= Cd*(1-u)";InitTable();};
+		CEpanechikov(int dim):CKernel<T>(dim){this->TypeOfKernel=string("Epanechikov kernel= Cd*(1-u)");InitTable();};
 	private:
 	virtual void	InitTable(){
 		static double
 			fep[]={0.75000113,0.63661975,0.59683102,0.60792705,0.66492015,0.77403670,0.95242788,1.2319173,1.6674189,2.3527875,3.4499109,5.2424031,8.2360444,13.349647,22.283674,38.243824,67.384374,121.73344,225.21478,426.23651};
 		T f1=(T)fep[this->m_dim-1];//Epanechikov
-		std::cout<<"Normalization constant of Kernel type "<< this->TypeOfKernel<<": "<<f1<<std::endl;
+		cout<<"Normalization constant of Kernel type "<< this->TypeOfKernel<<": "<<f1<<endl;
 		int i=0;
 		for(i=0;i<=this->KERNEL_TABLE+1;i++)
 			{
@@ -113,12 +119,11 @@ public:
 		}
 	~scoped_timer() {
 
-		boost::posix_time::ptime mystop( boost::posix_time::microsec_clock::universal_time() );
+		boost::posix_time::ptime stop( boost::posix_time::microsec_clock::universal_time() );
 		m_end=getticks();
 		double clock_cycles=elapsed(m_end, m_start);
 		std::cout<<std::setprecision(2)<<std::fixed;
-                double tot=(mystop-start_).total_milliseconds();
-		std::cout <<" "<<m_text<< " done in " <<tot/1000.0/60.0<<"min("<<  tot<< " milli seconds) or "<<clock_cycles<<" CPU cycles "<<std::endl;
+		std::cout <<" "<<m_text<< " done in " << ( stop - start_).total_milliseconds() << " milli seconds or "<<clock_cycles<<" CPU cycles "<<std::endl;
 		std::cout<<std::setprecision(16)<<std::fixed;
 		}
 protected:
