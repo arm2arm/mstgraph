@@ -26,7 +26,7 @@ inline MyFloat squared(const MyFloat x) {
 	return(x*x);
 	}
 template<class T>
-inline void kd_swap(T& a, T&b) {
+inline void kdswap(T& a, T&b) {
 	T tmp;
 	tmp = a;
 	a = b;
@@ -403,8 +403,9 @@ int kdtree2::select_on_coordinate_value(int c, MyFloat alpha, int l, int u) {
 // this holds useful information  to be used
 // during the search
 
-#include <limits>
-static const MyFloat kd_infinity = std::numeric_limits<MyFloat>::max() ;
+
+
+static const MyFloat infinity = std::numeric_limits<float>::max();
 
 class searchrecord {
 
@@ -430,14 +431,14 @@ public:
 		kdtree2_result_vector& result_in) :  
 	qv(qv_in),
 		result(result_in),
-		data(tree_in.data),		
-		ind(tree_in.ind),
-                data_state(tree_in.data_state)
+		data(tree_in.data),
+		data_state(tree_in.data_state),
+		ind(tree_in.ind) 
 		{
 		dim = tree_in.dim;
 		rearrange = tree_in.rearrange;
-		ballsize = kd_infinity;
-		nn = 0;
+		ballsize = infinity; 
+		nn = 0; 
 		};
 
 	};
@@ -457,7 +458,7 @@ void kdtree2::n_nearest_brute_force(std::vector<MyFloat>& qv, int nn, kdtree2_re
 		e.idx = i;
 		result.push_back(e);
 		}
-	std::sort(result.begin(), result.end() );
+	sort(result.begin(), result.end() ); 
 
 	}
 
@@ -489,7 +490,7 @@ void kdtree2::n_nearest(std::vector<MyFloat>& qv, int nn, kdtree2_result_vector&
 
 	root->search(sr); 
 
-	if (sort_results) sort(result.begin(), result.end());
+	if (sort_results) std::sort(result.begin(), result.end());
 
 	}
 */
@@ -515,7 +516,7 @@ void kdtree2::n_nearest_around_point(int idxin, int correltime, int nn,
 		root->search(sr); 
 		}
 
-		if (sort_results) std::sort(result.begin(), result.end());
+		if (sort_results) sort(result.begin(), result.end());
 
 	}
 
@@ -534,7 +535,7 @@ void kdtree2::r_nearest(std::vector<MyFloat>& qv, MyFloat r2, kdtree2_result_vec
 
 	root->search(sr); 
 
-	if (sort_results) std::sort(result.begin(), result.end());
+	if (sort_results) sort(result.begin(), result.end());
 
 	}
 
@@ -578,7 +579,7 @@ void kdtree2::r_nearest_around_point(int idxin, int correltime, MyFloat r2,
 		root->search(sr); 
 		}
 
-		if (sort_results) std::sort(result.begin(), result.end());
+		if (sort_results) sort(result.begin(), result.end());
 
 	}
 
@@ -737,7 +738,7 @@ void kdtree2_node::process_terminal_node(searchrecord& sr) {
 
 	for (int i=l; i<=u;i++) {
 		int indexofi;  // sr.ind[i]; 
-		MyFloat dis, vol=1.0;
+		MyFloat dis, vol;
 		bool early_exit; 
 		bool is_active;
 		if (rearrange) {
@@ -855,7 +856,7 @@ void kdtree2_node::process_terminal_node_fixedball(searchrecord& sr) {
 
 	for (int i=l; i<=u;i++) {
 		int indexofi = sr.ind[i];
-		MyFloat dis,vol=1.0;
+		MyFloat dis, vol;
 		bool early_exit;
 		bool is_active;
 

@@ -3,6 +3,7 @@
 #include<vector>
 #include <algorithm>
 #include "readers.h"
+#include <cstring>
 using namespace std;
 ////////////////
 /* this struct contains mostly code parameters read from the parameter file */
