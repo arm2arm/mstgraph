@@ -222,6 +222,7 @@ end
 pro read_smoothest, file, smest
 close, 2
 np=0l
+if(not FILE_TEST(file)) then return
 openr, 2, file
 readu, 2, Np
 
@@ -242,7 +243,7 @@ est=est.field1
 end
 
 pro read_est, file, TYPE,est, ngb, ngbA
-
+if(not FILE_TEST(file)) then return
 close, 1
 openr, 1, file
 dum1=0l
@@ -283,6 +284,7 @@ end
 
 pro read_idx, fileidx, grpidx
 close, 1
+if(not FILE_TEST(fileidx)) then return
 openr, 1, fileidx
 ngrp=0l
 npID=0l
@@ -305,6 +307,7 @@ pro read_ANNngb, file, annngb
 close, 2
 np=0l
 kl=0l
+if(not FILE_TEST(file)) then return
 openr, 2, file
 readu, 2,np, kl
 annNgb=Replicate({ip:0l,dist:0.0},np)
@@ -338,13 +341,13 @@ end
 device,retain=2,decomposed=0
 window,1, xsize=800+400, ysize=800
 !P.multi=[0, 6, 4]
-Rad=10.0
+Rad=20.0
 TYPE=4
 mask='snap_gal_sfr'
 ;mask='snap_gal_0.25_sfr'
 ;mask='test'
 snap='0450'
-;snap='0950'
+snap='1000'
 base='C:\arm2arm\DATA\MODEL7\MODELS\MODEL7\RUNG2\SNAPS\'
 base="/net/direct/dnas01/arm2arm/DATA/LIA/SPHBAR/NFW/MODELS/MODEL7/RUNG2/SNAPS/"
 file=base+mask+'_'+snap
@@ -427,10 +430,12 @@ getcicimage, flatarr(RR),flatarr( Ar), flatarr(Ap),wcic, p, vel,wcic6d
 ;stop
 
 ;; ANN
-if(0) then begin
+if(1) then begin
 w=smest
-Wmin=1e-7
-Wmax=0.001
+mma, w
+rplot=20
+Wmin=1.0e-4
+Wmax=0.002
 hist=histogram(nbins=nbins,alog10(w), min= alog10(wmin),max=alog10(wmax))
 plot,hist,$
   background=fsc_color("white"), color=fsc_color("black"), thick=2
@@ -443,12 +448,13 @@ draw_point_image, vel[0,*], vel[1,*], w, [-1,1]*600, [-1,1]*600 ,Wmin,$
 draw_point_image, vel[0,*], vel[2,*], w, [-1,1]*600, [-1,1]*600 , Wmin,$
   wmax
 
-draw_point_image, RR[*], Ap[*], w, [0,1]*8, [-1,1]*600 , wmin,$
+draw_point_image, RR[*], Ap[*], w, [0,1]*rplot, [-1,1]*600 , wmin,$
   wmax
 
-draw_point_image, RR[*], Ar[*], w, [0,1]*8, [-1,1]*600 , wmin,$
+draw_point_image, RR[*], Ar[*], w, [0,1]*rplot, [-1,1]*600 , wmin,$
   wmax
 endif
+stop
 if(0)then begin
 ; ANN with smoothing
 w=est
