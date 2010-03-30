@@ -11,8 +11,8 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${MSTGRAPH_SOURCE_DIR}/Modules)
 ###################################
 #SET(Boost_USE_STATIC_LIBS ON)
 SET(Boost_USE_MULTITHREAD ON)
-#SET( Boost_ADDITIONAL_VERSIONS "1.41.0" "1.40")
-find_package ( Boost "1.41.0" COMPONENTS program_options thread )
+#SET( Boost_ADDITIONAL_VERSIONS "1.41.0" "1.40" )
+find_package ( Boost  "1.41.0" COMPONENTS program_options thread )
 ################ TEST BOOST DIR 
 MESSAGE (STATUS "BOOST FOUND IN " ${Boost_INCLUDE_DIRS})
 MESSAGE (STATUS "BOOST LIB FOUND IN " ${Boost_LIBRARY_DIRS})

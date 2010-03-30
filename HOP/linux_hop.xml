@@ -8,7 +8,7 @@ Distrubuted under GPL v3.0
 <OPTIONS>
     <test_flag>0</test_flag>
     <snaps>
-        <snap>0450</snap>
+        <snap>1000</snap>
     </snaps>
     <models>
         <model>MODEL7</model>
@@ -41,11 +41,11 @@ Distrubuted under GPL v3.0
         </ndims>
         <flags>
             <flag>0</flag>
-            <flag>0</flag>
+            <flag>1</flag>
         </flags>
         <smooth_flags>
             <smooth_flag>0</smooth_flag>
-            <smooth_flag>1</smooth_flag>
+            <smooth_flag>0</smooth_flag>
         </smooth_flags>
         <nsmooths>
             <nsmooth>2</nsmooth>
