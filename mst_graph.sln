@@ -21,6 +21,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dll", "..\..\..\Downloads\a
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ann2fig", "..\..\..\Downloads\ann_1.1.1\MS_Win32\ann2fig\ann2fig.vcproj", "{622DD7D8-0C0A-4303-9176-C9A8AF467E70}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "trace_ids", "trace_ids\trace_ids.vcproj", "{36800C34-DD57-41AF-B950-A0D1BB0B1FDB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -67,6 +69,10 @@ Global
 		{622DD7D8-0C0A-4303-9176-C9A8AF467E70}.Debug|Win32.Build.0 = Debug|Win32
 		{622DD7D8-0C0A-4303-9176-C9A8AF467E70}.Release|Win32.ActiveCfg = Release|Win32
 		{622DD7D8-0C0A-4303-9176-C9A8AF467E70}.Release|Win32.Build.0 = Release|Win32
+		{36800C34-DD57-41AF-B950-A0D1BB0B1FDB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{36800C34-DD57-41AF-B950-A0D1BB0B1FDB}.Debug|Win32.Build.0 = Debug|Win32
+		{36800C34-DD57-41AF-B950-A0D1BB0B1FDB}.Release|Win32.ActiveCfg = Release|Win32
+		{36800C34-DD57-41AF-B950-A0D1BB0B1FDB}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
