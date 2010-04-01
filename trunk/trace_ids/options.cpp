@@ -29,7 +29,7 @@ bool is_file_exist(const std::string &filename)
 
 COptions::COptions(int argc, char* argv[]):m_status(0)
 	{
-	m_status=EXIT_SUCCESS;
+	m_status=EXIT_FAILURE;
 	try {
 		namespace po = boost::program_options;
 		//typedef string TIDlist;
@@ -51,11 +51,6 @@ COptions::COptions(int argc, char* argv[]):m_status(0)
 
 	//	printInputs(vm);
 
-		if (vm.count("help")) {
-			cout << commands << "\n";
-			m_status=EXIT_FAILURE;
-			}
-
 		if(vm.count("snapshotList")) {
 			//ostream_iterator<string> it(cout, "\n ");
 			cout << "snapshot list detected" << endl;
@@ -63,10 +58,12 @@ COptions::COptions(int argc, char* argv[]):m_status(0)
 			for(std::vector<string>::iterator it=m_snapshotList.begin();it<m_snapshotList.end(); it++)
 				{
 				cout<<(*it);
-				if(is_file_exist(*it))
+				if(is_file_exist(*it)){
 					cout<<"..exist."<<endl;
+					m_status=EXIT_SUCCESS;
+					}
 				else{
-					cout<<"does not exist."<<endl;
+					cout<<"does NOT exist."<<endl;
 					m_status=EXIT_FAILURE;
 					}
 				}
@@ -88,12 +85,18 @@ COptions::COptions(int argc, char* argv[]):m_status(0)
 			cout<<"numID="<<m_IDlist.size()<<" entries.";
 			cout << endl << endl;
 			}
+		if (vm.count("help")) {
+			cout << commands << "\n";
+			m_status=EXIT_FAILURE;
+			}
+		if(m_status==EXIT_FAILURE)
+			cout << commands << "\n";
 		}
 	catch (const std::exception& e) {
 		cout << e.what() << "\n";
 		m_status=EXIT_FAILURE;
 		}
-
+	
 	}
 
 /*void COptions::printInputs(variables_map vm)

@@ -2,7 +2,7 @@
 #define _LOADER_
 
 #include "data_readers.h"
-
+#include "particleid.h"
 
 template <class T>
 class generator
