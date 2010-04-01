@@ -1,10 +1,10 @@
 // trace_ids.cpp : Defines the entry point for the console application.
 //
 
-#include "particleid.h"
 #include "loader.h"
 #include "options.h"
 #include "utils.h"
+#include "store_data.h"
 
 template<typename Tag,typename MultiIndexContainer>
 void intersect_by(
@@ -33,35 +33,6 @@ void intersect_by(
 	
 	}
 
-
-
-void DumpIntersection(string filename,CLoader* L1, CLoader* L2, particlesID_set &ids_inboth)
-	{
-	//if(FileExists(filename.c_str()))
-		{
-		ofstream ofs(filename.c_str(), ios::binary);
-		
-		ofs<<L1->m_fname<<"\t"<<L1->m_nelem<<"\t"<<L1->m_ptype<<endl;
-		ofs<<L2->m_fname<<"\t"<<L2->m_nelem<<"\t"<<L2->m_ptype<<endl;
-
-		boost::multi_index::index<particlesID_set,ID>::type& L1_ID_index=
-			get<ID>(L1->data);
-		boost::multi_index::index<particlesID_set,ID>::type& L2_ID_index=
-			get<ID>(L2->data);
-		boost::multi_index::index<particlesID_set,ID>::type::iterator  L1_ID_index_it;
-	    boost::multi_index::index<particlesID_set,ID>::type::iterator  L2_ID_index_it;
-		particlesID_set::iterator it=ids_inboth.begin();
-		while(it!=ids_inboth.end())
-			{
-			L1_ID_index_it=L1_ID_index.find(it->ID);
-			L2_ID_index_it=L2_ID_index.find(it->ID);
-			ofs<<it->ID<<" "<<L1_ID_index_it->IDf<<" "<<L2_ID_index_it->IDf<<std::endl;
-			it++;
-			}
-
-		ofs.close();
-		}
-	}
 int main(int argc, char* argv[])
 	{
 	COptions opt(argc, argv);
@@ -98,7 +69,7 @@ int main(int argc, char* argv[])
 				" and L2.size= "<<
 				L2->m_nelem<<std::endl;
 			*/
-			DumpIntersection(opt.m_file_out+string("_byIDstar"), L1, L2, ids_inboth);
+			CStoreData store_now(opt.m_file_out+string("_byIDstar"), L1, L2, ids_inboth);
 			}
 			
 		
