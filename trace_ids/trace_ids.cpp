@@ -28,7 +28,7 @@ void intersect_by( const MultiIndexContainer& L1,const MultiIndexContainer& L2,M
 		L2_ID_index.end(),
 		std::inserter(s, s.begin()), strComparator<Tag>()
 		);
-
+	//filter_by_ID();
 	
 	}
 
@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
 
 	for(size_t i=0;i<opt.m_snapshotList.size();i++)
 		{
-		CLoader *pL=new CLoader(opt.m_snapshotList[i], ParticleType);
+		CLoader *pL=new CLoader(opt.m_snapshotList[i], opt.m_IDlist,ParticleType);
 		(*pL).PrintStat();
 		Lvec.push_back(pL);
 		}
