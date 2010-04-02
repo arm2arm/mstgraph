@@ -7,9 +7,8 @@
 #include "store_data.h"
 
 template<typename Tag,typename MultiIndexContainer>
-void intersect_by(
-				  const MultiIndexContainer& L1,const MultiIndexContainer& L2,MultiIndexContainer &s/*result*/, std::string msg="",
-				  Tag* =0 /* fixes a MSVC++ 6.0 bug with implicit template function parms */
+void intersect_by( const MultiIndexContainer& L1,const MultiIndexContainer& L2,MultiIndexContainer &s/*result*/, std::string msg="",
+			 Tag* =0 /* fixes a MSVC++ 6.0 bug with implicit template function parms */
 				  )
 	{
 	/* obtain a reference to the index tagged by Tag */

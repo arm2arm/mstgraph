@@ -12,17 +12,21 @@
 #include "loader.h"
 
 class CStoreData{
-public:
+ private:
+  std::string  m_fname;
+ public:
+	~CStoreData(){std::cout<<"...DONE"<<std::endl;};
 	CStoreData(){};
 	CStoreData(std::string filename,CLoader* L1, CLoader* L2, particlesID_set &ids_inboth){
 			DumpIntersection(filename,L1,L2, ids_inboth);
 			};
 	void DumpIntersection(string filename,CLoader* L1, CLoader* L2, particlesID_set &ids_inboth)
 		{
-		string fname=filename+".bzip2";
+		m_fname=filename+".bz2";
+		std::cout<<"\n Writing: "<<m_fname;
 		namespace BI = boost::iostreams;
 
-		std::fstream myFile(fname.c_str(), std::ios::binary|std::ios::out);
+		std::fstream myFile(m_fname.c_str(), std::ios::binary|std::ios::out);
 		BI::filtering_stream<BI::output> my_filter; 
 		my_filter.push(BI::bzip2_compressor()) ; 
 		my_filter.push(myFile) ; 
@@ -51,9 +55,11 @@ public:
 			{
 			string fname="test.bz2";
 				{
+				  std::fstream myfile(fname.c_str(), std::ios::binary|std::ios::out); 
 				BI::filtering_stream<BI::output> my_filter; 
 				my_filter.push(BI::bzip2_compressor()) ; 
-				my_filter.push(std::fstream(fname.c_str(), std::ios::binary|std::ios::out)) ; 
+				//				my_filter.push(std::fstream(fname.c_str(), std::ios::binary|std::ios::out)) ; 
+				my_filter.push(myfile);
 				my_filter << "test";
 				}
 			}
