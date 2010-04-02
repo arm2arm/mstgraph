@@ -3,7 +3,7 @@
 
 #include "data_readers.h"
 #include "particleid.h"
-
+#include <set>
 template <class T>
 class generator
 	{
@@ -35,7 +35,7 @@ class strMover
 class CLoader
 	{
 	public:
-		CLoader(std::string fname, unsigned int ptype=0):m_fname(fname), m_ptype(ptype)
+		CLoader(std::string fname, std::set<int>  &IDfromFile, unsigned int ptype=0):m_fname(fname), m_ptype(ptype)
 			{
 				CGadget *pG=new CGadget(fname, false);
 				m_nelem = pG->read_block<int>(pID,
@@ -47,6 +47,12 @@ class CLoader
 					std::cout<<"Cannot open file, exiting"<<std::endl;
 					exit(1);
 					}
+				if(IDfromFile.size()>0)
+					{
+					for(unsigned int i=0;i<m_nelem;i++)
+						if(IDfromFile.find(pID[i])!=IDfromFile.end())
+							data.insert(particleID(pID[i], i));
+					}else
 				for(unsigned int i=0;i<m_nelem;i++)
 					data.insert(particleID(pID[i], i));
 				///////////////////////////////////////////

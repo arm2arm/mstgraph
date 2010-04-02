@@ -12,6 +12,9 @@ using boost::lexical_cast;
 using boost::bad_lexical_cast;
 
 #include "options.h"
+#include <fstream>
+#include <string>
+
 
 bool is_file_exist(const std::string &filename)
 	{
@@ -26,6 +29,25 @@ bool is_file_exist(const std::string &filename)
 	return false;
 	}
 
+void COptions::ReadID(std::string file)
+	{
+	std::ifstream infile(file.c_str());
+
+	int val;
+	string f1, f2;
+	if(is_file_exist(file))
+		{
+		infile>>f1;
+		infile>>f2;
+		
+		while(infile>>val)
+			{
+			m_IDlist.insert(val);
+			}
+		}
+	else
+		std::cerr<<"WARNING::Cannot find ID file: "<<file<<std::endl;
+	}
 
 COptions::COptions(int argc, char* argv[]):m_status(0)
 	{
@@ -39,6 +61,7 @@ COptions::COptions(int argc, char* argv[]):m_status(0)
 		commands.add_options()
 			("snapshotList", po::value< vector<string> >(&m_snapshotList)->multitoken(), "Which snapshots to trace: ex. --snapshotList=snap_001 snap_002 snap_003 ")
 			("IDlist",       po::value< vector<TIDlist> >(&IDlist)->multitoken(), "Which IDs to trace: ex. --IDlist=0 1 200 -340")
+			("IDflist",       po::value< std::string >(&m_file_IDlist), "Which IDs to trace from file: ex. --IDfile=idFile.txt, where file has a integers inside the file")
 			("out-file", po::value< string>(&m_file_out)->default_value(string("intersect.idx")), "out file")
 			("type", po::value< int>(&m_type)->default_value(4), "particle type to track")
 			("help","print help")
@@ -80,8 +103,14 @@ COptions::COptions(int argc, char* argv[]):m_status(0)
 			//cout << "These IDs we will trace: ";
 			BOOST_FOREACH(TIDlist val, IDlist)
 				{
-				m_IDlist.push_back(boost::lexical_cast<int>(val));
+				m_IDlist.insert(boost::lexical_cast<int>(val));
 				};
+			cout<<"numID="<<m_IDlist.size()<<" entries.";
+			cout << endl << endl;
+			}
+		if(vm.count("IDflist")) {
+			
+			ReadID(m_file_IDlist);
 			cout<<"numID="<<m_IDlist.size()<<" entries.";
 			cout << endl << endl;
 			}
