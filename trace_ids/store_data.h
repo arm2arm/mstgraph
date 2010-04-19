@@ -55,10 +55,10 @@ class CStoreData{
 			{
 			string fname="test.bz2";
 				{
-				  std::fstream myfile(fname.c_str(), std::ios::binary|std::ios::out); 
+				 std::fstream myfile(fname.c_str(), std::ios::binary|std::ios::out); 
 				BI::filtering_stream<BI::output> my_filter; 
 				my_filter.push(BI::bzip2_compressor()) ; 
-				//				my_filter.push(std::fstream(fname.c_str(), std::ios::binary|std::ios::out)) ; 
+				//			my_filter.push(std::fstream(fname.c_str(), std::ios::binary|std::ios::out)) ; 
 				my_filter.push(myfile);
 				my_filter << "test";
 				}

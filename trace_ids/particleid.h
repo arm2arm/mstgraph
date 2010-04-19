@@ -17,7 +17,7 @@ using namespace boost::multi_index;
 struct particleID
 	{
 	int           ID;// real ID for particle from Gadget2 file "ID" block
-	unsigned int  IDf;// postition in the file 
+	unsigned int  IDf;// postition in the file
 	particleID(int id,const unsigned int idf):ID(id),IDf(idf){}
 	bool operator<(const particleID& p)const { return ID<p.ID;}
 	unsigned int getByGasID()const {return (ID&0x0FFF);};

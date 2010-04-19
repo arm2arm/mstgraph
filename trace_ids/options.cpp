@@ -35,14 +35,15 @@ void COptions::ReadID(std::string file)
 
 	int val;
 	string f1, f2;
+	float A, P, AP;
 	if(is_file_exist(file))
 		{
-		infile>>f1;
-		infile>>f2;
+		//infile>>f1;
+		//infile>>f2;
 		
-		while(infile>>val)
+		while(infile>>val>>A>>P>>AP)
 			{
-			m_IDlist.insert(val);
+			m_IDlist.insert(std::make_pair(val,TApData(A,P)));
 			}
 		}
 	else
@@ -61,7 +62,7 @@ COptions::COptions(int argc, char* argv[]):m_status(0)
 		commands.add_options()
 			("snapshotList", po::value< vector<string> >(&m_snapshotList)->multitoken(), "Which snapshots to trace: ex. --snapshotList=snap_001 snap_002 snap_003 ")
 			("IDlist",       po::value< vector<TIDlist> >(&IDlist)->multitoken(), "Which IDs to trace: ex. --IDlist=0 1 200 -340")
-			("IDflist",       po::value< std::string >(&m_file_IDlist), "Which IDs to trace from file: ex. --IDfile=idFile.txt, where file has a integers inside the file")
+			("IDflist",      po::value< vector<string> >(&m_snapshotList)->multitoken(), "Which IDs to trace from file: ex. --IDfile=idFile.txt, where file has a integers inside the file")
 			("out-file", po::value< string>(&m_file_out)->default_value(string("intersect.idx")), "out file")
 			("type", po::value< int>(&m_type)->default_value(4), "particle type to track")
 			("help","print help")
@@ -103,7 +104,7 @@ COptions::COptions(int argc, char* argv[]):m_status(0)
 			//cout << "These IDs we will trace: ";
 			BOOST_FOREACH(TIDlist val, IDlist)
 				{
-				m_IDlist.insert(boost::lexical_cast<int>(val));
+				m_IDlist.insert(std::make_pair(boost::lexical_cast<int>(val), TApData()));
 				};
 			cout<<"numID="<<m_IDlist.size()<<" entries.";
 			cout << endl << endl;
