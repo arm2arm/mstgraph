@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <map>
 #include <set>
+#include "ap_data.h"
 using std::cout;
 using std::endl;
 using std::vector;
@@ -20,7 +21,7 @@ public:
 	const int is_bad(){return m_status;};
 //////////////////////////////////////////
 	vector<string> m_snapshotList;
-	set<int> m_IDlist;
+	map<int, TApData> m_IDlist;
 	string m_file_out;
 	string m_file_IDlist;
 	int m_type;

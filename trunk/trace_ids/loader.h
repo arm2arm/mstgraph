@@ -3,7 +3,8 @@
 
 #include "data_readers.h"
 #include "particleid.h"
-#include <set>
+#include "ap_data.h"
+
 template <class T>
 class generator
 	{
@@ -35,7 +36,7 @@ class strMover
 class CLoader
 	{
 	public:
-		CLoader(std::string fname, std::set<int>  &IDfromFile, unsigned int ptype=0):m_fname(fname), m_ptype(ptype)
+		CLoader(std::string fname, std::map<int, TApData>  &IDfromFile, unsigned int ptype=0):m_fname(fname), m_ptype(ptype)
 			{
 				CGadget *pG=new CGadget(fname, false);
 				m_nelem = pG->read_block<int>(pID,
