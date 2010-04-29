@@ -4,9 +4,9 @@
 cmake_minimum_required(VERSION 2.6)
 
 # project name
-project (TRACEID)
+project (PROFILER)
 # find our custom CMake modules
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${TRACEID_SOURCE_DIR}/Modules)
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROFILER_SOURCE_DIR}/Modules)
 #set (CMAKE_BUILD_TYPE Debug)
 ###################################
 #SET(Boost_USE_STATIC_LIBS ON)
@@ -42,7 +42,7 @@ MESSAGE( STATUS "PROJECT_SOURCE_DIR: " ${PROJECT_SOURCE_DIR} )
 
 
 if(CMAKE_COMPILER_IS_GNUCXX)
-  SET(CMAKE_CXX_FLAGS "-Wno-deprecated -O3 -fopenmp ")
+  SET(CMAKE_CXX_FLAGS "-Wno-deprecated -O3  ")
 else(CMAKE_COMPILER_IS_GNUCXX)
         SET(CMAKE_CXX_FLAGS "-O3 -xW -Zp16 -ip -ansi_alias -ansi  -mp -vec-report3 -ipo " )	
 endif(CMAKE_COMPILER_IS_GNUCXX)
@@ -68,19 +68,19 @@ set(EXECUTABLE_OUTPUT_PATH bin)
 MESSAGE( STATUS "EXECUTABLE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH} )
 
 # Make sure the compiler can find include files from our Hello library.
-include_directories (${TRACEID_SOURCE_DIR} ${TRACEID_SOURCE_DIR} ${Boost_INCLUDE_DIRS} )
+include_directories (${PROFILER_SOURCE_DIR} ${PROFILER_SOURCE_DIR} ${Boost_INCLUDE_DIRS} )
 
 # Make sure the linker can find the Hello library once it is built.
-link_directories (${TRACEID_BINARY_DIR}  ${Boost_LIBRARY_DIRS} )
+link_directories (${PROFILER_BINARY_DIR}  ${Boost_LIBRARY_DIRS} )
 
 
 # ----------------------------------------------------------
 # Make sure the compiler can find include files from our Hello library.
 
-  add_executable (trace_id.x data_readers.cpp  options.cpp  trace_ids.cpp )
+  add_executable (profile.x data_readers.cpp utils.cpp options.cpp  profile.cpp )
 
   # Link the executable to the Hello library.
-  target_link_libraries (trace_id.x ${Boost_LIBRARIES} )
+  target_link_libraries (profile.x ${Boost_LIBRARIES} )
 
 
 # ----------------------------------------------------------
