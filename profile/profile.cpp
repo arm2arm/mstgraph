@@ -115,16 +115,13 @@ int main(int argc, char* argv[])
 		if(log.is_done(isnap))continue;
 		CLoader *pL=new CLoader(opt.m_snapshotList[i],ParticleType);
 
-		//(*pL).PrintStat();
 		///////////////////////////////
 		// Do profiling here
 		std::vector<float> fVec(NFields), x, y, R;
 		vector<unsigned int > idxR(pL->m_nelem-1,0);	
-
 		///////////////////////////////////
 		for(unsigned int i=0, ig=0, ist=0;i<pL->m_nelem-1;i++)// -1 to exclude BH particle
 			{
-
 			float rr=pL->R(i);
 			idxR.push_back(i);
 			if(pL->pType[i] == 0)ig++;
