@@ -199,12 +199,15 @@ class CAsciiReader
 	public:
 		CAsciiReader(){};
 		~CAsciiReader(){};
-		CAsciiReader(string IN_FILE, unsigned int nfields=1):m_filename(IN_FILE),m_nfields(nfields){
-			m_good=ReadAsciiFile();
-			};
+		CAsciiReader(string IN_FILE, unsigned int nfields=1, bool flag_load=true):m_filename(IN_FILE),m_nfields(nfields){
+		  if(flag_load)
+		    m_good=ReadAsciiFile();
+		  
+		};
 		typedef vector<float> dynvector;
 		typedef map<unsigned int,dynvector> TDataMap;
 		TDataMap m_data;
+		bool load(){ return ReadAsciiFile();}
 		bool ReadAsciiFile()
 			{
 			if(!FileExists(m_filename))
@@ -408,7 +411,7 @@ class CData
 class CReaders :public CData
 	{
 	public:
-		CReaders():swp_flag(false),find_flag(false)
+		CReaders():m_verbose(0),swp_flag(false),find_flag(false)
 			{};
 		virtual ~CReaders() {};
 		virtual bool ReadData(string file){return true;};
@@ -467,6 +470,7 @@ class CReaders :public CData
 		int blk;
 		string m_filename;
 		ifstream m_file;
+		int m_verbose;
 	};
 
 
@@ -500,7 +504,8 @@ class CGadget : public  CReaders
 		CGadget(string file, bool readnow=true):m_NBH(0)
 			{
 			m_filename=file;
-			cout<<"Opening: "<< m_filename<<endl;
+			if(m_verbose==1)
+			  cout<<"Opening: "<< m_filename<<endl;
 			if(!FileExists(m_filename)){cout<<"Can not find file: \n"<< m_filename<<endl;
 				m_isgood=false;
 			//exit(EXIT_FILE_NOT_FOUND);
@@ -578,7 +583,7 @@ class CGadget : public  CReaders
 					}
 				pV=new T[nall];
 				unsigned int sizeall=find_block(&m_file, name);
-				cout<<name<<endl;				
+				if(m_verbose==2)cout<<name<<endl;				
 				if(sizeall<1) return 0;
 				SeekToType(&m_file,t, sizeof(T));
 				GetBlk(&m_file, &blk);		
@@ -591,7 +596,7 @@ class CGadget : public  CReaders
 			int nall=np;
 			pV=new T[nall];
 			unsigned int sizeall=find_block(&m_file, name);
-			cout<<name<<endl;				
+			if(m_verbose==2)cout<<name<<endl;				
 			if(sizeall<1) return 0;
 			SeekToType(&m_file,0, sizeof(T));
 			GetBlk(&m_file, &blk);		

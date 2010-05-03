@@ -64,7 +64,7 @@ COptions::COptions(int argc, char* argv[]):m_status(0)
 					}
 				else{
 					cout<<"does NOT exist."<<endl;
-					m_status=EXIT_FAILURE;
+					//m_status=EXIT_FAILURE;
 					}
 				}
 			cout << endl << endl;

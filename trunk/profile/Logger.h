@@ -17,23 +17,27 @@ std::ostream & operator << (std::ostream &os, const TData &p)
 
 class CLogger :public CAsciiReader{
 public:
-	CLogger(std::string fout="dump.log", bool append=false,int nfields=1):CAsciiReader(fout, nfields), m_append(append){
-		if(m_append)
-			load();
+	CLogger(std::string fout="dump.log", bool append=false,int nfields=1):m_append(append),CAsciiReader(fout, nfields,append ){
+
+
+				    
 		};
 	~CLogger(){save();};
 	////////// Populate ////////
+
 	bool insert(const int isnap, const dynvector &d)
 		{
-		bool retval=(m_data.find(isnap)!=m_data.end());
+		bool retval=is_done(isnap);
 		m_data[isnap]=d;
 		return retval;
 		};
+        bool is_done(unsigned int isnap)
+	{return m_append&&(m_data.find(isnap)!=m_data.end());}
 	//////////// IO ////////
-	void load()
+	/*	void load()//moved to data_readers/ CAsciiReader
 		{
-		 ReadAsciiFile();
-		};
+		 ReadAsciiFile(); 
+		 };*/
 	bool write(string filename)
 		{
 		std::ofstream stream(filename.c_str());
@@ -76,3 +80,5 @@ private:
 
 
 #endif
+
+
