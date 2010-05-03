@@ -88,6 +88,14 @@ std::vector< std::vector<T> > GetAB(vector<T> &R,vector<T> &x,vector<T> &y, T pr
 	return result;
 	}
 
+//Result format R1, Am1, R2,  Am2, R3, Am3
+std::vector<float> getAmMaxMeanR(TLogData &result){ 
+
+  result[0].
+
+};
+
+
 int main(int argc, char* argv[])
 	{
 	COptions opt(argc, argv);
@@ -99,7 +107,9 @@ int main(int argc, char* argv[])
 	std::vector<float> rvec;
 	const int NFields=5+5+4;
 	CLogger log(opt.m_file_out,opt.m_updatelog, NFields);
-	CLoggerAm logAm("Amf.log",false);
+	CLogger logAmRR("AmRad.log", opt.m_updatelog);
+	logAmRR.SetComment("Am R1 R2 R3");
+	CLoggerAm logAm("Amf.log",opt.m_updatelog);
 	logAm.SetComment("R= 0.1-20.0");
 
 	log.SetComment(" snap  r1kpc(0-4) r2kpc(0-4) ");
@@ -125,12 +135,12 @@ int main(int argc, char* argv[])
 			float rr=pL->R(i);
 			idxR.push_back(i);
 			if(pL->pType[i] == 0)ig++;
-			if(pL->pType[i] == 4)
-				{
+			if(pL->pType[i] == 4)ist++;
+			if(pL->pType[i] == 4 || pL->pType[i] == 2){
 				R.push_back(rr);
 				x.push_back(pL->pPOS[i*3]);
 				y.push_back(pL->pPOS[i*3+1]);
-				ist++;
+			      
 				}
 			for(ir=0;ir<2;ir++)
 				if(rr<rvec[ir]){
@@ -146,7 +156,10 @@ int main(int argc, char* argv[])
 
 			}
 		///////////////////////////////////
-		logAm.insert(isnap,GetAB<float>(R,x,y));
+		TLogData result=GetAB<float>(R,x,y);
+		std::vector<float> AmRad=getAmMaxMeanR(result);//format R1, Am1, R2,  Am2, R3, Am3
+
+		logAm.insert(isnap, result);
 		log.insert(isnap, fVec);
 		///////////////////////////////
 		delete pL;
