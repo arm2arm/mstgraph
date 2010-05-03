@@ -77,8 +77,10 @@ private:
 	std::string m_comments;
 	};
 
+typedef std::vector< std::vector<float> > TLogData;
+
 class CLoggerAm{
-	typedef std::vector< std::vector<float> > TLogData;
+
 	typedef std::map<int, TLogData> TLogDataMap;
 public:
 	CLoggerAm(std::string file, bool update=false):m_filename(file), m_update(update)
@@ -125,13 +127,14 @@ private:
 						}
 					stream<<endl;
 					}
+				stream<<"\n\n"<<endl;
 				}
 
 			}else{
 				stream.close();
 				return false;
 			}
-
+		
 		stream.close();
 		return true;
 		}
