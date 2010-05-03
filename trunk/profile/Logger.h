@@ -17,12 +17,10 @@ std::ostream & operator << (std::ostream &os, const TData &p)
 
 class CLogger :public CAsciiReader{
 public:
-	CLogger(std::string fout="dump.log", bool append=false,int nfields=1):m_append(append),CAsciiReader(fout, nfields,append ){
-
-
+	CLogger(std::string fout="dump.log", bool append=false,int nfields=1):m_write_on_save(true),m_append(append),CAsciiReader(fout, nfields,append ){
 				    
 		};
-	~CLogger(){save();};
+	~CLogger(){if(m_write_on_save)save();};
 	////////// Populate ////////
 
 	bool insert(const int isnap, const dynvector &d)
@@ -74,8 +72,74 @@ public:
 		};
 	void SetComment(std::string comment){m_comments=comment;};
 private:
+	bool m_write_on_save;
 	bool m_append;
 	std::string m_comments;
+	};
+
+class CLoggerAm{
+	typedef std::vector< std::vector<float> > TLogData;
+	typedef std::map<int, TLogData> TLogDataMap;
+public:
+	CLoggerAm(std::string file, bool update=false):m_filename(file), m_update(update)
+		{
+		}
+	~CLoggerAm(){save();}
+	void SetComment(std::string msg){m_comment=msg;};
+	bool insert(const int isnap, TLogData &data)
+		{
+		bool ret=!(m_data.find(isnap)!=m_data.end());
+		for(size_t i=0;i<data.size();i++)
+			m_data[isnap].push_back(data[i]);
+		return ret;
+		}
+	void save()
+		{
+		if(!write(m_filename))
+			cout<<"WARNING: cannot open file :"<<m_filename<<endl;
+		else
+			if(!write("dump.log"))
+				{
+				cout<<"ERROR: cannot open log file for writing:"<<"dump.log"<<endl;
+				}
+		}
+private:
+	bool write(string filename)
+		{
+		std::ofstream stream(filename.c_str());
+		if(stream.is_open())
+			{
+			stream<<"# "<<m_comment<<endl;
+			TLogDataMap::iterator it;
+			for ( it=m_data.begin() ; it != m_data.end(); it++ )
+				{
+				stream <<"# "<< (*it).first << "\n"; 
+				TLogData::iterator itdata=(*it).second.begin();
+				size_t nj=(*it).second.size();
+				size_t ni=(*it).second.begin()->size();
+				for(size_t i=0;i<ni;i++)
+					{
+					for(size_t j=0;j<nj;j++)
+						{
+						stream<<(*it).second[j][i]<<"\t";
+						}
+					stream<<endl;
+					}
+				}
+
+			}else{
+				stream.close();
+				return false;
+			}
+
+		stream.close();
+		return true;
+		}
+	//CLogger m_log;
+	string m_filename;
+	string m_comment;
+	bool m_update;
+	TLogDataMap m_data;
 	};
 
 

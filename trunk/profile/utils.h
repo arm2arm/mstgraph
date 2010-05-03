@@ -121,6 +121,18 @@ class CEpanechikov : public CKernel<T>
 
 bool is_file_exist(const std::string &filename);
 unsigned int GetISnap(std::string str);
-
+/////////////////////
+template <class T>
+class ProxyLess
+	{
+	T& that;
+	public:
+		ProxyLess(T &f) : that(f){}
+		bool operator()(unsigned int leftID, unsigned int rightID) const 
+			{
+			return that[leftID]<that[rightID];
+			}
+	};
+///////////////////////
 #endif
 
