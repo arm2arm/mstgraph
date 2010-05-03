@@ -145,7 +145,7 @@ int CGadget::find_block(ifstream *fd,const char *label)
 	char blocklabel[5]={"    "};
 	find_flag=true;
 	fd->seekg(ios::beg);
-	printf("Finding: %s\n",label);
+	if(m_verbose==2)printf("Finding: %s\n",label);
 	while(!fd->eof() && (blocksize == 0))//&& strcmp(blocklabel, "Z   ")!=0 )
 		{
 		//      cout<<"SKIP1"<<endl;
@@ -175,9 +175,9 @@ int CGadget::find_block(ifstream *fd,const char *label)
 				if( DEBUG_ME)
 					{
 					if(ret>0)
-						printf("Found Block <%s> with %d bytes\n",blocklabel,blocksize);
+						if(m_verbose==2)printf("Found Block <%s> with %d bytes\n",blocklabel,blocksize);
 					else						
-						printf(" <%s> \n",label);
+						if(m_verbose==2)printf(" <%s> \n",label);
 
 
 					}
@@ -201,7 +201,7 @@ bool CGadget::GetGas(CRegion reg,bool flag_putin_COM)
 	float *pF;
 	CRange range, range1;
 	sizeall=find_block(&m_file, "POS ");
-	cout<<"POS"<<endl;
+	if(m_verbose==2) cout<<"POS"<<endl;
 	GetBlk(&m_file, &blk);
 	size=ngas*sizeof(float);
 	P=new strParticleData [ngas];
@@ -230,7 +230,7 @@ range.print("Pos Bounds: ");
 	ninreg=m_data.size();	
 
 	sizeall=find_block(&m_file, "RHO ");
-	cout<<"RHO"<<endl;
+	if(m_verbose==2)cout<<"RHO"<<endl;
 	GetBlk(&m_file, &blk);
 	my_fread(P, size, 1, &m_file);
 	pF=(float *)P;
@@ -240,7 +240,7 @@ range.print("Pos Bounds: ");
 		 m_data[ip].sph.Rho=	pF[indexinreg[ip]];
 		}
 	sizeall=find_block(&m_file, "U   ");
-	cout<<"U"<<endl;
+	if(m_verbose==2)cout<<"U"<<endl;
 	GetBlk(&m_file, &blk);
 	my_fread(P, size, 1, &m_file);
 	pF=(float *)P;
@@ -251,7 +251,7 @@ range.print("Pos Bounds: ");
 		}
 	
 	sizeall=find_block(&m_file, "HSML");
-	cout<<"HSML"<<endl;
+if(m_verbose==2)	cout<<"HSML"<<endl;
 	GetBlk(&m_file, &blk);
 	my_fread(P, size, 1, &m_file);
 	pF=(float *)P;
@@ -262,7 +262,7 @@ range.print("Pos Bounds: ");
 		}
 
 	sizeall=find_block(&m_file, "ENDT");
-	cout<<"ENDT"<<endl;
+if(m_verbose==2)	cout<<"ENDT"<<endl;
 	GetBlk(&m_file, &blk);
 	my_fread(P, size, 1, &m_file);
 	pF=(float *)P;
@@ -275,7 +275,7 @@ range.print("Pos Bounds: ");
 		    log10(m_data[ip].sph.Rho+1);
 		 range.getbound(m_data[ip].sph.EnDt);
 		}
-	range.print("Entropy range:");
+if(m_verbose==1)	range.print("Entropy range:");
 	unit_conversion();
 	for(ip=0;ip<ninreg;ip++)
 	  {
@@ -283,7 +283,7 @@ range.print("Pos Bounds: ");
 	      (range.Max-range.Min);
 	    range1.getbound(m_data[ip].sph.EnDt);	    
 	  }
-	range1.print("Entropy LOG range:");
+if(m_verbose==1)	range1.print("Entropy LOG range:");
 
 	delete P;
 	P=NULL;
@@ -321,7 +321,7 @@ bool CGadget::GetBH(CRegion reg)
 		unsigned int sizeall, size, ip;
 		float *pM=NULL;
 		strParticleData *pVel=NULL;
-		cout<<"POS"<<endl;
+	if(m_verbose==2)	cout<<"POS"<<endl;
 		sizeall=find_block(&m_file, "POS ");
 		GetBlk(&m_file, &blk);
 		SeekToType(&m_file,5, sizeof(float)*3);
@@ -331,7 +331,7 @@ bool CGadget::GetBH(CRegion reg)
 		my_fread(P, size, 3, &m_file);
 		swap_Nbyte((char*)P,nbh*3,4);
 		/////////////////////////////////////////////
-		cout<<"VEL"<<endl;
+	if(m_verbose==2)	cout<<"VEL"<<endl;
 		sizeall=find_block(&m_file, "VEL ");
 		GetBlk(&m_file, &blk);
 		SeekToType(&m_file,4, sizeof(float)*3);	
@@ -345,7 +345,7 @@ bool CGadget::GetBH(CRegion reg)
 			{
 			m_data.push_back(
 				strSPHParticle(&P[ip].Pos[0],char(5)));		
-			cout<<"BHparticle: "<<ip<<") "<<P[ip].Pos[0]<<" "<<P[ip].Pos[1]<<" "<<P[ip].Pos[2]<<endl;
+		if(m_verbose==1)	cout<<"BHparticle: "<<ip<<") "<<P[ip].Pos[0]<<" "<<P[ip].Pos[1]<<" "<<P[ip].Pos[2]<<endl;
 			m_data[ibh].sph.EnDt=0.0f;
 			m_data[ibh].sph.Hsml=0.1f;
 			m_data[ibh].sph.Rho=0.0f;
@@ -371,7 +371,7 @@ bool CGadget::GetSPHParticles(int type, CRegion reg, bool flag_putin_COM)
 	unsigned int sizeall, size, ip;
 	float *pM=NULL, *pH, *pF, *pU;
 	strParticleData *pVel=NULL;
-	cout<<"POS"<<endl;
+if(m_verbose==2)	cout<<"POS"<<endl;
 	sizeall=find_block(&m_file, "POS ");
 	GetBlk(&m_file, &blk);
 	SeekToType(&m_file,type, sizeof(float)*3);
@@ -383,7 +383,7 @@ bool CGadget::GetSPHParticles(int type, CRegion reg, bool flag_putin_COM)
 	if(flag_putin_COM)
 		PutInCOM(P, nstars);
 	/////////////////////////////////////////////
-	cout<<"VEL"<<endl;
+if(m_verbose==2)	cout<<"VEL"<<endl;
 	sizeall=find_block(&m_file, "VEL ");
 	GetBlk(&m_file, &blk);
 	SeekToType(&m_file,4, sizeof(float)*3);	
@@ -593,7 +593,7 @@ unsigned int CGadget::read_blockv3(float *&pV, const char *name, int t)
     }
   pV=new float[nall*3];
   unsigned int sizeall=find_block(&m_file, name);
-  cout<<name<<endl;
+if(m_verbose==2)  cout<<name<<endl;
   if(sizeall<1) return 0;
   GetBlk(&m_file, &blk);
   if(t !=6)SeekToType(&m_file,t, sizeof(float)*3);
@@ -798,6 +798,8 @@ void CGadget::GetHeader(ifstream *fd){
 	my_fread((void*)&myhead.flag_effmodel,sizeof(int), 1, fd);      swap_Nbyte((char*)&myhead.flag_effmodel,1,4);
 	my_fread((void*)myhead.fill,72*sizeof(char), 1, fd);
 	GetBlk(fd, &blk);
+if(m_verbose==1)
+  {
 	cout<<"====================="<<endl;
 	for(unsigned it=0;it<6;it++)
 	{
@@ -805,6 +807,7 @@ void CGadget::GetHeader(ifstream *fd){
 				myhead.mass[it]);
 	};
 	cout<<"====================="<<endl;
+  }
 	};
 void CGadget::GetHead(ifstream *fd, io_header &head){
 	m_name=string("HEAD");

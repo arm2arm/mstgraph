@@ -90,3 +90,5 @@ void print_out_by(
 	std::copy(i.begin(),i.end(),std::ostream_iterator<value_type>(std::cout));
 	}
 #endif
+
+

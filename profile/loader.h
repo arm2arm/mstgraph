@@ -38,25 +38,28 @@ class strMover
 class CLoader
 	{
 	public:
-		CLoader(std::string fname, unsigned int ptype=0):m_fname(fname), pType(NULL),m_ptype(ptype)
+		CLoader(std::string fname, unsigned int ptype=0):m_fname(fname),pID(NULL), pType(NULL),m_ptype(ptype)
 			{
 				CGadget *pG=new CGadget(fname, false);
-				m_nelem = pG->read_block<int>(pID,
-                "ID  ",
-                m_ptype);
-				//m_nelem=10;/just for debugging
-				if(m_nelem<1)
-					{
-					std::cout<<"Cannot open file, exiting"<<std::endl;
-					exit(1);
-					}
+pG->m_verbose=0;
+				//m_nelem = pG->read_block<int>(pID,
+                //"ID  ",
+                //m_ptype);
+		//		//m_nelem=10;/just for debugging
+		//		if(m_nelem<1)
+		//			{
+		//			std::cout<<"Cannot open file, exiting"<<std::endl;
+		///			exit(1);
+		//			}
 				/*for(unsigned int i=0;i<m_nelem;i++)
 					data.insert(particleID(pID[i], i));*/
 				///////////////////////////////////////////
 				get_com_bypot(pG);
+                                
 				unsigned int p_nelem = pG->read_blockv3(pPOS,
                 "POS ",
                 m_ptype);
+                                 m_nelem=p_nelem;
 				if(m_ptype==6)
 					{
 					pType= new int[m_nelem];
@@ -111,8 +114,9 @@ class CLoader
 			if(m_nelem>0)
 				{
 				cout<<"\n============ ID ============= "<<endl;
-				cout<<"Minval:"<<(*std::min_element(pID, pID+m_nelem))<<endl;
+				/*cout<<"Minval:"<<(*std::min_element(pID, pID+m_nelem))<<endl;
 				cout<<"Maxval:"<<(*std::max_element(pID, pID+m_nelem))<<endl;
+*/
 				cout<<"\n============ SFR ============= "<<endl;
 				cout<<"Minval:"<<(*std::min_element(pSFR, pSFR+m_npart[0]+m_npart[4]))<<endl;
 				cout<<"Maxval:"<<(*std::max_element(pSFR, pSFR+m_npart[0]+m_npart[4]))<<endl;
@@ -164,3 +168,7 @@ class CLoader
 
 
 #endif
+
+
+
+
