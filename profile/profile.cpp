@@ -88,9 +88,12 @@ std::vector< std::vector<T> > GetAB(vector<T> &R,vector<T> &x,vector<T> &y, T pr
 	return result;
 	}
 
+//////////////////////
+
+
 //Result format R1, Am1, R2,  Am2, R3, Am3
 std::vector<float> getAmMaxMeanR(TLogData &data){ 
-	std::vector<float> result(6, 0.0f);
+	std::vector<float> result;
   
 	//find the maximum id;
 	vector<float> R=data[0];
@@ -99,13 +102,15 @@ std::vector<float> getAmMaxMeanR(TLogData &data){
 	if(itmax==Am.end())
 		{ cout<<"Error to find the maximum"<<endl;return result;}
 	float Am1=(0.5f*(*itmax));
-	vector<float>::iterator it2=std::find_if(itmax, Am.end(), std::bind2nd( std::equal_to<float>(), Am1 )  );
+	vector<float>::iterator it2=std::find_if(itmax, Am.end(), std::bind2nd( std::less_equal<float>(), Am1 )  );
 	if(it2==Am.end()){ cout<<"Error to find the Half of maximum"<<endl;return result;}
 	result.push_back(R[std::distance(Am.begin(),itmax)]);
 	result.push_back(*itmax);
 	result.push_back(R[std::distance(Am.begin(),it2)]);
 	result.push_back( (*it2));
-	while((*it2) > 2 && it2!=Am.end())it2++;
+	float val= *it2;
+	while( *(++it2) < val)// && (it2+1)!=(Am.end()-1))
+		{ val= (*it2);};
 	if(it2==Am.end()){ cout<<"Error to find the next Minimum of maximum"<<endl;return result;}
 	result.push_back(R[std::distance(Am.begin(),it2)]);
 	result.push_back( (*it2));
