@@ -25,7 +25,7 @@ std::vector<T> smooth(std::vector<T> &v)
 	}
 
 template<class T>
-std::vector< std::vector<T> > GetAB(vector<T> &R,vector<T> &x,vector<T> &y, T profRMAX=20.0, T xStep=0.1)
+std::vector< std::vector<T> > GetAB(vector<T> &R,vector<T> &x,vector<T> &y, T profRMAX=10.0, T xStep=0.1)
 	{
 	std::vector<unsigned int> idxR(R.size(), 0);
 	for(size_t ii=0;ii<R.size(); ii++)
@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
 			idxR.push_back(i);
 			if(pL->pType[i] == 0)ig++;
 			if(pL->pType[i] == 4)ist++;
-			if(pL->pType[i] == 4 || pL->pType[i] == 2){
+			if( (pL->pType[i] == 4 /*|| pL->pType[i] == 2*/) ){
 				R.push_back(rr);
 				x.push_back(pL->pPOS[i*3]);
 				y.push_back(pL->pPOS[i*3+1]);
