@@ -5,6 +5,8 @@
 #include "options.h"
 #include "utils.h"
 #include "Logger.h"
+#include "MSTree.h"
+
 #include <numeric>
 #include <functional>
 template<class T> 
@@ -89,14 +91,16 @@ std::vector< std::vector<T> > GetAB(vector<T> &R,vector<T> &x,vector<T> &y, T pr
 	}
 
 //////////////////////
-
-
 //Result format R1, Am1, R2,  Am2, R3, Am3
 std::vector<float> getAmMaxMeanR(TLogData &data){ 
 	std::vector<float> result;
   
 	//find the maximum id;
 	vector<float> R=data[0];
+	unsigned int Rshift=std::distance(
+		std::find_if(R.begin(), R.end(), std::bind2nd( std::greater_equal<float>(), 10 )), 
+			R.end()
+		);
 	vector<float> Am=data[1];
 	vector<float>::iterator itmax=std::max_element(Am.begin(), Am.end());
 	if(itmax==Am.end())
@@ -118,7 +122,13 @@ std::vector<float> getAmMaxMeanR(TLogData &data){
 	return result;
 };
 
-
+////////////////////////
+void GetOmegaBar(vector<float> &x, vector<float> &y,vector<float>  &z)
+	{
+	CMSTree mst_tree(x,y,z,3);
+	
+	}
+///////////////////////
 int main(int argc, char* argv[])
 	{
 	COptions opt(argc, argv);
@@ -150,7 +160,7 @@ int main(int argc, char* argv[])
 
 		///////////////////////////////
 		// Do profiling here
-		std::vector<float> fVec(NFields), x, y, R;
+		std::vector<float> fVec(NFields), x, y,z, R;
 		vector<unsigned int > idxR(pL->m_nelem-1,0);	
 		///////////////////////////////////
 		for(unsigned int i=0, ig=0, ist=0;i<pL->m_nelem-1;i++)// -1 to exclude BH particle
@@ -159,11 +169,11 @@ int main(int argc, char* argv[])
 			idxR.push_back(i);
 			if(pL->pType[i] == 0)ig++;
 			if(pL->pType[i] == 4)ist++;
-			if( (pL->pType[i] == 4 /*|| pL->pType[i] == 2*/) ){
+			if( rr<3 && (pL->pType[i] == 4 /*|| pL->pType[i] == 2*/) ){
 				R.push_back(rr);
 				x.push_back(pL->pPOS[i*3]);
 				y.push_back(pL->pPOS[i*3+1]);
-			      
+				z.push_back(pL->pPOS[i*3+2]);			      
 				}
 			for(ir=0;ir<2;ir++)
 				if(rr<rvec[ir]){
@@ -186,6 +196,8 @@ int main(int argc, char* argv[])
 		logAmRR.insert(isnap, AmRad);
 
 		log.insert(isnap, fVec);
+		/////////////////////////////////
+		GetOmegaBar(x, y, z);
 		///////////////////////////////
 		delete pL;
 		//Lvec.push_back(pL);
