@@ -1,0 +1,159 @@
+#ifndef _MY_MSTREE_
+#define _MY_MSTREE_
+#include "kdtree2.hpp"
+#include <iostream>
+#include <string>
+#include <vector>
+#include "utils.h"
+using std::cout;
+using std::endl;
+using std::cerr;
+using std::vector;
+
+#include <boost/timer.hpp>
+#include <boost/bind.hpp>
+#include <boost/foreach.hpp>
+///////////////////
+#include <boost/graph/subgraph.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/kruskal_min_spanning_tree.hpp>
+#include <boost/graph/graphviz.hpp>
+#include <boost/graph/graph_utility.hpp>
+#include <boost/graph/iteration_macros.hpp>
+#include <boost/graph/connected_components.hpp>
+#include <boost/graph/filtered_graph.hpp>
+
+///////////////////
+#define MyFloat float
+using namespace boost;
+typedef adjacency_list < vecS, vecS, undirectedS,
+no_property, property < edge_weight_t, MyFloat > > Graph;
+typedef property_map<Graph, edge_weight_t>::type EdgeWeightMap;
+typedef property_map<Graph, edge_weight_t>::type	weight_map_type;
+
+
+typedef graph_traits < Graph >::edge_descriptor Edge;
+typedef graph_traits < Graph >::vertex_descriptor Vertex;
+typedef std::pair<int, int> E;
+
+///////////////////
+
+class CMSTree
+	{
+	typedef boost::multi_array<MyFloat,2> array2dfloat;
+	public:
+		//CMSTree(void);
+		CMSTree(vector<float> &x, vector<float> &y,vector<float>  &z,size_t dim=3, float afof_eps=0.1,size_t MAXNGB=3):
+		m_x(x),m_y(y),m_z(z),dim(dim),m_afof_eps(afof_eps),m_maxNGB(MAXNGB), tree(NULL){			
+
+			FillData();
+			BuildKDTree();
+			BuildGraph();
+			//CompileCATS();
+
+			};
+		~CMSTree(void);
+		void FillData()
+			{
+			size_t i;
+			N=m_x.size();
+			realdata.resize(boost::extents[N][dim]);
+			for (i=0; i<N; i++) {				
+					realdata[i][0] = m_x[i];
+					realdata[i][1] = m_y[i];
+					realdata[i][2] = m_z[i];				
+				}
+			
+			}
+		void BuildKDTree()
+			{
+			std::cout << "Build the KD-Tree:.." ;
+			tree = new kdtree2(realdata);
+			tree->sort_results = true;
+			std::cout<<".DONE."<< std::endl;
+			}
+		void BuildGraph()
+			{
+			std::cout << "Build the FOFGraph..." ;
+				{
+				scoped_timer timemme("Get FOFGraph:.....");
+				std::vector<MyFloat> qv;
+				size_t i, j, iq;
+				float  m_afof_eps2=m_afof_eps*m_afof_eps;
+				vector<bool> is_done(N,false);
+				std::cout << "Build Graph:" << realdata.size()<<" particles"<<std::endl;
+				qv.resize(3);
+				for(i=0;i<N;i++){
+					if(is_done[i])continue;
+
+					//iq=i;
+					qv[0]=m_x[i];qv[1]=m_y[i];qv[2]=m_z[i];
+					tree->r_nearest( qv, m_afof_eps2, ngblist);
+					for(int ingb=1;ingb<ngblist.size();ingb++)
+						{
+						j=ngblist[ingb].idx;
+						//if(i!=j)
+							{
+							//dist=ngbNum.dis;
+							//cout<<i<<" "<<j<<" "<<ngbNum.dis<<" "<<sqrt(Distance2(i,j))<<endl;
+							//if(ngbNum.dis<=m_afof_eps2)
+							add_edge(i,j,graphFOF);
+							is_done[j]=true;
+							}
+						
+						}
+					is_done[i]=true;
+
+					}
+				}
+				
+				report_components( graphFOF,false);
+
+				std::cout<<".DONE."<< std::endl;
+			}
+		
+		float Distance2(size_t i, size_t j)
+			{
+			  float distx=(m_x[i]-m_x[j]);
+			  float disty=(m_y[i]-m_y[j]);
+			  float distz=(m_z[i]-m_z[j]);
+			  return distx*distx+disty*disty+distz*distz;
+			}
+		template <class Graph>
+		void report_components(Graph& g, bool full_verbose=false) 
+			{
+			if(full_verbose)
+				scoped_timer timemme("Get Components:.....");
+			std::vector<int> component(num_vertices(g));
+			int num = connected_components(g, &component[0]);
+
+			std::vector<int>::size_type i;
+			cout << "Total number of components: " << num << endl;
+			if(full_verbose)
+				{
+				for (i = 0; i != component.size(); ++i)
+					cout << "Vertex " << i <<" is in component " << component[i] << endl;
+				}
+			cout << endl;
+
+			}
+
+	protected:
+/////////////////////////
+		int m_maxNGB;
+		kdtree2_result_vector ngblist, ngblistbrut;
+		array2dfloat realdata; 
+		size_t N;
+		size_t dim;
+		float m_afof_eps;
+		////////////////
+		kdtree2*  tree;
+		Graph graphFOF;
+		vector<float> &m_x;
+		vector<float> &m_y;
+		vector<float> &m_z;
+
+	};
+
+
+#endif
