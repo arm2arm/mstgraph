@@ -5,6 +5,7 @@
 #include <string>
 #include <cassert>
 #include <vector>
+
 using std::min;
 using std::max;
 using std::cout;
@@ -134,5 +135,37 @@ class ProxyLess
 			}
 	};
 ///////////////////////
+#include <boost/timer.hpp>
+#include <boost/config.hpp>
+#include <ctime>
+#include <cstring>
+
+#include <boost/limits.hpp>
+#include "boost/date_time/posix_time/posix_time.hpp"
+
+class scoped_timer {
+	boost::posix_time::ptime start_;
+	std::string m_text;
+public:    
+	inline  void   SetText(std::string text){m_text=text;};
+	scoped_timer(std::string text) 
+		: start_(boost::posix_time::microsec_clock::universal_time()),m_text(text)
+		{
+		//m_start= getticks();
+		}
+	~scoped_timer() {
+
+		boost::posix_time::ptime stop( boost::posix_time::microsec_clock::universal_time() );
+//		m_end=getticks();
+//		double clock_cycles=elapsed(m_end, m_start);
+		std::cout<<std::setprecision(2)<<std::fixed;
+		std::cout <<" "<<m_text<< " done in " << ( stop - start_).total_milliseconds() << " milli seconds "<<std::endl;
+		std::cout<<std::setprecision(16)<<std::fixed;
+		}
+protected:
+	
+	};
+///////////////////////
+#define SafeFree(a) if(a!=NULL)delete a;
 #endif
 
