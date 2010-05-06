@@ -5,7 +5,8 @@
 // Licensed under the Academic Free License version 1.1 found in file LICENSE
 // with additional provisions in that same file.
 
-
+#include <stdio.h>
+#include <stdlib.h>
 #include "kdtree2.hpp"
 
 #include <algorithm> 
