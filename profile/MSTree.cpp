@@ -3,7 +3,7 @@
 
 CMSTree::~CMSTree(void)
 	{
-	SafeFree(tree);
+	delete tree;
 
 	}
 
