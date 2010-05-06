@@ -138,7 +138,7 @@ int main(int argc, char* argv[])
 	typedef std::vector<CLoader*> TLoader;
 	TLoader Lvec;
 	std::vector<float> rvec;
-	const int NFields=5+5+4;
+	const int NFields=5+5+4+1;
 	CLogger log(opt.m_file_out,opt.m_updatelog, NFields);
 	CLogger logAmRR("AmRad.log", opt.m_updatelog);
 	logAmRR.SetComment("Am R1 R2 R3");
@@ -192,15 +192,16 @@ int main(int argc, char* argv[])
 		TLogData result=GetAB<float>(R,x,y);
 		std::vector<float> AmRad=getAmMaxMeanR(result);//format R1, Am1, R2,  Am2, R3, Am3
 		
-		logAm.insert(isnap, result);		
-		logAmRR.insert(isnap, AmRad);
-
-		log.insert(isnap, fVec);
+		
 		/////////////////////////////////
 		CMSTree mst_tree(x,y,z, opt.m_eps, opt.m_min_npart);
 		CPCA pca;
-		pca.GetCovarMatrix(mst_tree, 0);
-		mst_tree.dump(0);
+		double phi=pca.GetCovarMatrix(mst_tree, 0);
+		fVec[14]=(float)phi;
+		//mst_tree.dump(0);
+		logAm.insert(isnap, result);		
+		logAmRR.insert(isnap, AmRad);
+		log.insert(isnap, fVec);
 		///////////////////////////////
 		delete pL;
 		//Lvec.push_back(pL);
