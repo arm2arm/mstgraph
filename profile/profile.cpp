@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
 			idxR.push_back(i);
 			if(pL->pType[i] == 0)ig++;
 			if(pL->pType[i] == 4)ist++;
-			if( rr<2 && (pL->pType[i] == 4 /*|| pL->pType[i] == 2*/) ){
+			if( (pL->pType[i] == 4 /*|| pL->pType[i] == 2*/) ){
 				R.push_back(rr);
 				x.push_back(pL->pPOS[i*3]);
 				y.push_back(pL->pPOS[i*3+1]);

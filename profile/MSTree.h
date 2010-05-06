@@ -108,7 +108,7 @@ class CMSTree
 			for (i = 0; i != m_MSTCatalog.size(); ++i)
 				{// compile position and velocity
 				m_MSTCatalog[i].DoneInsert();
-				cout<<m_MSTCatalog[i]<<endl;
+				//cout<<m_MSTCatalog[i]<<endl;
 				}
 			cout << endl;
 			
