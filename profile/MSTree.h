@@ -21,8 +21,9 @@ using std::vector;
 #include <boost/graph/graph_utility.hpp>
 #include <boost/graph/iteration_macros.hpp>
 #include <boost/graph/connected_components.hpp>
+#include <boost/graph/edge_connectivity.hpp>
 #include <boost/graph/filtered_graph.hpp>
-
+#include "MSTGroup.h"
 ///////////////////
 #define MyFloat float
 using namespace boost;
@@ -43,16 +44,53 @@ class CMSTree
 	typedef boost::multi_array<MyFloat,2> array2dfloat;
 	public:
 		//CMSTree(void);
-		CMSTree(vector<float> &x, vector<float> &y,vector<float>  &z,size_t dim=3, float afof_eps=0.1,size_t MAXNGB=3):
-		m_x(x),m_y(y),m_z(z),dim(dim),m_afof_eps(afof_eps),m_maxNGB(MAXNGB), tree(NULL){			
+		CMSTree(vector<float> &x, vector<float> &y,vector<float>  &z,float afof_eps=1.0,size_t min_num=100,size_t MAXNGB=4):
+		m_x(x),m_y(y),m_z(z),dim(3),m_afof_eps(afof_eps),m_min_num(min_num),m_maxNGB(MAXNGB), tree(NULL){			
 
 			FillData();
 			BuildKDTree();
 			BuildGraph();
+			GetMST();
 			//CompileCATS();
 
 			};
 		~CMSTree(void);
+		void GetMST()
+			{
+			scoped_timer timemme("Get MSTGraph:.....");
+			/////////////// BUILD The MST tree
+			std::vector < Edge > spanning_tree;
+			std::cout << "Building MST:." ;	
+			kruskal_minimum_spanning_tree(graphFOF, std::back_inserter(spanning_tree));
+			std::cout <<"MST num edges="<< spanning_tree.size()<<" .. done " << std::endl;
+
+			int N = spanning_tree.size();
+			typedef adjacency_list<vecS, vecS, undirectedS> UndirectedGraph;
+			UndirectedGraph g(N);
+			for(int i=0;i<N;i++)
+				add_edge(spanning_tree[i].m_source,spanning_tree[i].m_target, g);
+
+			std::vector<int> component(num_vertices(g));
+			int num = connected_components(g, &component[0]);
+
+			std::vector<int>::size_type i;
+			cout << "Total number of components: " << num << endl;
+			m_MSTCatalog.resize(num);
+			for ( i = 0; i != component.size(); ++i)
+				{
+				//cout << "Vertex " << i <<" is in component " << component[i] << endl;
+				m_MSTCatalog[component[i]].insert(i,m_x[i],m_y[i],m_z[i] );
+				}
+			std::remove_if(m_MSTCatalog.begin(), m_MSTCatalog.end(), bind2nd(less_equal<CMSTGroup>(), m_min_num));
+			for (i = 0; i != m_MSTCatalog.size(); ++i)
+				{
+				m_MSTCatalog[i].DoneInsert();
+				cout<<m_MSTCatalog[i]<<endl;
+				}
+			cout << endl;
+			
+
+			};
 		void FillData()
 			{
 			size_t i;
@@ -78,31 +116,31 @@ class CMSTree
 				{
 				scoped_timer timemme("Get FOFGraph:.....");
 				std::vector<MyFloat> qv;
-				size_t i, j, iq;
+				size_t i, j;
 				float  m_afof_eps2=m_afof_eps*m_afof_eps;
 				vector<bool> is_done(N,false);
 				std::cout << "Build Graph:" << realdata.size()<<" particles"<<std::endl;
 				qv.resize(3);
 				for(i=0;i<N;i++){
-					if(is_done[i])continue;
+					//if(is_done[i])continue;
 
 					//iq=i;
 					qv[0]=m_x[i];qv[1]=m_y[i];qv[2]=m_z[i];
-					tree->r_nearest( qv, m_afof_eps2, ngblist);
-					for(int ingb=1;ingb<ngblist.size();ingb++)
+					tree->n_nearest( qv, m_maxNGB, ngblist);
+					for(size_t ingb=1;ingb<ngblist.size();ingb++)
 						{
 						j=ngblist[ingb].idx;
 						//if(i!=j)
 							{
 							//dist=ngbNum.dis;
 							//cout<<i<<" "<<j<<" "<<ngbNum.dis<<" "<<sqrt(Distance2(i,j))<<endl;
-							//if(ngbNum.dis<=m_afof_eps2)
-							add_edge(i,j,graphFOF);
-							is_done[j]=true;
+							if(ngblist[ingb].dis<=m_afof_eps2)
+								add_edge(i,j,graphFOF);
+							//is_done[j]=true;
 							}
 						
 						}
-					is_done[i]=true;
+					//is_done[i]=true;
 
 					}
 				}
@@ -146,12 +184,14 @@ class CMSTree
 		size_t N;
 		size_t dim;
 		float m_afof_eps;
+		size_t m_min_num;
 		////////////////
 		kdtree2*  tree;
 		Graph graphFOF;
 		vector<float> &m_x;
 		vector<float> &m_y;
 		vector<float> &m_z;
+		TMSTCat m_MSTCatalog;
 
 	};
 

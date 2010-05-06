@@ -114,7 +114,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -179,6 +179,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MSTGroup.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\MSTree.cpp"
 				>
 			</File>
@@ -210,6 +214,10 @@
 			</File>
 			<File
 				RelativePath=".\Logger.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MSTGroup.h"
 				>
 			</File>
 			<File
