@@ -12,7 +12,7 @@ public:
 
 	CMSTGroup(){
 		ResetAll();		
-		ID++;
+		//ID++;
 		}
 	void ResetAll()
 		{		
@@ -70,8 +70,9 @@ public:
 		return os;
 		}
 
-	void DoneInsert()
+	void DoneInsert(int i=0)
 		{
+		ID=i;
 		Ntotal=id.size();
 		for(int j=0;j<3;j++)
 		 {
@@ -88,7 +89,7 @@ public:
 	double com[3], wcom[3], vel[3],wvel[3];
 	float R90, R50;
 	float m_Rxx;
-	static int ID;
+	int ID;
 	double wtotal;
 	int npart[3];
 	int Rxyz[3];

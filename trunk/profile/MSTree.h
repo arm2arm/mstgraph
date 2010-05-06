@@ -76,10 +76,11 @@ class CMSTree
 			std::vector<int>::size_type i;
 			cout << "Total number of components: " << num << endl;
 			m_MSTCatalog.resize(num);
+
 			for ( i = 0; i != component.size(); ++i)
 				{
 				//cout << "Vertex " << i <<" is in component " << component[i] << endl;
-				m_MSTCatalog[component[i]].insert(i,m_x[i],m_y[i],m_z[i] );
+				m_MSTCatalog[component[i]].insert(i,m_x[i],m_y[i],m_z[i] );				
 				}
 			// Lets remove small objects
 			/*m_MSTCatalog.erase(
@@ -109,7 +110,7 @@ class CMSTree
 			cout << "Total number of components where Np>"<<m_min_num<<" : " << num << endl;
 			for (i = 0; i < num; ++i)
 				{// compile position and velocity
-				m_MSTCatalog[i].DoneInsert();
+				m_MSTCatalog[i].DoneInsert(i);
 				cout<<m_MSTCatalog[i]<<endl;
 				}
 			cout <<"Done catalogues"<< endl;
