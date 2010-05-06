@@ -77,7 +77,7 @@ link_directories (${PROFILER_BINARY_DIR}  ${Boost_LIBRARY_DIRS} )
 # ----------------------------------------------------------
 # Make sure the compiler can find include files from our Hello library.
 
-  add_executable (profile.x MSTGroup.cpp MSTree.cpp kdtree2.cpp data_readers.cpp utils.cpp options.cpp  profile.cpp )
+  add_executable (profile.x MSTGroup.cpp MSTree.cpp kdtree2.cpp PCA.cpp  data_readers.cpp utils.cpp options.cpp  profile.cpp )
 
   # Link the executable to the Hello library.
   target_link_libraries (profile.x ${Boost_LIBRARIES} )

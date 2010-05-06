@@ -189,6 +189,14 @@ class CMSTree
 			cout << endl;
 
 			}
+		  void dump(int ig)
+		    {
+		      for(size_t i=0;i<m_MSTCatalog[ig].id.size();i++)
+			{
+			  int ip=m_MSTCatalog[ig].id[i];
+			  cout<<m_x[ip]<<" "<<m_y[ip]<<endl;
+			}
+		    }
 
 	protected:
 /////////////////////////
