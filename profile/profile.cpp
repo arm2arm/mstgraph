@@ -200,6 +200,7 @@ int main(int argc, char* argv[])
 		CMSTree mst_tree(x,y,z, opt.m_eps, opt.m_min_npart);
 		CPCA pca;
 		pca.GetCovarMatrix(mst_tree, 0);
+		mst_tree.dump(0);
 		///////////////////////////////
 		delete pL;
 		//Lvec.push_back(pL);

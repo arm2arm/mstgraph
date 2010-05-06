@@ -9,6 +9,18 @@ CPCA::~CPCA(void)
 	}
 
 using std::vector;
+void print(vector<vector<float> > &Cov)
+{
+ 	for(size_t i =1;i<Cov.size()-1;i++)
+	  {
+		for(size_t j =1;j<Cov[0].size()-1;j++)
+		  {
+		    cout<<Cov[i][j]<<" ";
+		  }
+		cout<<endl;
+	  }
+	cout<<endl;
+}
 
 void CPCA::GetCovarMatrix( CMSTree &mst, int ID)
 	{
@@ -41,14 +53,19 @@ void CPCA::GetCovarMatrix( CMSTree &mst, int ID)
 	a[2][2] = Cov[1][1];
 	a[1][2] = Cov[0][1];
 	a[2][1] = Cov[1][0];
+
+	//	a[1][1]=0.037727899;   a[1][2]= 0.021687787;
+	//	a[2][1]= 0.021687787;  a[2][2]=  0.24034810;
 	/*a(1,3) = a13
 	a(3,1) = a13
 	a(2,3) = a23
 	a(3,2) = a23
 	*/
+	//	print(a);
 	jacobi(a,n,d,v,&nrot);
-	
-	double Phi = atan2((double)(d[1][0]), (double)(d[0][0]));
+	//	print(a);
+	//	print(v);
+	double Phi = rad2deg<double>(atan2((double)(v[1+1][1+1]), (double)(v[0+1][1+1])));
 	cout<<"Phi = "<<Phi<<endl;
 
 	}

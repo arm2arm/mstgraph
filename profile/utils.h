@@ -165,6 +165,13 @@ public:
 protected:
 	
 	};
+
+////////////////////////
+template <class T >
+T rad2deg(T v){return v*(T)(180/M_PI);};
+template <class T >
+T deg2rad(T v){return v*(T)(M_PI/180.0);};
+
 ///////////////////////
 #define SafeFree(a) if(a!=NULL)delete a;
 
