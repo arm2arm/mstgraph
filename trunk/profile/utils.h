@@ -167,5 +167,9 @@ protected:
 	};
 ///////////////////////
 #define SafeFree(a) if(a!=NULL)delete a;
+
+
+void jacobi(std::vector<std::vector<float> > &a, int n, std::vector<float>  &d, std::vector<std::vector<float> > &v, int *nrot);
+
 #endif
 

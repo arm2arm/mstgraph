@@ -6,7 +6,7 @@
 #include "utils.h"
 #include "Logger.h"
 #include "MSTree.h"
-
+#include "PCA.h"
 #include <numeric>
 #include <functional>
 template<class T> 
@@ -198,6 +198,8 @@ int main(int argc, char* argv[])
 		log.insert(isnap, fVec);
 		/////////////////////////////////
 		CMSTree mst_tree(x,y,z, opt.m_eps, opt.m_min_npart);
+		CPCA pca;
+		pca.GetCovarMatrix(mst_tree, 0);
 		///////////////////////////////
 		delete pL;
 		//Lvec.push_back(pL);

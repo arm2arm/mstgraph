@@ -191,6 +191,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PCA.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\profile.cpp"
 				>
 			</File>
@@ -230,6 +234,10 @@
 			</File>
 			<File
 				RelativePath=".\particleid.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PCA.h"
 				>
 			</File>
 			<File

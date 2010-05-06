@@ -202,6 +202,7 @@ class CMSTree
 		////////////////
 		kdtree2*  tree;
 		Graph graphFOF;
+public:
 		vector<float> &m_x;
 		vector<float> &m_y;
 		vector<float> &m_z;
