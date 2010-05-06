@@ -41,7 +41,11 @@ COptions::COptions(int argc, char* argv[]):m_status(0)
 			("out-file", po::value< string>(&m_file_out)->default_value(string("dump.log")), "out file, the result file if it exist the code will update if update=true(default value)")
 			("update", po::value< bool>(&m_updatelog)->default_value(1), " update out file 0/1= No/Yes, if =0 then it will overwrite  out file")
 			("type", po::value< int>(&m_type)->default_value(6), "particle type to track, if 6 then all particles")
-			("help","print help")
+			("eps,e", po::value< float>(&m_eps)->default_value(0.05), "MSTFOF linking length ")
+			("min-npart,m", po::value< int>(&m_min_npart)->default_value(100), "MSTFOF group minimum length ")			
+			("mst-file,o", po::value< string>(&m_file_out)->default_value(string("mstfof")), "MSTFOF group out file")
+			("help,h","print help")
+
 			;
 
 		variables_map vm;

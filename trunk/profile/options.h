@@ -25,6 +25,8 @@ public:
 	string m_file_out;
 	string m_file_IDlist;
 	int m_type;
+	float m_eps;
+	int  m_min_npart;
 	bool m_updatelog;
 private:
 	void ReadID(std::string file);

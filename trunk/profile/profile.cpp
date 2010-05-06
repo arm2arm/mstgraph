@@ -125,7 +125,7 @@ std::vector<float> getAmMaxMeanR(TLogData &data){
 ////////////////////////
 void GetOmegaBar(vector<float> &x, vector<float> &y,vector<float>  &z)
 	{
-	CMSTree mst_tree(x,y,z);
+	
 	
 	}
 ///////////////////////
@@ -197,7 +197,7 @@ int main(int argc, char* argv[])
 
 		log.insert(isnap, fVec);
 		/////////////////////////////////
-		GetOmegaBar(x, y, z);
+		CMSTree mst_tree(x,y,z, opt.m_eps, opt.m_min_npart);
 		///////////////////////////////
 		delete pL;
 		//Lvec.push_back(pL);
