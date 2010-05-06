@@ -82,12 +82,12 @@ class CMSTree
 				m_MSTCatalog[component[i]].insert(i,m_x[i],m_y[i],m_z[i] );
 				}
 			// Lets remove small objects
-			m_MSTCatalog.erase(
+			/*m_MSTCatalog.erase(
 				std::remove_if(m_MSTCatalog.begin(),
 				m_MSTCatalog.end(), IfLt<int>(m_min_num)
 				)
-				);
-			/*TMSTCat::iterator it = m_MSTCatalog.begin();
+				);*/
+			TMSTCat::iterator it = m_MSTCatalog.begin();
 			while ( it != m_MSTCatalog.end() )
 				{
 				
@@ -100,7 +100,7 @@ class CMSTree
 					++it;
 					}
 				}
-				*/
+				
 			cout << "Total number of components where Np>"<<m_min_num<<" : " << m_MSTCatalog.size() << endl;
 //sort them by size
 			std::sort(m_MSTCatalog.begin(),m_MSTCatalog.end()); 
