@@ -105,9 +105,9 @@ class CMSTree
 						
 //sort them by size
 			std::sort(m_MSTCatalog.begin(),m_MSTCatalog.end()); 
-			num = std::count_if(m_MSTCatalog.begin(), m_MSTCatalog.end(), IfLt<int>(m_min_num));
+			num = std::count_if(m_MSTCatalog.begin(), m_MSTCatalog.end(), IfGt<int>(m_min_num));
 			cout << "Total number of components where Np>"<<m_min_num<<" : " << num << endl;
-			for (i = 0; i != num; ++i)
+			for (i = 0; i < num; ++i)
 				{// compile position and velocity
 				m_MSTCatalog[i].DoneInsert();
 				cout<<m_MSTCatalog[i]<<endl;
