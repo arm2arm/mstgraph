@@ -48,7 +48,7 @@ void CPCA::GetCovarMatrix( CMSTree &mst, int ID)
 	*/
 	jacobi(a,n,d,v,&nrot);
 	
-	double Phi = atan2((double)a[1][0], (double)a[0,0]);
+	double Phi = atan2((double)(a[1][0]), (double)(a[0][0]));
 	cout<<"Phi = "<<Phi<<endl;
 
 	}
