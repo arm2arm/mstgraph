@@ -29,10 +29,13 @@ public:
 		{
 		com[0]+=x;com[1]+=y;com[2]+=z;
 		id.push_back(i);
+		Ntotal=id.size();
 		}
 
 	~CMSTGroup(){id.clear();};
-	bool operator() (const int &np){return np<=id.size();};
+	/// For sorting
+	friend bool operator<(const CMSTGroup& left,const CMSTGroup& right);
+
 	friend std::ostream& operator<<(std::ostream& os, const CMSTGroup& g)
 		{
 		os.width(1);
@@ -79,6 +82,7 @@ public:
 		 }
 
 		}
+	inline size_t size(){return id.size();};
 	/////////////////////////////	
 	std::vector<int> id;	
 	double com[3], wcom[3], vel[3],wvel[3];
@@ -94,6 +98,18 @@ public:
 
 typedef std::vector<CMSTGroup> TMSTCat;
 
+template <class T>
+struct IfGt{
+	T val;
+	IfGt(const T n):val(n){};
+	bool operator ()(const CMSTGroup& g){return g.Ntotal > val;};
+	};
+template <class T>
+struct IfLt{
+	T val;
+	IfLt(const T n):val(n){};
+	bool operator ()(const CMSTGroup& g){return g.Ntotal < val;};
+	};
 #endif
 
 
