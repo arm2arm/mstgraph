@@ -44,7 +44,7 @@ class CMSTree
 	typedef boost::multi_array<MyFloat,2> array2dfloat;
 	public:
 		//CMSTree(void);
-		CMSTree(vector<float> &x, vector<float> &y,vector<float>  &z,float afof_eps=1.0,size_t min_num=100,size_t MAXNGB=4):
+		CMSTree(vector<float> &x, vector<float> &y,vector<float>  &z,float afof_eps=0.05,size_t min_num=100,size_t MAXNGB=4):
 		m_x(x),m_y(y),m_z(z),dim(3),m_afof_eps(afof_eps),m_min_num(min_num),m_maxNGB(MAXNGB), tree(NULL){			
 
 			FillData();
@@ -81,9 +81,32 @@ class CMSTree
 				//cout << "Vertex " << i <<" is in component " << component[i] << endl;
 				m_MSTCatalog[component[i]].insert(i,m_x[i],m_y[i],m_z[i] );
 				}
-			std::remove_if(m_MSTCatalog.begin(), m_MSTCatalog.end(), bind2nd(less_equal<CMSTGroup>(), m_min_num));
-			for (i = 0; i != m_MSTCatalog.size(); ++i)
+			// Lets remove small objects
+			m_MSTCatalog.erase(
+				std::remove_if(m_MSTCatalog.begin(),
+				m_MSTCatalog.end(), IfLt<int>(m_min_num)
+				)
+				);
+			/*TMSTCat::iterator it = m_MSTCatalog.begin();
+			while ( it != m_MSTCatalog.end() )
 				{
+				
+				if ((*it).size() < m_min_num)
+					{
+					it = m_MSTCatalog.erase(it);
+					}
+				else
+					{
+					++it;
+					}
+				}
+				*/
+			cout << "Total number of components where Np>"<<m_min_num<<" : " << m_MSTCatalog.size() << endl;
+//sort them by size
+			std::sort(m_MSTCatalog.begin(),m_MSTCatalog.end()); 
+
+			for (i = 0; i != m_MSTCatalog.size(); ++i)
+				{// compile position and velocity
 				m_MSTCatalog[i].DoneInsert();
 				cout<<m_MSTCatalog[i]<<endl;
 				}
@@ -122,32 +145,20 @@ class CMSTree
 				std::cout << "Build Graph:" << realdata.size()<<" particles"<<std::endl;
 				qv.resize(3);
 				for(i=0;i<N;i++){
-					//if(is_done[i])continue;
-
-					//iq=i;
 					qv[0]=m_x[i];qv[1]=m_y[i];qv[2]=m_z[i];
 					tree->n_nearest( qv, m_maxNGB, ngblist);
 					for(size_t ingb=1;ingb<ngblist.size();ingb++)
 						{
 						j=ngblist[ingb].idx;
-						//if(i!=j)
-							{
-							//dist=ngbNum.dis;
-							//cout<<i<<" "<<j<<" "<<ngbNum.dis<<" "<<sqrt(Distance2(i,j))<<endl;
-							if(ngblist[ingb].dis<=m_afof_eps2)
-								add_edge(i,j,graphFOF);
-							//is_done[j]=true;
-							}
-						
+						if(ngblist[ingb].dis<=m_afof_eps2)
+							add_edge(i,j,graphFOF);
 						}
-					//is_done[i]=true;
-
 					}
-				}
-				
+
 				report_components( graphFOF,false);
 
 				std::cout<<".DONE."<< std::endl;
+				}
 			}
 		
 		float Distance2(size_t i, size_t j)
