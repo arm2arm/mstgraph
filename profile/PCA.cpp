@@ -26,6 +26,7 @@ double CPCA::GetCovarMatrix( CMSTree &mst, int ID)
 	{
 	size_t i;
 	vector<vector<float> > Cov( 4, vector<float>(4, 0.0f));
+	if(mst.m_MSTCatalog.size() ==0)return 0.0;
 	for(size_t ip=0;i<mst.m_MSTCatalog[ID].size();ip++)
 		{
 		i=mst.m_MSTCatalog[ID].id[ip];
