@@ -87,7 +87,8 @@ class CMSTree
 				m_MSTCatalog.end(), IfLt<int>(m_min_num)
 				)
 				);*/
-			TMSTCat::iterator it = m_MSTCatalog.begin();
+			cout<<"done compiling"<<endl;
+			/* TMSTCat::iterator it = m_MSTCatalog.begin();
 			while ( it != m_MSTCatalog.end() )
 				{
 				
@@ -100,7 +101,7 @@ class CMSTree
 					++it;
 					}
 				}
-				
+				*/
 			cout << "Total number of components where Np>"<<m_min_num<<" : " << m_MSTCatalog.size() << endl;
 //sort them by size
 			std::sort(m_MSTCatalog.begin(),m_MSTCatalog.end()); 
@@ -110,7 +111,7 @@ class CMSTree
 				m_MSTCatalog[i].DoneInsert();
 				//cout<<m_MSTCatalog[i]<<endl;
 				}
-			cout << endl;
+			cout <<"Done catalogues"<< endl;
 			
 
 			};
