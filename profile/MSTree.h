@@ -71,7 +71,7 @@ class CMSTree
 				add_edge(spanning_tree[i].m_source,spanning_tree[i].m_target, g);
 
 			std::vector<int> component(num_vertices(g));
-			int num = connected_components(g, &component[0]);
+			size_t num = connected_components(g, &component[0]);
 
 			std::vector<int>::size_type i;
 			cout << "Total number of components: " << num << endl;
