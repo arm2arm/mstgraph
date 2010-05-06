@@ -10,7 +10,7 @@ class CPCA
 		CPCA(void);
 		~CPCA(void);
 		void GetCovarMatrix( CMSTree &mst, int ID=0);
-    void GetPCA(void);
+    double GetPCA(void);
 
 	private:
 		//TMSTCat m_MSTCatalog;

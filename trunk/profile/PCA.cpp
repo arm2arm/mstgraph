@@ -22,7 +22,7 @@ void print(vector<vector<float> > &Cov)
 	cout<<endl;
 }
 
-void CPCA::GetCovarMatrix( CMSTree &mst, int ID)
+double CPCA::GetCovarMatrix( CMSTree &mst, int ID)
 	{
 	size_t i;
 	vector<vector<float> > Cov( 4, vector<float>(4, 0.0f));
@@ -66,8 +66,8 @@ void CPCA::GetCovarMatrix( CMSTree &mst, int ID)
 	//	print(a);
 	//	print(v);
 	double Phi = rad2deg<double>(atan2((double)(v[1+1][1+1]), (double)(v[0+1][1+1])));
-	cout<<"Phi = "<<Phi<<endl;
-
+	//cout<<"Phi = "<<Phi<<endl;
+	return Phi;
 	}
 
 void CPCA::GetPCA(void)
