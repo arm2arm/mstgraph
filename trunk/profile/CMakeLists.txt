@@ -42,7 +42,7 @@ MESSAGE( STATUS "PROJECT_SOURCE_DIR: " ${PROJECT_SOURCE_DIR} )
 
 if (CMAKE_COMPILER_IS_GNUCXX)
 
-  set ( CMAKE_CXX_FLAGS " " 
+  set ( CMAKE_CXX_FLAGS " -O3 -g -Wno-deprecated " 
         CACHE STRING "g++ Compiler Flags for All Builds" FORCE)
 
   set ( CMAKE_CXX_FLAGS_DEBUG " -O0 -g "

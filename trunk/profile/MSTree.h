@@ -45,7 +45,7 @@ class CMSTree
 	public:
 		//CMSTree(void);
 		CMSTree(vector<float> &x, vector<float> &y,vector<float>  &z,float afof_eps=0.05,size_t min_num=100,size_t MAXNGB=4):
-		m_x(x),m_y(y),m_z(z),dim(3),m_afof_eps(afof_eps),m_min_num(min_num),m_maxNGB(MAXNGB), tree(NULL){			
+		m_x(x),m_y(y),m_z(z),dim(3),m_afof_eps(afof_eps),m_min_num(min_num),m_maxNGB(MAXNGB), tree(NULL), m_verbose(false){			
 
 			FillData();
 			BuildKDTree();
@@ -76,7 +76,6 @@ class CMSTree
 			std::vector<int>::size_type i;
 			cout << "Total number of components: " << num << endl;
 			m_MSTCatalog.resize(num);
-
 			for ( i = 0; i != component.size(); ++i)
 				{
 				//cout << "Vertex " << i <<" is in component " << component[i] << endl;
@@ -111,8 +110,11 @@ class CMSTree
 			for (i = 0; i < num; ++i)
 				{// compile position and velocity
 				m_MSTCatalog[i].DoneInsert(i);
-				cout<<m_MSTCatalog[i]<<endl;
+				if(m_verbose)
+				  cout<<m_MSTCatalog[i]<<endl;
 				}
+			if(!m_verbose && m_MSTCatalog.size()!=0)
+			  cout<<m_MSTCatalog[0]<<endl;
 			cout <<"Done catalogues"<< endl;
 			
 
@@ -145,7 +147,7 @@ class CMSTree
 				size_t i, j;
 				float  m_afof_eps2=m_afof_eps*m_afof_eps;
 				vector<bool> is_done(N,false);
-				std::cout << "Build Graph:" << realdata.size()<<" particles"<<std::endl;
+				std::cout << "Build Graph:" << realdata.size()<<" particles"<<"...";cout.flush();
 				qv.resize(3);
 				for(i=0;i<N;i++){
 					qv[0]=m_x[i];qv[1]=m_y[i];qv[2]=m_z[i];
@@ -158,7 +160,8 @@ class CMSTree
 						}
 					}
 
-				report_components( graphFOF,false);
+				if(m_verbose)
+				  report_components( graphFOF,false);
 
 				std::cout<<".DONE."<< std::endl;
 				}
@@ -191,11 +194,17 @@ class CMSTree
 			}
 		  void dump(int ig)
 		    {
-		      for(size_t i=0;i<m_MSTCatalog[ig].id.size();i++)
+		      std::string fname=string("part_ig")+boost::lexical_cast<std::string>(ig)+string(".ascii");
+		      ofstream of(fname.c_str());
+		       for(size_t i=0;i<m_MSTCatalog[ig].id.size();i++)
 			{
 			  int ip=m_MSTCatalog[ig].id[i];
-			  cout<<m_x[ip]<<" "<<m_y[ip]<<endl;
+			  if(of.is_open())
+			    of<<m_x[ip]<<" "<<m_y[ip]<<endl;
+			    else
+			    cout<<m_x[ip]<<" "<<m_y[ip]<<endl;
 			}
+		       of.close();
 		    }
 
 	protected:
@@ -210,11 +219,13 @@ class CMSTree
 		////////////////
 		kdtree2*  tree;
 		Graph graphFOF;
+		bool m_verbose;
 public:
 		vector<float> &m_x;
 		vector<float> &m_y;
 		vector<float> &m_z;
 		TMSTCat m_MSTCatalog;
+
 
 	};
 

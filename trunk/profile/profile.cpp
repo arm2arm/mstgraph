@@ -198,11 +198,12 @@ int main(int argc, char* argv[])
 		CPCA pca;
 		double phi=pca.GetCovarMatrix(mst_tree, 0);
 		fVec[14]=(float)phi;
-		//mst_tree.dump(0);
+		mst_tree.dump(0);
 		logAm.insert(isnap, result);		
 		logAmRR.insert(isnap, AmRad);
 		log.insert(isnap, fVec);
 		///////////////////////////////
+		
 		delete pL;
 		//Lvec.push_back(pL);
 		}
