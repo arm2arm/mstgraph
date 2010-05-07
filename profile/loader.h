@@ -30,8 +30,8 @@ class strMover
 			{}
 		void operator() ( const unsigned int ip )
 			{
-			std::transform(&pP_[ip*stride_], &pP_[ip*stride_]+stride_, 
-				pMove_, &pP_[ip*stride_], op_sum<T>);
+			std::transform(&(pP_[ip*stride_]), &(pP_[ip*stride_])+stride_, 
+				pMove_, &(pP_[ip*stride_]), op_sum<T>);
 			}
 	};
 
@@ -85,31 +85,32 @@ pG->m_verbose=0;
 		void get_com_bypot(CGadget *pG)
 			{
 				float *pP;
-				unsigned int all_nelem = pG->read_block<float>(pP,
-                "POT ",
-                6);
+				unsigned int all_nelem = pG->read_block<float>(pP,"POT ", 6);
 				unsigned int comID=std::distance(pP, std::min_element(pP, pP+all_nelem));
 				delete [] pP;
-				unsigned int p_nelem = pG->read_blockv3(pPOS,
-                "POS ",
-                6);
-
-				memcpy(&m_COM[0],&pP[comID*3],3*sizeof(float));
-				delete [] pP;
+				unsigned int p_nelem = pG->read_blockv3(pPOS,"POS ", 6);
+				memcpy(&m_COM[0],&pPOS[comID*3],3*sizeof(float));
+				//delete [] pPOS;
 				
 			}
 
 		void MoveToCOM(){
-			unsigned int stride=3;
-			
-			std::transform ( m_COM, m_COM+3, m_COM, std::negate<float>() );
-		
-			generator<unsigned int> gen(0, 1);
-			vector<unsigned int> idx(m_nelem);
-			std::generate(idx.begin(), idx.end(),gen);
-			std::for_each(idx.begin(), idx.end(), strMover<float>(&pPOS[0],&m_COM[0],stride));
-			std::transform ( m_COM, m_COM+3, m_COM, std::negate<float>());
-			}
+		  const	unsigned int stride=3;
+		  /*for(int ip=0;ip<m_nelem;ip++)
+		    {
+		    pPOS[ip*stride]-=m_COM[0];
+		    pPOS[ip*stride+1]-=m_COM[1];
+		    pPOS[ip*stride+2]-=m_COM[2];
+		    
+		    }*/
+		  std::transform ( m_COM, m_COM+3, m_COM, std::negate<float>() );
+		  
+		  generator<unsigned int> gen(0, 0);
+		  vector<unsigned int> idx(m_nelem);
+		  std::generate(idx.begin(), idx.end(),gen);
+		  std::for_each(idx.begin(), idx.end(), strMover<float>(&pPOS[0],&m_COM[0],stride));
+		  std::transform ( m_COM, m_COM+3, m_COM, std::negate<float>());
+		}
 		void PrintStat(){
 			if(m_nelem>0)
 				{

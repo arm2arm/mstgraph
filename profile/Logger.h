@@ -20,14 +20,17 @@ public:
 	CLogger(std::string fout="dump.log", bool append=false,int nfields=1):m_write_on_save(true),m_append(append),CAsciiReader(fout, nfields,append ){
 				    
 		};
-	~CLogger(){if(m_write_on_save)save();};
+	~CLogger(){if(m_write_on_save)flush();};
+	void flush(){save();};
 	////////// Populate ////////
-
+	
 	bool insert(const int isnap, const dynvector &d)
 		{
 		bool retval=is_done(isnap);
 		m_data[isnap]=d;
+		flush();
 		return retval;
+		
 		};
         bool is_done(unsigned int isnap)
 	{return m_append&&(m_data.find(isnap)!=m_data.end());}
@@ -70,7 +73,7 @@ public:
 				}
 			
 		};
-	void SetComment(std::string comment){m_comments=comment;};
+inline	void SetComment(std::string comment){m_comments=comment;};
 private:
 	bool m_write_on_save;
 	bool m_append;
@@ -87,12 +90,14 @@ public:
 		{
 		}
 	~CLoggerAm(){save();}
+	void flush(){save();};
 	void SetComment(std::string msg){m_comment=msg;};
 	bool insert(const int isnap, TLogData &data)
 		{
 		bool ret=!(m_data.find(isnap)!=m_data.end());
 		for(size_t i=0;i<data.size();i++)
 			m_data[isnap].push_back(data[i]);
+		flush();
 		return ret;
 		}
 	void save()
