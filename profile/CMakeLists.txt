@@ -40,12 +40,24 @@ MESSAGE( STATUS "PROJECT_SOURCE_DIR: " ${PROJECT_SOURCE_DIR} )
 # Destination path for the lib
 #SET(LIBRARY_OUTPUT_PATH lib)
 
+if (CMAKE_COMPILER_IS_GNUCXX)
 
-if(CMAKE_COMPILER_IS_GNUCXX)
-  SET(CMAKE_CXX_FLAGS "-Wno-deprecated -O3  ")
-else(CMAKE_COMPILER_IS_GNUCXX)
-        SET(CMAKE_CXX_FLAGS "-O3 -xW -Zp16 -ip -ansi_alias -ansi  -mp -vec-report3 -ipo " )	
-endif(CMAKE_COMPILER_IS_GNUCXX)
+  set ( CMAKE_CXX_FLAGS " " 
+        CACHE STRING "g++ Compiler Flags for All Builds" FORCE)
+
+  set ( CMAKE_CXX_FLAGS_DEBUG " -O0 -g "
+        CACHE STRING "g++ Compiler Flags for Debug Builds" FORCE)
+
+  set ( CMAKE_CXX_FLAGS_RELEASE  " -O3 "
+        CACHE STRING "g++ Compiler Flags for Release Builds" FORCE)
+
+endif ()
+
+#if(CMAKE_COMPILER_IS_GNUCXX)
+#  SET(CMAKE_CXX_FLAGS "-Wno-deprecated -O3  ")
+#else(CMAKE_COMPILER_IS_GNUCXX)
+#        SET(CMAKE_CXX_FLAGS "-O3 -xW -Zp16 -ip -ansi_alias -ansi  -mp -vec-report3 -ipo " )	
+#endif(CMAKE_COMPILER_IS_GNUCXX)
 
 
 #################
