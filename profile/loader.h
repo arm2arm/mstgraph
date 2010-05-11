@@ -30,7 +30,7 @@ class strMover
 			{}
 		void operator() ( const unsigned int ip )
 			{
-			std::transform(&(pP_[ip*stride_]), &(pP_[ip*stride_])+stride_, 
+			std::transform(&(pP_[ip*stride_]), &(pP_[ip*stride_ +stride_]), 
 				pMove_, &(pP_[ip*stride_]), op_sum<T>);
 			}
 	};
@@ -56,9 +56,7 @@ pG->m_verbose=0;
 				///////////////////////////////////////////
 				get_com_bypot(pG);
                                 
-				unsigned int p_nelem = pG->read_blockv3(pPOS,
-                "POS ",
-                m_ptype);
+				unsigned int p_nelem = pG->read_blockv3(pPOS,"POS ", m_ptype);
                                  m_nelem=p_nelem;
 				if(m_ptype==6)
 					{
@@ -73,7 +71,7 @@ pG->m_verbose=0;
 					if(np!=npout){cout<<"error reading SFR"<<endl;exit(0);} 
 					}
 				memcpy(&m_npart[0], &pG->myhead.npart[0], 6*sizeof(unsigned int));
-				MoveToCOM();
+				MoveToCOM<float>();
 				delete pG;
 			}
 		float R(unsigned int i){
@@ -90,26 +88,28 @@ pG->m_verbose=0;
 				delete [] pP;
 				unsigned int p_nelem = pG->read_blockv3(pPOS,"POS ", 6);
 				memcpy(&m_COM[0],&pPOS[comID*3],3*sizeof(float));
-				//delete [] pPOS;
+				delete [] pPOS;
 				
 			}
 
-		void MoveToCOM(){
+	template<class T>
+	  void MoveToCOM(T *com=NULL){
 		  const	unsigned int stride=3;
-		  /*for(int ip=0;ip<m_nelem;ip++)
+		  if(com!=NULL)
+		    for(size_t i=0;i<stride;i++)
+		      m_COM[i]=static_cast<float>(com[i]);
+		  for(int ip=0;ip<m_nelem;ip++)
 		    {
-		    pPOS[ip*stride]-=m_COM[0];
-		    pPOS[ip*stride+1]-=m_COM[1];
-		    pPOS[ip*stride+2]-=m_COM[2];
-		    
-		    }*/
-		  std::transform ( m_COM, m_COM+3, m_COM, std::negate<float>() );
-		  
+		    pPOS[ip*stride]   -= m_COM[0];
+		    pPOS[ip*stride+1] -= m_COM[1];
+		    pPOS[ip*stride+2] -= m_COM[2]; 
+		    }
+		  /* std::transform ( m_COM, m_COM+3, m_COM, std::negate<float>() );		  
 		  generator<unsigned int> gen(0, 0);
 		  vector<unsigned int> idx(m_nelem);
 		  std::generate(idx.begin(), idx.end(),gen);
 		  std::for_each(idx.begin(), idx.end(), strMover<float>(&pPOS[0],&m_COM[0],stride));
-		  std::transform ( m_COM, m_COM+3, m_COM, std::negate<float>());
+		  std::transform ( m_COM, m_COM+3, m_COM, std::negate<float>());*/
 		}
 		void PrintStat(){
 			if(m_nelem>0)

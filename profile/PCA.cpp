@@ -27,7 +27,7 @@ double CPCA::GetCovarMatrix( CMSTree &mst, int ID)
 	size_t i;
 	vector<vector<float> > Cov( 4, vector<float>(4, 0.0f));
 	if(mst.m_MSTCatalog.size() ==0)return 0.0;
-	for(size_t ip=0;i<mst.m_MSTCatalog[ID].size();ip++)
+	for(size_t ip=0;ip<mst.m_MSTCatalog[ID].size();ip++)
 		{
 		i=mst.m_MSTCatalog[ID].id[ip];
 		//grp.
@@ -52,8 +52,11 @@ double CPCA::GetCovarMatrix( CMSTree &mst, int ID)
 	int n=2,nrot;
 	a[1][1] = Cov[0][0];
 	a[2][2] = Cov[1][1];
-	a[1][2] = Cov[0][1];
-	a[2][1] = Cov[1][0];
+
+	a[2][1] = Cov[0][1];//trans
+	a[1][2] = Cov[1][0];//trans
+
+	
 
 	//	a[1][1]=0.037727899;   a[1][2]= 0.021687787;
 	//	a[2][1]= 0.021687787;  a[2][2]=  0.24034810;
@@ -62,12 +65,13 @@ double CPCA::GetCovarMatrix( CMSTree &mst, int ID)
 	a(2,3) = a23
 	a(3,2) = a23
 	*/
-	//	print(a);
+	//print(a);
 	jacobi(a,n,d,v,&nrot);
 	//	print(a);
 	//	print(v);
 	double Phi = rad2deg<double>(atan2((double)(v[1+1][1+1]), (double)(v[0+1][1+1])));
-	//cout<<"Phi = "<<Phi<<endl;
+	cout<<"Phi = "<<Phi<<endl;
+       
 	return Phi;
 	}
 

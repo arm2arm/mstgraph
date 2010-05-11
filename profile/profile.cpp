@@ -128,10 +128,14 @@ void GetOmegaBar(vector<float> &x, vector<float> &y,vector<float>  &z)
 	
 	
 	}
+
 ///////////////////////
+
 int main(int argc, char* argv[])
 	{
+	  scoped_timer timemme("Main program Profiler :.....");
 	COptions opt(argc, argv);
+
 	if(opt.is_bad())
 		return EXIT_FAILURE;
 	unsigned int ParticleType=opt.m_type;
@@ -157,24 +161,42 @@ int main(int argc, char* argv[])
 
 		if(log.is_done(isnap))continue;
 		CLoader *pL=new CLoader(opt.m_snapshotList[i],ParticleType);
-
+		
+		if(true)
+		  {
 		///////////////////////////////
 		// Do profiling here
 		std::vector<float> fVec(NFields), x, y,z, R;
 		vector<unsigned int > idxR(pL->m_nelem-1,0);	
 		///////////////////////////////////
+		cout<<"COM: "<<pL->m_COM[0]<<" "<<pL->m_COM[1]<<" "<<pL->m_COM[2]<<endl;
 		for(unsigned int i=0, ig=0, ist=0;i<pL->m_nelem-1;i++)// -1 to exclude BH particle
-			{
-			float rr=pL->R(i);
-			idxR.push_back(i);
-			if(pL->pType[i] == 0)ig++;
-			if(pL->pType[i] == 4)ist++;
-			if( (pL->pType[i] == 4 /*|| pL->pType[i] == 2*/) ){
-				R.push_back(rr);
+		  	if( pL->pType[i] == 4 ){
 				x.push_back(pL->pPOS[i*3]);
 				y.push_back(pL->pPOS[i*3+1]);
 				z.push_back(pL->pPOS[i*3+2]);			      
 				}
+		CMSTree mst_tree(x,y,z, opt.m_eps, opt.m_min_npart, opt.m_NGB);
+		
+		pL->MoveToCOM(&mst_tree.m_MSTCatalog[0].wcom[0]);
+
+		x.clear();y.clear();z.clear();R.clear();
+		for(unsigned int i=0, ig=0, ist=0;i<pL->m_nelem-1;i++)// -1 to exclude BH particle
+			{
+			float rr=pL->R(i);
+
+			idxR.push_back(i);
+			if(pL->pType[i] == 0)ig++;
+			if(pL->pType[i] == 4)
+			  {
+			    ist++;
+			    R.push_back(rr);
+			    x.push_back(pL->pPOS[i*3]);
+			    y.push_back(pL->pPOS[i*3+1]);
+			    z.push_back(pL->pPOS[i*3+2]);	
+			  }
+
+			
 			for(ir=0;ir<2;ir++)
 				if(rr<rvec[ir]){
 					fVec[ir*5+pL->pType[i]]+=1.0;
@@ -184,17 +206,16 @@ int main(int argc, char* argv[])
 							if(pL->pType[i]==4){
 								fVec[12+ir]+=pL->pSFR[ist+pL->m_npart[0]-1];
 								}
-
 					}
 
 			}
 		///////////////////////////////////
-		TLogData result=GetAB<float>(R,x,y);
+
+		TLogData result=GetAB<float>(R,x,y, opt.m_Rmax);
 		std::vector<float> AmRad=getAmMaxMeanR(result);//format R1, Am1, R2,  Am2, R3, Am3
-		
-		
+				
 		/////////////////////////////////
-		CMSTree mst_tree(x,y,z, opt.m_eps, opt.m_min_npart);
+		     
 		CPCA pca;
 		double phi=pca.GetCovarMatrix(mst_tree, 0);
 		fVec[14]=(float)phi;
@@ -203,7 +224,7 @@ int main(int argc, char* argv[])
 		logAmRR.insert(isnap, AmRad);
 		log.insert(isnap, fVec);
 		///////////////////////////////
-		
+		}
 		delete pL;
 		//Lvec.push_back(pL);
 		}

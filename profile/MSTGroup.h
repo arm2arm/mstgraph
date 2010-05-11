@@ -4,7 +4,9 @@
 #include <iostream>
 #include <vector>
 #include <cstring>
-
+#include <stdlib.h>
+using std::cout;
+using std::endl;
 
 ////////////////////CGalaxy class ////////
 class CMSTGroup{
@@ -25,13 +27,23 @@ public:
 		Ntotal=0;R90=0;R50=0;m_Rxx=0;
 		wtotal=0.0;
 		}
-	void insert(int i, float x,float y,float z)
+	/*void insert(int i, float x,float y,float z)
 		{
 		com[0]+=x;com[1]+=y;com[2]+=z;
 		id.push_back(i);
 		Ntotal=id.size();
+		}*/
+	void insert(int i, float x,float y,float z, float w)
+		{		 
+		com[0]+=x;com[1]+=y;com[2]+=z;
+		wcom[0]+=x*w;
+		wcom[1]+=y*w;
+		wcom[2]+=z*w;
+		wtotal+=w;
+		//exit(0);
+		id.push_back(i);
+		Ntotal=id.size();
 		}
-
 	~CMSTGroup(){id.clear();};
 	/// For sorting
 	friend bool operator<(const CMSTGroup& left,const CMSTGroup& right);
@@ -43,7 +55,7 @@ public:
 		os.width(8);
 		os<<" "<<g.Ntotal;
 
-		os.precision(4);
+		os.precision(5);
 		os.width(10);
 		os.setf( std::ios::fixed, std::ios::floatfield ) ;
 		os<<" "<<g.com[0];
@@ -77,11 +89,12 @@ public:
 		for(int j=0;j<3;j++)
 		 {
 		 com[j]/=double(Ntotal);
-		 //wcom[j]/=(wtotal*Ntotal);
-		 vel[j]/=double(Ntotal);
+		 wcom[j]/=double(wtotal);
+		 //cout<<wcom[j]<<" ";
+		 //vel[j]/=double(Ntotal);
 		 //wvel[j]/=(wtotal*Ntotal);
 		 }
-
+		//cout<<endl;
 		}
 	inline size_t size(){return id.size();};
 	/////////////////////////////	
