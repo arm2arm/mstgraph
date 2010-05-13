@@ -19,7 +19,7 @@ public:
 	COptions(int argc, char* argv[]);
 	const int is_bad(){return m_status;};
 //////////////////////////////////////////
-	vector<string> m_snapshotList;
+	std::vector<string> m_snapshotList;
 	std::vector<std::string>  m_ApFilelist;
 	std::vector<int>  m_IDlist;
 	string m_file_out;
@@ -31,6 +31,7 @@ public:
 	float m_Rmax;
 	bool m_updatelog;
 private:
+	bool ParseSnapshotLists(std::vector<string> &strinout);
 	void ReadID(std::string file);
 	int m_status;
 	};

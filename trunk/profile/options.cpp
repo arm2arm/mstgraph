@@ -16,7 +16,7 @@ using boost::bad_lexical_cast;
 
 #include <fstream>
 #include <string>
-
+#include <set>
 
 
 
@@ -58,8 +58,9 @@ COptions::COptions(int argc, char* argv[]):m_status(0)
 	//	printInputs(vm);
 
 		if(vm.count("snapshotList")) {
-			//ostream_iterator<string> it(cout, "\n ");
 			cout << "snapshot list detected" << endl;
+			cout<<"Parsing snapshot lists..."<<endl;
+			ParseSnapshotLists(m_snapshotList);
 			cout << "We will trace following snapshots:\n ";
 			for(std::vector<string>::iterator it=m_snapshotList.begin();it<m_snapshotList.end(); it++)
 				{
@@ -111,6 +112,83 @@ COptions::COptions(int argc, char* argv[]):m_status(0)
 	
 	}
 
+#include <boost/algorithm/string.hpp>// for split
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
+#include <boost/filesystem.hpp>
+#include <boost/regex.hpp>  // also functional,iostream,iterator,string
+namespace bfs = boost::filesystem;
+
+
+struct match : public std::unary_function<bfs::directory_entry,bool> {
+	match(const std::string pat="snap_[0-2][0-9][0-9][0-9]"):pat(pat){}
+	std::string pat;
+    bool operator()(const bfs::directory_entry& d) const {
+        std::string fn(d.filename());
+        return boost::regex_match(fn.begin(), fn.end(), boost::regex(pat));
+    }
+};
+template <class Tstrvec>
+class CFileNameParser
+{
+public:
+ CFileNameParser(std::string& path, Tstrvec& outlist)
+  : m_path(path)
+  , m_outlist(outlist)
+ {}
+
+ void operator()(const std::string& str) const
+ {
+  std::string fname = m_path + "/" + str; 
+  boost::algorithm::replace_all(fname, "\\", "/"); 
+  if( std::find(m_outlist.begin(),m_outlist.end(), fname) == m_outlist.end()) 
+	  if(!fname.empty())m_outlist.insert(fname);  
+ }
+
+private:
+ std::string m_path;
+ Tstrvec& m_outlist;
+};
+
+
+bool COptions::ParseSnapshotLists(std::vector<string> &strinout){
+	bool state=true;
+	typedef std::vector<string> Tstrvec;
+	typedef Tstrvec::iterator TstrvecIT;
+	std::set<std::string> result;
+	std::string pat, path;
+	for(TstrvecIT it=strinout.begin();it<strinout.end(); it++)
+		boost::split(  result,*it,boost::is_any_of("\t ") );
+	//count the entries
+	std::copy(result.begin(),result.end(),std::back_inserter(strinout));
+	result.clear();
+	for(TstrvecIT it=strinout.begin();it<strinout.end(); it++){
+		if(is_file_exist(*it)){
+			boost::algorithm::replace_all((*it), "\\", "/");
+			if(std::find(result.begin(),result.end(),*it)==result.end())
+				result.insert(*it);
+			}else{
+			//get path
+			if((*it).empty())continue;
+			bfs::path full_path( *it );
+			path=full_path.branch_path().string();		
+			pat=full_path.filename();
+			boost::algorithm::replace_all(pat, "?", "[0-9]");
+			std::list<std::string> partial_result;
+			match PatternMatch(pat);
+			transform_if(bfs::directory_iterator(path), bfs::directory_iterator(),
+				std::back_inserter(partial_result),
+				PatternMatch,
+				mem_fun_ref(&bfs::directory_entry::filename));
+			std::for_each(partial_result.begin(), 
+				partial_result.end(), 
+				CFileNameParser<std::set<std::string> >(path, result) );
+			}
+		};
+	//std::copy(result.begin(), result.end(),std::ostream_iterator<std::string>(std::cout, "\n"));
+	std::copy(result.begin(),result.end(),std::back_inserter(strinout));
+	return state;
+	}
 /*void COptions::printInputs(variables_map vm)
 {
 int i=0;
