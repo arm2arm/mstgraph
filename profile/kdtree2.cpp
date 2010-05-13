@@ -183,14 +183,14 @@ kdtree2_node* kdtree2::build_tree_for_range(int l, int u, kdtree2_node* parent) 
       float average;
 
       if (true) {
-	sum = 0.0;
+	sum = 0.0f;
 	for (int k=l; k <= u; k++) {
 	  sum += the_data[ind[k]][c];
 	}
 	average = sum / static_cast<float> (u-l+1);
       } else {
 	// average of top and bottom nodes.
-	average = (node->box[c].upper + node->box[c].lower)*0.5; 
+	average = (node->box[c].upper + node->box[c].lower)*0.5f; 
       }
 	
       m = select_on_coordinate_value(c,average,l,u);
@@ -218,7 +218,7 @@ kdtree2_node* kdtree2::build_tree_for_range(int l, int u, kdtree2_node* parent) 
     } else {
       node->cut_val_right = node->right->box[c].lower;
       node->cut_val_left  = node->left->box[c].upper;
-      node->cut_val = (node->cut_val_left + node->cut_val_right) / 2.0; 
+      node->cut_val = (node->cut_val_left + node->cut_val_right) / 2.0f; 
       //
       // now recompute true bounding box as union of subtree boxes.
       // This is now faster having built the tree, being logarithmic in
@@ -359,8 +359,8 @@ int kdtree2::select_on_coordinate_value(int c, float alpha, int l, int u) {
 // during the search
 
 
-
-static const float infinity = 1.0e38;
+#include <limits>
+static const float infinity = std::numeric_limits<float>::infinity( );
 
 class searchrecord {
 

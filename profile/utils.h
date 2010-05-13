@@ -165,6 +165,17 @@ public:
 protected:
 	
 	};
+///////////////// USED by REGEX ///////////
+template<class In,class Out,class Pred, class Op>
+Out transform_if(In first,In last,Out res,Pred p,Op op)
+	{
+	while(first!=last){
+		if (p(*first))
+			*res = op(*first);
+		++first;++res;
+		}
+	return res;
+	}
 
 ////////////////////////
 template <class T >
