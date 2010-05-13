@@ -160,7 +160,8 @@ bool COptions::ParseSnapshotLists(std::vector<string> &strinout){
 	for(TstrvecIT it=strinout.begin();it<strinout.end(); it++)
 		boost::split(  result,*it,boost::is_any_of("\t ") );
 	//count the entries
-	std::copy(result.begin(),result.end(),std::back_inserter(strinout));
+	strinout.clear();
+	std::unique_copy(result.begin(),result.end(),std::back_inserter(strinout));
 	result.clear();
 	for(TstrvecIT it=strinout.begin();it<strinout.end(); it++){
 		if(is_file_exist(*it)){
@@ -186,7 +187,8 @@ bool COptions::ParseSnapshotLists(std::vector<string> &strinout){
 			}
 		};
 	//std::copy(result.begin(), result.end(),std::ostream_iterator<std::string>(std::cout, "\n"));
-	std::copy(result.begin(),result.end(),std::back_inserter(strinout));
+	strinout.clear();
+	std::unique_copy(result.begin(),result.end(),std::back_inserter(strinout));
 	return state;
 	}
 /*void COptions::printInputs(variables_map vm)
