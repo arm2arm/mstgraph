@@ -98,9 +98,9 @@ double CPCA::GetCovarMatrix( CMSTree &mst, int ID)
 		}
 	GetPCAXYZ(x, y, z, eigen, eigenvalue);
 	//Some strange stuff is going here....
-	for(size_t ii=0;ii<eigen.size();ii++)
+	/*for(size_t ii=0;ii<eigen.size();ii++)
 		eigen[ii]= -eigen[ii];
-	if(verbose)
+*/	if(!verbose)
 		{
 	cout<<"\nresult\n"<<endl;
 	copy (eigen.begin(), eigen.end(),
@@ -109,75 +109,11 @@ double CPCA::GetCovarMatrix( CMSTree &mst, int ID)
 	cout << endl;
 		}
 	double Phi = rad2deg<double>(atan2( (double)(eigen[3]), (double)(eigen[0])));
+	
 	cout<<"Phi = "<<Phi<<endl;
 	//cout<<(double)(v[0+1][1+1])<<" "<< (double)(v[1+1][1+1])<<endl;
 	//exit(0);
 	return Phi;
-	}
-
-void CPCA::GetPCA(void)
-	{
-	size_t i;
-	vector<vector<double> > Cov( 4, vector<double>(4, 0.0))/*, CovNew( 4, vector<double>(4, 0.0))*/;
-	double x[] = {2.5, 0.5, 2.2, 1.9, 3.1, 2.3, 2.0, 1.0, 1.5, 1.1};
-	double y[] = {2.4, 0.7, 2.9, 2.2, 3.0, 2.7, 1.6, 1.1, 1.6, 0.9};
-	//double z[] = {2.4, 0.7, 2.9, 2.2, 3.0, 2.7, 1.6, 1.1, 1.6, 0.9};
-	
-	size_t np=sizeof(x)/sizeof(double);
-	
-	double m1=accumulate(x, x+np, 0.0)/(double)np;
-	double m2=accumulate(y, y+np, 0.0)/(double)np;
-	//double m3=accumulate(z, z+np, 0.0)/(double)np;
-	std::transform( x, x+np, x,std::bind2nd( std::minus<double>(), m1) );
-	std::transform( y, y+np, y,std::bind2nd( std::minus<double>(), m2) );
-	//std::transform( z, z+np, y,std::bind2nd( std::minus<double>(), m3) );
-		
-	/*vector<vector<double> > data;
-	data.resize(np);
-	for(i=0;i<np;i++)data[i].resize(3,0.0);
-
-	for(size_t i=0;i<np;i++){
-		data[i][0]=x[i];
-		data[i][1]=y[i];
-		}*/
-	//this  returns normalized to (n-1)
-	//covcol( data, np, 2, CovNew);
-	for(size_t ip=0;ip</**/np;ip++)
-		{
-			i=ip;
-			Cov[0][0] += x[i]*x[i];
-			Cov[0][1] += x[i]*y[i];
-
-			Cov[1][0] += y[i]*x[i];
-			Cov[1][1] += y[i]*y[i];
-		}
-	for(i=0;i<3;i++)
-		for(size_t j=0;j<3;j++)
-			Cov[i][j]/=double(np-1);
-
-	print(Cov, 0);
-	std::vector<vector<double> > a( 4, vector<double>(4, 0.0)), v( 4, vector<double>(4, 0.0));
-	std::vector<double> d(4, 0.0);
-	
-	int n=2,nrot;
-	const int ish=1;
-	for(size_t i =0;i<Cov.size()-1;i++)
-		for(size_t j =0;j<Cov[0].size()-1;j++)
-			a[i+ish][j+ish]=Cov[j][i];//transpose here
-
-	//print(a);
-	//Transpose(a);
-	print(a);
-	jacobi(a,n,d,v,&nrot);
-	print(a);
-	print(v);
-	copy (d.begin(), d.end(),
-          ostream_iterator<double>(cout," "));
-    cout << endl;
-	double Phi = rad2deg<double>(atan2((double)(v[1+1][1+1]), (double)(v[0+1][1+1])));
-	cout<<"Phi = "<<Phi<<endl;
-	exit(0); 
-	
 	}
 
 void CPCA::GetPCAXYZ(vector<double> &x, vector<double> &y, vector<double> &z, vector<double> &eigenvec, vector<double> &eigenvalue)
@@ -213,9 +149,9 @@ void CPCA::GetPCAXYZ(vector<double> &x, vector<double> &y, vector<double> &z, ve
 	for(i=0;i<3;i++)
 		for(size_t j=0;j<3;j++)
 			Cov[i][j]/=double(np-1);
-if(verbose)
-		
+if(verbose)		
 	print(Cov, 0);
+
 	std::vector<vector<double> > a( 4, vector<double>(4, 0.0)), v( 4, vector<double>(4, 0.0));
 	std::vector<double> d(4, 0.0);
 	
@@ -232,16 +168,13 @@ if(verbose)
 	jacobi(a,n,d,v,&nrot);
 	if(verbose)
 	print(a, 0);
-	Transpose(v);
+//	Transpose(v);
 	if(verbose)
 		{
-	print(v, 0);
-	copy (d.begin(), d.end(),
-          ostream_iterator<double>(cout," "));
+		print(v, 0);
+		copy (d.begin(), d.end(),
+			ostream_iterator<double>(cout," "));
 		}
-	//cout << endl;
-	//double Phi = rad2deg<double>(atan2((double)(v[1+1][1+1]), (double)(v[0+1][1+1])));
-	//cout<<"Phi = "<<Phi<<endl;
 	eigenvalue=d;
 	for(int i=ish;i<n+ish;i++)
 		for(int j=ish;j<n+ish;j++)
