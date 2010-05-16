@@ -151,12 +151,13 @@ TF Wsph(TF rr, TF h)
 				qv.resize(3);
 				//	CKernel<float> *pKernel = new CEpanechikov<float>(3); // Init Kernel for calculations
 				rho.resize(N,0);
-				std::fill(rho.begin(), rho.end(), 0.0);
-				//				rho=0;
+				std::fill(rho.begin(), rho.end(), 0.0f);
+				cout<<endl;
+				size_t imax=std::min<size_t>((size_t)m_maxNGB, (size_t)5);
 				for(i=0;i<N;i++){
 					qv[0]=m_x[i];qv[1]=m_y[i];qv[2]=m_z[i];
 					tree->n_nearest( qv, m_maxNGB, ngblist);
-					for(size_t ingb=1;ingb<5;ingb++)
+					for(size_t ingb=1;ingb<imax;ingb++)
 						{
 						j=ngblist[ingb].idx;
 						if(ngblist[ingb].dis<=m_afof_eps2)
@@ -169,6 +170,7 @@ TF Wsph(TF rr, TF h)
 						    Wsph<float>(sqrt(ngblist[ingb].dis) , hsml);
 
 						}
+					if(i%100==0)cout<<i<<"\r";
 					}
 
 				if(m_verbose)
@@ -211,7 +213,7 @@ TF Wsph(TF rr, TF h)
 			{
 			  int ip=m_MSTCatalog[ig].id[i];
 			  if(of.is_open())
-			    of<<m_x[ip]<<" "<<m_y[ip]<<" "<<m_z[ip]<<" "<<rho[ip]<<endl;
+				  of<<std::setw(32)<<std::setprecision(16)<<m_x[ip]<<" "<<m_y[ip]<<" "<<m_z[ip]<<" "<<rho[ip]<<endl;
 			    else
 			    cout<<m_x[ip]<<" "<<m_y[ip]<<endl;
 			}
