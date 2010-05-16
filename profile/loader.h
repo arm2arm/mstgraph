@@ -54,7 +54,7 @@ pG->m_verbose=0;
 				/*for(unsigned int i=0;i<m_nelem;i++)
 					data.insert(particleID(pID[i], i));*/
 				///////////////////////////////////////////
-				get_com_bypot(pG);
+		//		get_com_bypot(pG);
                                 
 				unsigned int p_nelem = pG->read_blockv3(pPOS,"POS ", m_ptype);
                                  m_nelem=p_nelem;
@@ -71,7 +71,7 @@ pG->m_verbose=0;
 					if(np!=npout){cout<<"error reading SFR"<<endl;exit(0);} 
 					}
 				memcpy(&m_npart[0], &pG->myhead.npart[0], 6*sizeof(unsigned int));
-				MoveToCOM<float>();
+			//	MoveToCOM<float>();
 				delete pG;
 			}
 		float R(unsigned int i){
@@ -98,7 +98,7 @@ pG->m_verbose=0;
 		  if(com!=NULL)
 		    for(size_t i=0;i<stride;i++)
 		      m_COM[i]=static_cast<float>(com[i]);
-		  for(int ip=0;ip<m_nelem;ip++)
+		  for(size_t ip=0;ip<m_nelem;ip++)
 		    {
 		    pPOS[ip*stride]   -= m_COM[0];
 		    pPOS[ip*stride+1] -= m_COM[1];
@@ -157,7 +157,7 @@ pG->m_verbose=0;
 			}
 		particlesID_set data;//keeping relation for ID, IDf
 		std::string m_fname;
-		unsigned int m_nelem;
+		size_t m_nelem;
 		unsigned int m_npart[6];
 		unsigned int m_ptype;
 		int *pID;

@@ -1,6 +1,7 @@
 // profile.cpp : Definiert den Einstiegspunkt für die Konsolenanwendung.
 //
 
+
 #include "loader.h"
 #include "options.h"
 #include "utils.h"
@@ -8,6 +9,7 @@
 #include "MSTree.h"
 #include "PCA.h"
 #include <numeric>
+#include <valarray>
 #include <functional>
 template<class T> 
 std::vector<T> smooth(std::vector<T> &v)
@@ -133,8 +135,10 @@ void GetOmegaBar(vector<float> &x, vector<float> &y,vector<float>  &z)
 
 int main(int argc, char* argv[])
 	{
-	  scoped_timer timemme("Main program Profiler :.....");
+    scoped_timer timemme("Main program Profiler :.....");
 	COptions opt(argc, argv);
+//	CPCA pca;
+//	pca.GetPCA();
 
 	if(opt.is_bad())
 		return EXIT_FAILURE;
@@ -169,7 +173,7 @@ int main(int argc, char* argv[])
 		std::vector<float> fVec(NFields), x, y,z, R;
 		vector<unsigned int > idxR(pL->m_nelem-1,0);	
 		///////////////////////////////////
-		cout<<"COM: "<<pL->m_COM[0]<<" "<<pL->m_COM[1]<<" "<<pL->m_COM[2]<<endl;
+		//cout<<"COM: "<<pL->m_COM[0]<<" "<<pL->m_COM[1]<<" "<<pL->m_COM[2]<<endl;
 		for(unsigned int i=0, ig=0, ist=0;i<pL->m_nelem-1;i++)// -1 to exclude BH particle
 		  	if( pL->pType[i] == 4 ){
 				x.push_back(pL->pPOS[i*3]);
@@ -179,8 +183,11 @@ int main(int argc, char* argv[])
 		CMSTree mst_tree(x,y,z, opt.m_eps, opt.m_min_npart, opt.m_NGB);
 		
 		pL->MoveToCOM(&mst_tree.m_MSTCatalog[0].wcom[0]);
+		std::transform( x.begin(), x.end(), x.begin(),std::bind2nd( std::minus<float>(), mst_tree.m_MSTCatalog[0].wcom[0]) );
+		std::transform( y.begin(), y.end(), y.begin(),std::bind2nd( std::minus<float>(), mst_tree.m_MSTCatalog[0].wcom[1]) );
+		std::transform( z.begin(), z.end(), z.begin(),std::bind2nd( std::minus<float>(), mst_tree.m_MSTCatalog[0].wcom[2]) );
 
-		x.clear();y.clear();z.clear();R.clear();
+		//x.clear();y.clear();z.clear();R.clear();
 		for(unsigned int i=0, ig=0, ist=0;i<pL->m_nelem-1;i++)// -1 to exclude BH particle
 			{
 			float rr=pL->R(i);
@@ -191,9 +198,9 @@ int main(int argc, char* argv[])
 			  {
 			    ist++;
 			    R.push_back(rr);
-			    x.push_back(pL->pPOS[i*3]);
-			    y.push_back(pL->pPOS[i*3+1]);
-			    z.push_back(pL->pPOS[i*3+2]);	
+			    //x.push_back(pL->pPOS[i*3]);
+			    //y.push_back(pL->pPOS[i*3+1]);
+			    //z.push_back(pL->pPOS[i*3+2]);	
 			  }
 
 			
@@ -214,12 +221,11 @@ int main(int argc, char* argv[])
 		TLogData result=GetAB<float>(R,x,y, opt.m_Rmax);
 		std::vector<float> AmRad=getAmMaxMeanR(result);//format R1, Am1, R2,  Am2, R3, Am3
 				
-		/////////////////////////////////
-		     
+		/////////////////////////////////		     
 		CPCA pca;
 		double phi=pca.GetCovarMatrix(mst_tree, 0);
 		fVec[14]=(float)phi;
-		mst_tree.dump(0);
+		//mst_tree.dump(0);
 		logAm.insert(isnap, result);		
 		logAmRR.insert(isnap, AmRad);
 		log.insert(isnap, fVec);

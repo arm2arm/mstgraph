@@ -187,7 +187,15 @@ T deg2rad(T v){return v*(T)(M_PI/180.0);};
 #define SafeFree(a) if(a!=NULL)delete a;
 
 
-void jacobi(std::vector<std::vector<float> > &a, int n, std::vector<float>  &d, std::vector<std::vector<float> > &v, int *nrot);
+//void jacobi(std::vector<std::vector<float> > &a, int n, std::vector<float>  &d, std::vector<std::vector<float> > &v, int *nrot);
+//////////////////////////////////////
+#include <cmath>
+#include <vector>
+
+void jacobi(std::vector<std::vector<double> > &a, int n, std::vector<double> &d, std::vector<std::vector<double> > &v, int *nrot, int ish=1);
+
+
+
 
 #endif
 
