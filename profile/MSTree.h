@@ -170,7 +170,8 @@ TF Wsph(TF rr, TF h)
 						    Wsph<float>(sqrt(ngblist[ingb].dis) , hsml);
 
 						}
-					if(i%100==0)cout<<i<<"\r";
+					if(m_verbose)
+						if(i%100==0)cout<<i<<"\r";
 					}
 
 				if(m_verbose)
