@@ -11,9 +11,13 @@ class CPCA
 		~CPCA(void);
 		double  GetCovarMatrix( CMSTree &mst, int ID=0);
 		void GetPCA(void){};
-void GetPCAXYZ(vector<double> &x, vector<double> &y, vector<double> &z, vector<double> &eigen, vector<double> &eigenvalue);
+		void eigen (vector<vector<double> > &a, vector<double> &eigen, vector<vector<double> > &eigenvec);
+void GetPCAXYZ(vector<double> &x, vector<double> &y, vector<double> &z);
+inline double Phi(){return m_Phi;};
 	private:
-		//TMSTCat m_MSTCatalog;
+		vector<double>  eigenvals;
+		std::vector<std::vector<double> > eigenvec;
+		double m_Phi;
 bool verbose;
 	};
 

@@ -193,7 +193,7 @@ T deg2rad(T v){return v*(T)(M_PI/180.0);};
 #include <vector>
 
 void jacobi(std::vector<std::vector<double> > &a, int n, std::vector<double> &d, std::vector<std::vector<double> > &v, int *nrot, int ish=1);
-
+void eigsrt(std::vector<double>  &d, std::vector<std::vector<double> > &v, int n);
 
 
 
