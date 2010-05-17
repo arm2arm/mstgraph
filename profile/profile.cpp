@@ -11,6 +11,27 @@
 #include <numeric>
 #include <valarray>
 #include <functional>
+using std::string;
+template <typename T>
+ void dump_xyz(vector<T>&x,vector<T> &y,vector<T> &z, std::string filename="dum_points.log")
+		    {
+		      cout<<"dumping";
+		      std::string fname=filename;
+		      ofstream of(fname.c_str());
+		      if(of.is_open())
+		       for(size_t ip=0;ip<x.size();ip++)
+			{
+			  if((ip%10000)==0)
+			    cout<<".";
+			  cout.flush();
+				  of<<std::setw(12)<<std::setprecision(7)<<x[ip]<<" "<<y[ip]<<" "<<z[ip]<<endl;
+			  
+			}
+		       of.close();
+		       cout<<"done!"<<endl;
+		    }
+
+
 template<class T> 
 std::vector<T> smooth(std::vector<T> &v)
 	{
@@ -176,29 +197,32 @@ int main(int argc, char* argv[])
 		///////////////////////////////////
 		//cout<<"COM: "<<pL->m_COM[0]<<" "<<pL->m_COM[1]<<" "<<pL->m_COM[2]<<endl;
 		for(unsigned int i=0, ig=0, ist=0;i<pL->m_nelem-1;i++)// -1 to exclude BH particle
-		  	if( pL->pType[i] == 4 ){
+		  //if( pL->pType[i] == 4 )
+		    {
 				x.push_back(pL->pPOS[i*3]);
 				y.push_back(pL->pPOS[i*3+1]);
 				z.push_back(pL->pPOS[i*3+2]);			      
 				}
+
 		CMSTree mst_tree(x,y,z, opt.m_eps, opt.m_min_npart, opt.m_NGB);
 		
 		pL->MoveToCOM(&mst_tree.m_MSTCatalog[0].wcom[0]);
 		std::transform( x.begin(), x.end(), x.begin(),std::bind2nd( std::minus<float>(), mst_tree.m_MSTCatalog[0].wcom[0]) );
 		std::transform( y.begin(), y.end(), y.begin(),std::bind2nd( std::minus<float>(), mst_tree.m_MSTCatalog[0].wcom[1]) );
 		std::transform( z.begin(), z.end(), z.begin(),std::bind2nd( std::minus<float>(), mst_tree.m_MSTCatalog[0].wcom[2]) );
-
-		//x.clear();y.clear();z.clear();R.clear();
+		dump_xyz(x, y, z);
+		//x.clear();y.clear();z.clear();
+		R.clear();
 		for(unsigned int i=0, ig=0, ist=0;i<pL->m_nelem-1;i++)// -1 to exclude BH particle
 			{
-			float rr=pL->R(i);
+			  float rr=pL->R(i);//
 
-			idxR.push_back(i);
+			  // idxR.push_back(i);
 			if(pL->pType[i] == 0)ig++;
 			if(pL->pType[i] == 4)
 			  {
 			    ist++;
-			    R.push_back(rr);
+			    R.push_back(sqrt(x[i]*x[i]+y[i]*y[i]+z[i]*z[i]));
 			    //x.push_back(pL->pPOS[i*3]);
 			    //y.push_back(pL->pPOS[i*3+1]);
 			    //z.push_back(pL->pPOS[i*3+2]);	
@@ -219,17 +243,18 @@ int main(int argc, char* argv[])
 			}
 		///////////////////////////////////
 
-		TLogData result=GetAB<float>(R,x,y, opt.m_Rmax);
+		TLogData result=GetAB<float>(R,x,y, 8, 0.1);//opt.m_Rmax);
 		std::vector<float> AmRad=getAmMaxMeanR(result);//format R1, Am1, R2,  Am2, R3, Am3
 				
 		/////////////////////////////////		     
 		CPCA pca;
 		double phi=pca.GetCovarMatrix(mst_tree, 0);
 		fVec[14]=(float)phi;
-		//mst_tree.dump(0);
+		mst_tree.dump(0);
 		logAm.insert(isnap, result);		
 		logAmRR.insert(isnap, AmRad);
 		log.insert(isnap, fVec);
+		pca.dump();
 		///////////////////////////////
 		}
 		delete pL;
