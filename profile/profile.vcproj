@@ -117,7 +117,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="C:\Program Files\GnuWin32\include"
+				AdditionalIncludeDirectories="&quot;C:\Program Files\GnuWin32\include&quot;;CImg/"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -205,6 +205,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Render.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\utils.cpp"
 				>
 			</File>
@@ -244,6 +248,10 @@
 			</File>
 			<File
 				RelativePath=".\PCA.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Render.h"
 				>
 			</File>
 			<File

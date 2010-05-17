@@ -1,5 +1,6 @@
 #include "PCA.h"
 #include "utils.h"
+#include  "Render.h"
 #include <vector>
 using std::vector;
 //////////////////////////
@@ -395,8 +396,7 @@ void CPCA::GetPCAXYZ(vector<double> &x, vector<double> &y, vector<double> &z)
 			//exit(0); 
 	}
 
-#include <gsl/gsl_math.h>
-#include <gsl/gsl_eigen.h>
+
 void CPCA::eigen (vector<vector<double> > &a, vector<double> &eigenvalue, vector<vector<double> > &eigenvec)
 	{
 	size_t n=a.size()-1;
