@@ -137,8 +137,9 @@ int main(int argc, char* argv[])
 	{
     scoped_timer timemme("Main program Profiler :.....");
 	COptions opt(argc, argv);
-//	CPCA pca;
-//	pca.GetPCA();
+	//CPCA pca;
+	//vector<double> d;
+	//pca.eigen(d);
 
 	if(opt.is_bad())
 		return EXIT_FAILURE;

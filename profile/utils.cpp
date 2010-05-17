@@ -106,6 +106,26 @@ void jacobi(std::vector<std::vector<double> > &a, int n, std::vector<double> &d,
 	std::cerr<<"Too many iterations in routine jacobi"<<std::endl;
 }
 #undef ROTATE
+void eigsrt(std::vector<double>  &d, std::vector<std::vector<double> > &v, int n)
+{
+        int k,j,i;
+        double p;
+
+        for (i=1;i<n;i++) {
+                p=d[k=i];
+                for (j=i+1;j<=n;j++)
+                        if (d[j] >= p) p=d[k=j];
+                if (k != i) {
+                        d[k]=d[i];
+                        d[i]=p;
+                        for (j=1;j<=n;j++) {
+                                p=v[j][i];
+                                v[j][i]=v[j][k];
+                                v[j][k]=p;
+                        }   
+                }   
+        }   
+}
 
 /* (C) Copr. 1986-92 Numerical Recipes Software ,2kB. */
 //////////////////////////////////////
