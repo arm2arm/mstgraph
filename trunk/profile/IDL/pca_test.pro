@@ -95,7 +95,7 @@ xx=scale_vector(findgen(11), -1, 1)
 tvellipse,abs(scx),abs(scy),0,0,PhiBar,thick=10, /MAJOR, /MINOR, /DATA,  color=fsc_color("cyan")
 
 fAmrad=LogBase+'AmRad.log'
-;!P.thick=5
+!P.thick=10
 Amrad=read_ascii(fAmrad, comment_symbol='#')
 circle, 0,0,Amrad.field1[1], fsc_color("red")
 circle, 0,0,Amrad.field1[3], fsc_color("green")
