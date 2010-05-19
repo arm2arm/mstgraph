@@ -47,7 +47,10 @@ public:
 	~CMSTGroup(){id.clear();};
 	/// For sorting
 	friend bool operator<(const CMSTGroup& left,const CMSTGroup& right);
-
+	/*CMSTGroup& CMSTGroup::operator=(const CMSTGroup& p)
+		{
+		
+		}*/
 	friend std::ostream& operator<<(std::ostream& os, const CMSTGroup& g)
 		{
 		os.width(1);
@@ -81,7 +84,26 @@ public:
 
 		return os;
 		}
+	friend std::istream &operator>>(std::istream& is,  CMSTGroup& g){
+		
+		is>>g.ID
+		>>g.Ntotal
+		>>g.com[0]
+		>>g.com[1]
+		>>g.com[2]
 
+		>>g.wcom[0]
+		>>g.wcom[1]
+		>>g.wcom[2]
+
+		>>g.wvel[0]
+		>>g.wvel[1]
+		>>g.wvel[2];
+
+
+		return is;
+	 
+	 }
 	void DoneInsert(int i=0)
 		{
 		ID=i;

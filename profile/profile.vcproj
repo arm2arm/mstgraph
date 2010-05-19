@@ -205,10 +205,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Render.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\utils.cpp"
 				>
 			</File>
@@ -248,10 +244,6 @@
 			</File>
 			<File
 				RelativePath=".\PCA.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Render.h"
 				>
 			</File>
 			<File

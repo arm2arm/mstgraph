@@ -3,6 +3,7 @@
 
 CMSTree::~CMSTree(void)
 	{
+	save();
 	delete tree;
 
 	}
