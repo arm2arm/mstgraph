@@ -197,7 +197,7 @@ int main(int argc, char* argv[])
 		///////////////////////////////////
 		//cout<<"COM: "<<pL->m_COM[0]<<" "<<pL->m_COM[1]<<" "<<pL->m_COM[2]<<endl;
 		for(unsigned int i=0, ig=0, ist=0;i<pL->m_nelem-1;i++)// -1 to exclude BH particle
-		  //if( pL->pType[i] == 4 )
+		  if( pL->pType[i] == 4 )
 		    {
 				x.push_back(pL->pPOS[i*3]);
 				y.push_back(pL->pPOS[i*3+1]);
@@ -221,11 +221,9 @@ int main(int argc, char* argv[])
 			if(pL->pType[i] == 0)ig++;
 			if(pL->pType[i] == 4)
 			  {
-			    ist++;
-			    R.push_back(sqrt(x[i]*x[i]+y[i]*y[i]+z[i]*z[i]));
-			    //x.push_back(pL->pPOS[i*3]);
-			    //y.push_back(pL->pPOS[i*3+1]);
-			    //z.push_back(pL->pPOS[i*3+2]);	
+			    
+			    R.push_back(sqrt(x[ist]*x[ist]+y[ist]*y[ist]+z[ist]*z[ist]));
+				ist++;
 			  }
 
 			

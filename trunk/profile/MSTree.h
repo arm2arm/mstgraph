@@ -47,16 +47,21 @@ class CMSTree
 		CMSTree(vector<float> &x, vector<float> &y,vector<float>  &z,
 			float afof_eps=0.05,
 			size_t min_num=100,
-			size_t MAXNGB=15):
-		m_x(x),m_y(y),m_z(z),dim(3),m_afof_eps(afof_eps),m_min_num(min_num),m_maxNGB(MAXNGB), tree(NULL), m_verbose(false){			
-
-		  cout<<"geting NGB:"<<m_maxNGB<<endl;
-			FillData();
-			BuildKDTree();
-			BuildGraph();
-			GetMST();
-			//CompileCATS();
-
+			size_t MAXNGB=15, bool update=true, std::string fname_="mst_group"):
+		m_x(x),m_y(y),m_z(z),dim(3),m_afof_eps(afof_eps),m_min_num(min_num),m_maxNGB(MAXNGB), 
+			fname(fname_),
+			tree(NULL), m_verbose(false){
+				fnameidx=fname+".grp.idx";
+				fname+=".grp.txt";
+				//if(!update && !load())
+					{
+					cout<<"geting NGB:"<<m_maxNGB<<endl;
+					FillData();
+					BuildKDTree();
+					BuildGraph();
+					GetMST();
+					//CompileCATS();
+					}
 			};
 		~CMSTree(void);
 		void GetMST()
@@ -85,11 +90,11 @@ class CMSTree
 				//cout << "Vertex " << i <<" is in component " << component[i] << endl;
 				m_MSTCatalog[component[i]].insert(i,m_x[i],m_y[i],m_z[i], rho[i]*rho[i] );				
 				}
-		
+
 			cout<<"done compiling"<<endl;
-		
-						
-//sort them by size
+
+
+			//sort them by size
 			std::sort(m_MSTCatalog.begin(),m_MSTCatalog.end()); 
 			num = std::count_if(m_MSTCatalog.begin(), m_MSTCatalog.end(), IfGt<int>(m_min_num));
 			cout << "Total number of components where Np>"<<m_min_num<<" : " << num << endl;
@@ -97,12 +102,12 @@ class CMSTree
 				{// compile position and velocity
 				m_MSTCatalog[i].DoneInsert(i);
 				if(m_verbose)
-				  cout<<m_MSTCatalog[i]<<endl;
+					cout<<m_MSTCatalog[i]<<endl;
 				}
 			if(!m_verbose && m_MSTCatalog.size()!=0)
-			  cout<<m_MSTCatalog[0]<<endl;
+				cout<<m_MSTCatalog[0]<<endl;
 			cout <<"Done catalogues"<< endl;
-			
+
 
 			};
 		void FillData()
@@ -111,11 +116,11 @@ class CMSTree
 			N=m_x.size();
 			realdata.resize(boost::extents[N][dim]);
 			for (i=0; i<N; i++) {				
-					realdata[i][0] = m_x[i];
-					realdata[i][1] = m_y[i];
-					realdata[i][2] = m_z[i];				
+				realdata[i][0] = m_x[i];
+				realdata[i][1] = m_y[i];
+				realdata[i][2] = m_z[i];				
 				}
-			
+
 			}
 		void BuildKDTree()
 			{
@@ -124,20 +129,20 @@ class CMSTree
 			tree->sort_results = true;
 			std::cout<<".DONE."<< std::endl;
 			}
-template<class TF>
-TF Wsph(TF rr, TF h)
-	{
-	TF retval=0;
-	TF u=rr/h;
-	if(0<=u&&u<=1 )
-		retval=1.0f-3.0f/2.0f*u*u+3.0f/4.0f*u*u*u;
-	else
-		if(1<u&&u<=2)
-			retval=1.0f/4.0f*(2.0f-u)*(2.0f-u)*(2.0f-u);
-		else
-			return 0;
-	return retval/(3.1456f*h*h*h);
-	}
+		template<class TF>
+		TF Wsph(TF rr, TF h)
+			{
+			TF retval=0;
+			TF u=rr/h;
+			if(0<=u&&u<=1 )
+				retval=1.0f-3.0f/2.0f*u*u+3.0f/4.0f*u*u*u;
+			else
+				if(1<u&&u<=2)
+					retval=1.0f/4.0f*(2.0f-u)*(2.0f-u)*(2.0f-u);
+				else
+					return 0;
+			return retval/(3.1456f*h*h*h);
+			}
 		void BuildGraph()
 			{
 			std::cout << "Build the FOFGraph..." ;
@@ -166,8 +171,8 @@ TF Wsph(TF rr, TF h)
 					float hsml=sqrt(ngblist[ngblist.size()-1].dis);
 					for(size_t ingb=0;ingb<ngblist.size();ingb++)
 						{
-						  rho[i]+=
-						    Wsph<float>(sqrt(ngblist[ingb].dis) , hsml);
+						rho[i]+=
+							Wsph<float>(sqrt(ngblist[ingb].dis) , hsml);
 
 						}
 					if(m_verbose)
@@ -175,18 +180,18 @@ TF Wsph(TF rr, TF h)
 					}
 
 				if(m_verbose)
-				  report_components( graphFOF,false);
+					report_components( graphFOF,false);
 				//delete pKernel;
 				std::cout<<".DONE."<< std::endl;
 				}
 			}
-		
+
 		float Distance2(size_t i, size_t j)
 			{
-			  float distx=(m_x[i]-m_x[j]);
-			  float disty=(m_y[i]-m_y[j]);
-			  float distz=(m_z[i]-m_z[j]);
-			  return distx*distx+disty*disty+distz*distz;
+			float distx=(m_x[i]-m_x[j]);
+			float disty=(m_y[i]-m_y[j]);
+			float distz=(m_z[i]-m_z[j]);
+			return distx*distx+disty*disty+distz*distz;
 			}
 		template <class Graph>
 		void report_components(Graph& g, bool full_verbose=false) 
@@ -206,23 +211,70 @@ TF Wsph(TF rr, TF h)
 			cout << endl;
 
 			}
-		  void dump(int ig)
-		    {
-		      std::string fname=string("part_ig")+boost::lexical_cast<std::string>(ig)+string(".ascii");
-		      ofstream of(fname.c_str());
-		       for(size_t i=0;i<m_MSTCatalog[ig].id.size();i++)
+		void dump(int ig)
 			{
-			  int ip=m_MSTCatalog[ig].id[i];
-			  if(of.is_open())
-				  of<<std::setw(32)<<std::setprecision(16)<<m_x[ip]<<" "<<m_y[ip]<<" "<<m_z[ip]<<" "<<rho[ip]<<endl;
-			    else
-			    cout<<m_x[ip]<<" "<<m_y[ip]<<endl;
+			std::string fname=string("part_ig")+boost::lexical_cast<std::string>(ig)+string(".ascii");
+			ofstream of(fname.c_str());
+			if(of.is_open())
+				for(size_t i=0;i<m_MSTCatalog[ig].id.size();i++)
+					{
+					int ip=m_MSTCatalog[ig].id[i];
+
+						{
+						of<<std::setw(32)<<std::setprecision(16)<<m_x[ip]<<" "<<m_y[ip]<<" "<<m_z[ip]<<" "<<rho[ip]<<endl;
+						}
+					}
+				of.close();
 			}
-		       of.close();
-		    }
+
+
+		///////////////////////
+		void save(){
+
+			std::ofstream of(fname.c_str());
+			std::ofstream ofidx(fnameidx.c_str());
+
+			if(of.is_open())
+				{
+				if(m_MSTCatalog.size()!=0)
+					{
+					of<<m_MSTCatalog[0]<<endl;
+					std::copy(m_MSTCatalog[0].id.begin(),
+						m_MSTCatalog[0].id.end(), ostream_iterator<double>(ofidx," "));
+					}
+				}
+
+			of.close();
+			ofidx.close();
+			}
+		bool load(){
+			bool result=true;
+			////
+			std::ifstream stream(fname.c_str());
+			std::ifstream streamidx(fnameidx.c_str());
+			if(!stream.is_open()){
+				cerr<<"\nCannot open group file: "<<fname<<endl;
+				return false;
+				}
+			if(!stream.is_open()){
+				cerr<<"\nCannot open indexes for group file: "<<fname<<endl;
+				return false;
+				}
+			CMSTGroup grp; 
+			unsigned int idx;
+			stream>>grp;
+			for(int i=0;i<grp.Ntotal;i++)
+				{streamidx>>idx;grp.id.push_back(idx);}
+			m_MSTCatalog.push_back(grp);
+			stream.close();
+			streamidx.close();
+			////
+			return result;
+			}
+		///////////////////////
 
 	protected:
-/////////////////////////
+		/////////////////////////
 		int m_maxNGB;
 		kdtree2_result_vector ngblist, ngblistbrut;
 		array2dfloat realdata; 
@@ -234,11 +286,14 @@ TF Wsph(TF rr, TF h)
 		kdtree2*  tree;
 		Graph graphFOF;
 		bool m_verbose;
-public:
+		std::string fname;				    
+		std::string fnameidx;
+
+	public:
 		vector<float> &m_x;
 		vector<float> &m_y;
 		vector<float> &m_z;
-                vector<float> rho;
+		vector<float> rho;
 		TMSTCat m_MSTCatalog;
 
 
