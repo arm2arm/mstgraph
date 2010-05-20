@@ -58,13 +58,13 @@ COptions::COptions(int argc, char* argv[]):m_status(0)
 	//	printInputs(vm);
 
 		if(vm.count("snapshotList")) {
-			cout << "snapshot list detected" << endl;
-			cout<<"Parsing snapshot lists..."<<endl;
+			cout << "# snapshot list detected" << endl;
+			cout<<"# Parsing snapshot lists..."<<endl;
 			ParseSnapshotLists(m_snapshotList);
-			cout << "We will trace following snapshots:\n ";
+			cout << "# We will trace following snapshots:\n ";
 			for(std::vector<string>::iterator it=m_snapshotList.begin();it<m_snapshotList.end(); it++)
 				{
-				cout<<(*it);
+				  cout<<"# "<<(*it);
 				if(is_file_exist(*it)){
 					cout<<"..exist."<<endl;
 					m_status=EXIT_SUCCESS;
@@ -74,7 +74,7 @@ COptions::COptions(int argc, char* argv[]):m_status(0)
 					//m_status=EXIT_FAILURE;
 					}
 				}
-			cout << endl << endl;
+			//cout << endl << endl;
 			if(m_snapshotList.size()<1)
 				{
 				cout<<"Error: The minimum number of snapshots is 1."<<endl;
