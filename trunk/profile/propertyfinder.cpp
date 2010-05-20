@@ -24,39 +24,73 @@ int main(int argc, char* argv[])
 	unsigned int ParticleType=opt.m_type;
 	typedef std::vector<CLoader*> TLoader;
 	TLoader Lvec;
-
+	cout<<"# snap Ngas<1 Ngas<2 MBHinit MBH  sigVstar sigVdisk"<<endl;
 	for(size_t i=0;i<opt.m_snapshotList.size();i++)
 		{
 		unsigned int isnap=GetISnap(opt.m_snapshotList[i]);  
 		if(!is_file_exist(opt.m_snapshotList[i])){cout<<"skipping...isnap="<<isnap<<endl;continue;}
 
 
-		CLoader *pL=new CLoader(opt.m_snapshotList[i],0);
-		CLoader *pLBH=new CLoader(opt.m_snapshotList[i],5);
-
+		CLoader *pL=new CLoader(opt.m_snapshotList[i],6, true);//get vel as well
+		CLoader *pLBH=new CLoader(opt.m_snapshotList[i],5, true);
+		string path;
+		GetSnapPath(opt.m_snapshotList[i], path);
+		path=path+"/snap_m8_gal_sfr_bh_104";
+		CLoader *pLBHINIT=new CLoader(path,5);
+		
+		
 		///////////////////////////////
 		//Do something on Snaps.
-		pL->MoveToCOM(&pLBH->pPOS[0]);
+		float com[]={
+		  pLBH->pPOS[0], pLBH->pPOS[1],pLBH->pPOS[2],
+		  pLBH->pVEL[0],pLBH->pVEL[1],pLBH->pVEL[2]
+		};
+		pL->MoveToCOM(&com[0], 6);
 		///////////////////////////////
-		size_t ig1=0, ig2=0;
+		size_t ig1=0, ig2=0, istar=0;
+		vector<int> itype(6,0);
+		vector<double> sigV(6,0.0);
 		for(size_t i=0;i<pL->size();i++)
 		  {
-		    if(pL->R(i)<1.0)
+		    
+		    if(pL->pType[i]==0)
 		      {
-			ig1++;
-			
+			if(pL->R(i)<1.0 )
+			  {
+			    ig1++;
+			    
+			  }
+			if(pL->R(i)<2.0)
+			  {
+			    ig2++;
+			  }
 		      }
-		    if(pL->R(i)<2.0)
+		    if(pL->pType[i]==4 && pL->R(i)<1.5)
 		      {
-			ig2++;
+			sigV[4]+=pL->Get3DVel(i);
+			istar++;
+			itype[4]++;
+		      }
+		    if(pL->pType[i]==2 && pL->R(i)<1.5)
+		      {
+			sigV[2]+=pL->Get3DVel(i);
+			istar++;
+			itype[2]++;
 		      }
 		  }
+		for(size_t isig=0;isig<sigV.size();isig++)
+		  if(itype[isig]>0)
+		    sigV[isig]/=double(itype[isig]);
 		///////////////////////////////
 		cout.precision(10);
-		cout<<std::setw(12)<<std::fixed<<GetISnap(pL->m_fname)<<" "<<ig1<<" "<<ig2<<" "<<pLBH->GetBHMass()<<endl;		
+		cout<<std::setw(12)<<std::fixed<<GetISnap(pL->m_fname)<<" "
+		    <<ig1<<" "<<ig2<<" "
+		    <<pLBHINIT->GetBHMass()<<" "<<pLBH->GetBHMass()<<" "
+		    <<sigV[2]<<" "<<sigV[4]<<endl;		
 		///////////////////////////////
 		delete pL;
 		delete pLBH;
+		delete pLBHINIT;
 		}
 
 
