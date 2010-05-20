@@ -38,11 +38,11 @@ class strMover
 class CLoader
 	{
 	public:
-		CLoader(std::string fname, unsigned int ptype=0):
+		CLoader(std::string fname, unsigned int ptype=0, bool velflag=false):
 		  m_fname(fname),
 		  pSFR(NULL),
 		  pID(NULL), 
-		  pType(NULL),m_ptype(ptype), m_verbose(0)
+		  pType(NULL),pVEL(NULL),m_ptype(ptype), m_verbose(0)
 			{
 				CGadget *pG=new CGadget(fname, false);
 pG->m_verbose=0;
@@ -58,11 +58,13 @@ pG->m_verbose=0;
      if(nelem>0)
        m_BHDATA[1]=tdata[0];
      if(tdata!=NULL)delete [] tdata;
-     
+
    } 
                                 
 				unsigned int p_nelem = pG->read_blockv3(pPOS,"POS ", m_ptype);
                                  m_nelem=p_nelem;
+				 if(velflag)
+				   pG->read_blockv3(pVEL,"VEL ", m_ptype);
 				if(m_ptype==6)
 					{
 					pType= new int[m_nelem];
@@ -79,10 +81,16 @@ pG->m_verbose=0;
 			//	MoveToCOM<float>();
 				delete pG;
 			}
-		float R(unsigned int i){
+inline 		float R(unsigned int i){
 			float val=pPOS[i*3+0]*pPOS[i*3+0]+
 				pPOS[i*3+1]*pPOS[i*3+1]+
 				pPOS[i*3+2]*pPOS[i*3+2];
+			return sqrt(val);
+			}
+inline 		float Get3DVel(unsigned int i){
+			float val=pVEL[i*3+0]*pVEL[i*3+0]+
+				pVEL[i*3+1]*pVEL[i*3+1]+
+				pVEL[i*3+2]*pVEL[i*3+2];
 			return sqrt(val);
 			}
 inline 		float GetBHMass(int i=0){return m_BHDATA[i*2];}
@@ -100,10 +108,10 @@ inline 		float GetBHDOTMass(int i=0){return m_BHDATA[i*2+1];}
 			}
 
 	template<class T>
-	  void MoveToCOM(T *com=NULL){
-		  const	unsigned int stride=3;
+	  void MoveToCOM(T *com=NULL,unsigned int ncom=3 ){
+	  const unsigned int stride=3;
 		  if(com!=NULL)
-		    for(size_t i=0;i<stride;i++)
+		    for(size_t i=0;i<ncom;i++)
 		      m_COM[i]=static_cast<float>(com[i]);
 		  for(size_t ip=0;ip<m_nelem;ip++)
 		    {
@@ -111,6 +119,14 @@ inline 		float GetBHDOTMass(int i=0){return m_BHDATA[i*2+1];}
 		    pPOS[ip*stride+1] -= m_COM[1];
 		    pPOS[ip*stride+2] -= m_COM[2]; 
 		    }
+		  if(ncom ==6 && pVEL!=NULL)
+		  for(size_t ip=0;ip<m_nelem;ip++)
+		    {
+		      pVEL[ip*stride]   -= m_COM[3];
+		      pVEL[ip*stride+1] -= m_COM[4];
+		      pVEL[ip*stride+2] -= m_COM[5]; 
+		    }
+		  
 		  /* std::transform ( m_COM, m_COM+3, m_COM, std::negate<float>() );		  
 		  generator<unsigned int> gen(0, 0);
 		  vector<unsigned int> idx(m_nelem);
@@ -160,6 +176,8 @@ inline 		float GetBHDOTMass(int i=0){return m_BHDATA[i*2+1];}
 				delete[] pSFR;
 			if(pPOS!=NULL)
 				delete [] pPOS;
+			if(pVEL!=NULL)
+			  delete [] pVEL;
 			if(m_verbose==2)std::cout<<"exiting..."<<m_fname<<std::endl;
 			}
 		inline size_t size(){return m_nelem;}
@@ -172,7 +190,8 @@ inline 		float GetBHDOTMass(int i=0){return m_BHDATA[i*2+1];}
 		int *pType;
 		float *pSFR;
 		float *pPOS;
-		float m_COM[3];
+		float *pVEL;
+		float m_COM[6];
 		float m_BHDATA[2];//Mbh, DOTMbh
 		int m_verbose;
 	};

@@ -61,7 +61,7 @@ COptions::COptions(int argc, char* argv[]):m_status(0)
 			cout << "# snapshot list detected" << endl;
 			cout<<"# Parsing snapshot lists..."<<endl;
 			ParseSnapshotLists(m_snapshotList);
-			cout << "# We will trace following snapshots:\n ";
+			cout << "# We will trace following snapshots:\n";
 			for(std::vector<string>::iterator it=m_snapshotList.begin();it<m_snapshotList.end(); it++)
 				{
 				  cout<<"# "<<(*it);
