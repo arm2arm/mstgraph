@@ -94,6 +94,10 @@ link_directories (${PROFILER_BINARY_DIR}  ${Boost_LIBRARY_DIRS} )
   # Link the executable to the Hello library.
   target_link_libraries (profile.x ${Boost_LIBRARIES} )
 
+add_executable (propertyfinder.x MSTGroup.cpp MSTree.cpp kdtree2.cpp PCA.cpp  data_readers.cpp utils.cpp options.cpp  propertyfinder.cpp )
+
+  # Link the executable to the Hello library.
+  target_link_libraries (propertyfinder.x ${Boost_LIBRARIES} )
 
 # ----------------------------------------------------------
 # install target                                            

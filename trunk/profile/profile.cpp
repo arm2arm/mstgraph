@@ -210,7 +210,7 @@ int main(int argc, char* argv[])
 		std::transform( x.begin(), x.end(), x.begin(),std::bind2nd( std::minus<float>(), mst_tree.m_MSTCatalog[0].wcom[0]) );
 		std::transform( y.begin(), y.end(), y.begin(),std::bind2nd( std::minus<float>(), mst_tree.m_MSTCatalog[0].wcom[1]) );
 		std::transform( z.begin(), z.end(), z.begin(),std::bind2nd( std::minus<float>(), mst_tree.m_MSTCatalog[0].wcom[2]) );
-		dump_xyz(x, y, z);
+		//dump_xyz(x, y, z);
 		//x.clear();y.clear();z.clear();
 		R.clear();
 		for(unsigned int i=0, ig=0, ist=0;i<pL->m_nelem-1;i++)// -1 to exclude BH particle

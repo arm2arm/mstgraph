@@ -159,7 +159,7 @@ public:
 //		m_end=getticks();
 //		double clock_cycles=elapsed(m_end, m_start);
 		std::cout<<std::setprecision(2)<<std::fixed;
-		std::cout <<" "<<m_text<< " done in " << ( stop - start_).total_milliseconds() << " milli seconds "<<std::endl;
+		std::cout <<"# "<<m_text<< " done in " << ( stop - start_).total_milliseconds() << " milli seconds "<<std::endl;
 		std::cout<<std::setprecision(16)<<std::fixed;
 		}
 protected:

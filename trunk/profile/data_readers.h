@@ -594,12 +594,14 @@ class CGadget : public  CReaders
 		template <class T> unsigned int read_full_block(T *&pV, const char *name, int np)
 			{
 			int nall=np;
+			
 			pV=new T[nall];
 			unsigned int sizeall=find_block(&m_file, name);
 			if(m_verbose==2)cout<<name<<endl;				
 			if(sizeall<1) return 0;
 			SeekToType(&m_file,0, sizeof(T));
-			GetBlk(&m_file, &blk);		
+			GetBlk(&m_file, &blk);
+			if(m_verbose==2)cout<<"reading:"<<nall<<endl;
 			my_fread(pV, sizeof(T)*nall, 1, &m_file);
 			swap_Nbyte((char*)pV,nall,4);
 			return nall;

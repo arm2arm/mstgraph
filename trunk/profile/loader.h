@@ -38,23 +38,28 @@ class strMover
 class CLoader
 	{
 	public:
-		CLoader(std::string fname, unsigned int ptype=0):m_fname(fname),pID(NULL), pType(NULL),m_ptype(ptype)
+		CLoader(std::string fname, unsigned int ptype=0):
+		  m_fname(fname),
+		  pSFR(NULL),
+		  pID(NULL), 
+		  pType(NULL),m_ptype(ptype), m_verbose(0)
 			{
 				CGadget *pG=new CGadget(fname, false);
 pG->m_verbose=0;
-				//m_nelem = pG->read_block<int>(pID,
-                //"ID  ",
-                //m_ptype);
-		//		//m_nelem=10;/just for debugging
-		//		if(m_nelem<1)
-		//			{
-		//			std::cout<<"Cannot open file, exiting"<<std::endl;
-		///			exit(1);
-		//			}
-				/*for(unsigned int i=0;i<m_nelem;i++)
-					data.insert(particleID(pID[i], i));*/
-				///////////////////////////////////////////
-		//		get_com_bypot(pG);
+ if(m_ptype==5)
+   {
+     //     pG->m_verbose=2;
+     int np=pG->myhead.npart[5];
+     float *tdata=NULL;//=new float[np];
+     unsigned int nelem = pG->read_full_block<float>(tdata, "BHMA", np);
+     if(nelem>0)
+       m_BHDATA[0]=tdata[0];
+     nelem = pG->read_full_block<float>(tdata, "BHMD", np);
+     if(nelem>0)
+       m_BHDATA[1]=tdata[0];
+     if(tdata!=NULL)delete [] tdata;
+     
+   } 
                                 
 				unsigned int p_nelem = pG->read_blockv3(pPOS,"POS ", m_ptype);
                                  m_nelem=p_nelem;
@@ -80,6 +85,8 @@ pG->m_verbose=0;
 				pPOS[i*3+2]*pPOS[i*3+2];
 			return sqrt(val);
 			}
+inline 		float GetBHMass(int i=0){return m_BHDATA[i*2];}
+inline 		float GetBHDOTMass(int i=0){return m_BHDATA[i*2+1];}
 		void get_com_bypot(CGadget *pG)
 			{
 				float *pP;
@@ -153,8 +160,9 @@ pG->m_verbose=0;
 				delete[] pSFR;
 			if(pPOS!=NULL)
 				delete [] pPOS;
-			std::cout<<"exiting..."<<m_fname<<std::endl;
+			if(m_verbose==2)std::cout<<"exiting..."<<m_fname<<std::endl;
 			}
+		inline size_t size(){return m_nelem;}
 		particlesID_set data;//keeping relation for ID, IDf
 		std::string m_fname;
 		size_t m_nelem;
@@ -165,6 +173,8 @@ pG->m_verbose=0;
 		float *pSFR;
 		float *pPOS;
 		float m_COM[3];
+		float m_BHDATA[2];//Mbh, DOTMbh
+		int m_verbose;
 	};
 
 
