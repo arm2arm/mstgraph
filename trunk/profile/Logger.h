@@ -35,10 +35,10 @@ public:
         bool is_done(unsigned int isnap)
 	{return m_append&&(m_data.find(isnap)!=m_data.end());}
 	//////////// IO ////////
-	/*	void load()//moved to data_readers/ CAsciiReader
-		{
-		 ReadAsciiFile(); 
-		 };*/
+	//		void load()//moved to data_readers/ CAsciiReader
+	//{
+	//
+	// };
 	bool write(string filename)
 		{
 		std::ofstream stream(filename.c_str());
@@ -88,6 +88,7 @@ class CLoggerAm{
 public:
 	CLoggerAm(std::string file, bool update=false):m_filename(file), m_update(update)
 		{
+		  load();
 		}
 	~CLoggerAm(){save();}
 	void flush(){save();};
@@ -110,6 +111,39 @@ public:
 				cout<<"ERROR: cannot open log file for writing:"<<"dump.log"<<endl;
 				}
 		}
+	bool load()
+	  {
+
+	    std::ifstream stream(filename.c_str());
+	    if(stream.is_open())
+	      {
+			stream.getline()>>"# "<<m_comment<<endl;
+			TLogDataMap::iterator it;
+			for ( it=m_data.begin() ; it != m_data.end(); it++ )
+				{
+				stream <<"# "<< (*it).first << "\n"; 
+				TLogData::iterator itdata=(*it).second.begin();
+				size_t nj=(*it).second.size();
+				size_t ni=(*it).second.begin()->size();
+				for(size_t i=0;i<ni;i++)
+					{
+					for(size_t j=0;j<nj;j++)
+						{
+						stream<<(*it).second[j][i]<<"\t";
+						}
+					stream<<endl;
+					}
+				stream<<"\n\n"<<endl;
+				}
+
+			}else{
+				stream.close();
+				return false;
+			}
+		
+		stream.close();
+		return true;
+	  }
 private:
 	bool write(string filename)
 		{
