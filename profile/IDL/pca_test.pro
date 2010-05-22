@@ -12,15 +12,22 @@ return, sqrt(a[0]*a[0]+a[1]*a[1])
 end
 
 device,retain=2,decomposed=0
-
+;;;;;;;;;;;;;;;;;;;; Windows Models
 ImageBase='c:\arm2arm\'
 SnapBase='C:\arm2arm\DATA\MODEL7\MODELS\MODEL7\RUNG2\SNAPS\'
 LogBase='C:\Documents and Settings\arm2arm\Mes documents\Visual Studio 2008\Projects\mstgraph\profile\'
-file=SnapBase+'snap_gal_sfr_0450'
+SnapName='snap_gal_sfr_0450'
+;;;;;;;;;;;;;;;;;;;;;
+;;Linux Models....
+model='04'
+SnapName='snap_m8_gal_sfr_bh_450'
+SnapBase='/dnas01/arm2arm/DATA/LIA/SPHBAR/NFW/MODEL8_BH_EXPLORE/BH/ISOLMODEL'+model+'/SNAPS/'
+LogBase='/dnas01/arm2arm/DATA/LIA/SPHBAR/NFW/MODEL8_BH_EXPLORE/BH/ISOLMODEL'+model+'/'
 
-
+file=SnapBase+snapname
 readnew, file, pos, "POS", parttype=4
-readnew, file+'_rho_4', rhoin, "RHO4"
+if( FILE_TEST(file+'_rho_4')) then $
+readnew, file+'_rho_4', rhoin, "RHO4" else rhoin=pos(0,*)*0+1.0
 fas=LogBase+'part_ig0.ascii'
 data=read_ascii(fas)
 data=DOUBLE(data.field1)
@@ -59,7 +66,7 @@ np=double(n_elements(x))
 
 ip=randomu(10, np*0.1)*np
 oplot, data[0,ip], data[1,ip], psym=4,symsize=0.1, color=fsc_color('red')
-oplot, [0], [0], psym=1, symsize=100, color=fsc_color('grey'), linestyle=2
+oplot, [0], [0], psym=1, symsize=100, color=fsc_color('gray'), linestyle=2
 
 
 
@@ -97,13 +104,14 @@ tvellipse,abs(scx),abs(scy),0,0,PhiBar,thick=10, /MAJOR, /MINOR, /DATA,  color=f
 fAmrad=LogBase+'AmRad.log'
 !P.thick=10
 Amrad=read_ascii(fAmrad, comment_symbol='#')
-circle, 0,0,Amrad.field1[1], fsc_color("red")
-circle, 0,0,Amrad.field1[3], fsc_color("green")
-circle, 0,0,Amrad.field1[5], fsc_color("blue")
+mycircle, 0,0,Amrad.field1[1], fsc_color("red")
+mycircle, 0,0,Amrad.field1[3], fsc_color("green")
+mycircle, 0,0,Amrad.field1[5], fsc_color("blue")
 unset_eps
 ;; Plot the second image
 set_teck_eps, ImageBase+'Rm2_m7_0450.eps',  8, 8
 fProf=LogBase+'Amf.log'
+print, 'Reading: ', fProf
 Am2=read_ascii(fProf, comment_symbol='#')
 
 Am=Am2.field1[0:1,*]
@@ -115,6 +123,7 @@ oplot, [0,0]+Amrad.field1[3], [0,1], color=fsc_color("green")
 oplot, [0,0]+Amrad.field1[5], [0,1], color=fsc_color("blue")
 
 unset_eps
+
 
 
 print, "...done..."
