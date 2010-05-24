@@ -241,7 +241,7 @@ int main(int argc, char* argv[])
 			}
 		///////////////////////////////////
 
-		TLogData result=GetAB<float>(R,x,y, 8, 0.1);//opt.m_Rmax);
+		TLogData result=GetAB<float>(R,x,y, 8, 0.1f);//opt.m_Rmax);
 		std::vector<float> AmRad=getAmMaxMeanR(result);//format R1, Am1, R2,  Am2, R3, Am3
 				
 		/////////////////////////////////		     

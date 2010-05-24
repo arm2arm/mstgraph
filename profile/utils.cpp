@@ -25,6 +25,16 @@ unsigned int GetISnap(std::string str)
 	return val;
 	}
 
+size_t count_nonblanks(std::string &line)
+	{
+	size_t numSpaces = static_cast<std::size_t>(std::count(line.begin(), line.end(), ' '));
+	numSpaces += static_cast<std::size_t>(std::count(line.begin(), line.end(), '\t'));
+	return numSpaces;
+	}
+
+
+///////////////////////////////////////////
+
 #define ROTATE(a,i,j,k,l) g=a[i][j];h=a[k][l];a[i][j]=g-s*(h+g*tau);\
 	a[k][l]=h+s*(g-h*tau);
 
