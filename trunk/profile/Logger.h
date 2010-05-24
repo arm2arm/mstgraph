@@ -2,6 +2,7 @@
 #define _LOGGER_
 #include "loader.h"
 #include "utils.h"
+#include <iterator>
 struct TData
 	{
 	std::vector<float> v;
@@ -111,39 +112,52 @@ public:
 				cout<<"ERROR: cannot open log file for writing:"<<"dump.log"<<endl;
 				}
 		}
-	bool load()
-	  {
 
-	    std::ifstream stream(filename.c_str());
-	    if(stream.is_open())
-	      {
-			stream.getline()>>"# "<<m_comment<<endl;
-			TLogDataMap::iterator it;
-			for ( it=m_data.begin() ; it != m_data.end(); it++ )
+	bool load()
+		{
+		std::ifstream stream(m_filename.c_str());
+		if(stream.is_open())
+			{
+			
+			int isnap;
+			char ch;
+			std::string oneline;
+			std::getline(stream,oneline, '\n');//skip comments
+			//while(std::getline(stream,oneline, '\n'))
 				{
-				stream <<"# "<< (*it).first << "\n"; 
-				TLogData::iterator itdata=(*it).second.begin();
-				size_t nj=(*it).second.size();
-				size_t ni=(*it).second.begin()->size();
-				for(size_t i=0;i<ni;i++)
+				
+				for(;;)
 					{
-					for(size_t j=0;j<nj;j++)
+					if(!std::getline(stream,oneline, '\n'))break;
+					if(count_nonblanks(oneline)==0)continue;
+					istringstream in(oneline);
+					in>>ch>>isnap;
+					
+					
+					//fill one profile
+					for(;;)
 						{
-						stream<<(*it).second[j][i]<<"\t";
+						std::vector<float> vec;
+						std::getline(stream,oneline, '\n');
+						if(count_nonblanks(oneline))
+							{
+							istringstream in(oneline);
+							std::copy(std::istream_iterator<float>(in),std::istream_iterator<float>(), std::back_inserter(vec)); 
+							m_data[isnap].push_back(vec);
+							}else break;
 						}
-					stream<<endl;
 					}
-				stream<<"\n\n"<<endl;
+					
 				}
 
 			}else{
 				stream.close();
 				return false;
 			}
-		
+
 		stream.close();
 		return true;
-	  }
+		}
 private:
 	bool write(string filename)
 		{

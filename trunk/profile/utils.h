@@ -165,6 +165,8 @@ public:
 protected:
 	
 	};
+///////////////////////////////////////////
+size_t count_nonblanks(std::string &str);
 ///////////////// USED by REGEX ///////////
 template<class In,class Out,class Pred, class Op>
 Out transform_if(In first,In last,Out res,Pred p,Op op)
