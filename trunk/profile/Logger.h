@@ -132,8 +132,6 @@ public:
 					if(count_nonblanks(oneline)==0)continue;
 					istringstream in(oneline);
 					in>>ch>>isnap;
-					
-					
 					//fill one profile
 					for(;;)
 						{

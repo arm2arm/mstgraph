@@ -395,7 +395,95 @@ void CPCA::GetPCAXYZ(vector<double> &x, vector<double> &y, vector<double> &z)
 			cout<<"\nPhi="<<m_Phi<<"\n"<<endl;
 			//exit(0); 
 	}
+void CPCA::GetPCAXYZVEL(vector<double> &x, vector<double> &y, vector<double> &z,vector<double> &vx, vector<double> &vy, vector<double> &vz)
+	{
+	size_t i;
+	vector<vector<double> > Cov( 4, vector<double>(4, 0.0));
+	vector<vector<double> > AngularMomentum( 4, vector<double>(4, 0.0));
+	vector<double> Jv(4,0.0);
+	size_t np=x.size();
 
+	double m1=accumulate(x.begin(), x.end(), 0.0)/(double)np;
+	double m2=accumulate(y.begin(), y.end(), 0.0)/(double)np;
+	double m3=accumulate(z.begin(), z.end(), 0.0)/(double)np;
+	double mv1=accumulate(vx.begin(), vx.end(), 0.0)/(double)np;
+	double mv2=accumulate(vy.begin(), vy.end(), 0.0)/(double)np;
+	double mv3=accumulate(vz.begin(), vz.end(), 0.0)/(double)np;
+
+	cout<<m1<<" "<<m2<<" "<<m3<<" "<<endl;
+	cout<<mv1<<" "<<mv2<<" "<<mv3<<" "<<endl;
+
+	std::transform( x.begin(), x.end(), x.begin(),std::bind2nd( std::minus<double>(), m1) );
+	std::transform( y.begin(), y.end(), y.begin(),std::bind2nd( std::minus<double>(), m2) );
+	std::transform( z.begin(), z.end(), z.begin(),std::bind2nd( std::minus<double>(), m3) );
+	std::transform( vx.begin(), vx.end(), vx.begin(),std::bind2nd( std::minus<double>(), mv1) );
+	std::transform( vy.begin(), vy.end(), vy.begin(),std::bind2nd( std::minus<double>(), mv2) );
+	std::transform( vz.begin(), vz.end(), vz.begin(),std::bind2nd( std::minus<double>(), mv3) );
+
+	vector<double> dtest;
+	for(size_t i=0;i<np;i++)
+		{
+		//similar as  inertia tensor
+		Cov[0][0] += x[i]*x[i];
+		Cov[1][0] += x[i]*y[i];
+		Cov[2][0] += x[i]*z[i];
+
+		Cov[0][1] += y[i]*x[i];
+		Cov[1][1] += y[i]*y[i];
+		Cov[2][1] += y[i]*z[i];
+
+		Cov[0][2] += z[i]*x[i];
+		Cov[1][2] += z[i]*y[i];
+		Cov[2][2] += z[i]*z[i];
+// angular momentum
+		Jv[0] += (y[i]*vz[i]-z[i]*vy[i]);
+		Jv[1] += (y[i]*vz[i]-z[i]*vy[i]);
+		Jv[2] += (y[i]*vz[i]-z[i]*vy[i]);
+		// inertia tensor
+		/*a[1][1]+=x[i]*x[i];
+        a[2][2]+=y[i]*y[i];
+        a[3][3]+=z[i]*z[i];
+        a[1][2]+=x[i]*y[i];
+        a[2][3]+=y[i]*z[i];
+        a[1][3]+=x[i]*z[i];
+       */
+
+		}
+	for(i=0;i<3;i++)
+		for(size_t j=0;j<3;j++)
+			{
+			Cov[i][j]/=double(np-1);
+			}
+		if(verbose)		
+			print(Cov, 0);
+
+		std::vector<vector<double> > a( 4, vector<double>(4, 0.0)), v( 4, vector<double>(4, 0.0));
+		std::vector<double> d(4, 0.0);
+
+		size_t n=3;
+		const int ish=1;
+		for(size_t i =0;i<Cov.size()-1;i++)
+			for(size_t j =0;j<Cov[0].size()-1;j++)
+				{
+				a[i+ish][j+ish]=Cov[j][i];// Transpose
+				}
+
+			if(verbose)
+				print(a,0);
+			eigenvals.resize(n+1);
+	
+			eigenvec=a;
+			eigen (a, eigenvals, eigenvec);
+
+			cout<<"Vectors"<<endl;
+			print(eigenvec, 0);
+			cout<<"Values"<<endl;
+			if(verbose)
+				copy (eigenvals.begin(), eigenvals.end(),
+				ostream_iterator<double>(cout," "));
+			m_Phi=rad2deg<double>( atan2(eigenvec[1][2], eigenvec[1][1]) );
+			cout<<"\nPhi="<<m_Phi<<"\n"<<endl;
+	}
 
 void CPCA::eigen (vector<vector<double> > &a, vector<double> &eigenvalue, vector<vector<double> > &eigenvec)
 	{
