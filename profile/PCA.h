@@ -13,6 +13,7 @@ class CPCA
 		void GetPCA(void){};
 		void eigen (vector<vector<double> > &a, vector<double> &eigen, vector<vector<double> > &eigenvec);
 void GetPCAXYZ(vector<double> &x, vector<double> &y, vector<double> &z);
+void GetPCAXYZVEL(vector<double> &x, vector<double> &y, vector<double> &z,vector<double> &vx, vector<double> &vy, vector<double> &vz);
 inline double Phi(){return m_Phi;};
  void dump(std::string file="eigendata.log")
    {
