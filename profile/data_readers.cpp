@@ -1,5 +1,6 @@
 #include "data_readers.h"
 #include "utils.h"
+using std::basic_string;
 #define DEBUG_ME false
 #define RadFrac  0.6
 /////////////////////////////
@@ -60,7 +61,7 @@ bool FileExists(string filename) {
 //////////////////////
 bool StringToInt(const string &s, int &i)
 	{
-	istringstream myStream(s);
+	std::istringstream myStream(s);
 
 	if (myStream>>i)
 		return true;
@@ -136,7 +137,7 @@ void CGadget::SeekToType(ifstream *file_to_read,int type, int onesize, bool  mas
 			nskip+=(this->myhead.npart[ip]*flag);
 			}
 		}
-	file_to_read->seekg((nskip)*onesize, ios_base::cur);
+	file_to_read->seekg((nskip)*onesize, std::ios_base::cur);
 	}
 
 int CGadget::find_block(ifstream *fd,const char *label)
@@ -144,7 +145,7 @@ int CGadget::find_block(ifstream *fd,const char *label)
 	int4bytes blocksize=0, blksize=0, ret=0;
 	char blocklabel[5]={"    "};
 	find_flag=true;
-	fd->seekg(ios::beg);
+	fd->seekg(std::ios::beg);
 	if(m_verbose==2)printf("Finding: %s\n",label);
 	while(!fd->eof() && (blocksize == 0))//&& strcmp(blocklabel, "Z   ")!=0 )
 		{
@@ -185,7 +186,7 @@ int CGadget::find_block(ifstream *fd,const char *label)
 				GetBlk(fd, &blksize);
 				if(strcmp(label,blocklabel)!=0)
 					{ 	
-					fd->seekg(blocksize,ios_base::cur);
+					fd->seekg(blocksize,std::ios_base::cur);
 					blocksize=0;
 					}
 				}
@@ -408,7 +409,7 @@ if(m_verbose==2)	cout<<"VEL"<<endl;
 	string rhofilename=m_filename+string("_rho_")+string(buf);
 	bool get_rho_from_file=FileExists(rhofilename);
 	ifstream rhofile;
-	rhofile.open(rhofilename.c_str(),ios::in|ios::binary);
+	rhofile.open(rhofilename.c_str(),std::ios::in|std::ios::binary);
 	bool o_swap=swp_flag;
 	GetFileFormat(rhofile);
 	//	if(get_rho_from_file)
@@ -627,7 +628,7 @@ void CGadget::WriteOneBlock(ostream &file, string blname,const char* pData, unsi
 void CGadget::WriteRhoFile(string rhofilename, int type)
 	{
 		ofstream file;
-		file.open(rhofilename.c_str(),ios::binary);
+		file.open(rhofilename.c_str(),std::ios::binary);
 		unsigned int blsize, i,ninreg=m_data.size();
 		io_header head;
 		float *pHsml=new float[ninreg];
@@ -731,7 +732,7 @@ int  CGadget::unit_conversion(void)
 
 bool CGadget::ReadData(string file)
 	{
-	m_file.open(file.data(),  ios::in|ios::binary);
+	m_file.open(file.data(),  std::ios::in|std::ios::binary);
 
 	char name[5];
 	memset(name, 0,sizeof(name));
@@ -852,7 +853,7 @@ bool CGadget::GetFileFormat(ifstream &filein)
 			}
 		cout<<"We have enabled Byte Swapping!!!"<<endl;
 		}
-	filein.seekg(0, ios_base::beg);
+	filein.seekg(0, std::ios_base::beg);
 	return true;	
 	}
 bool CGadget::GetFileFormat()
@@ -868,7 +869,7 @@ bool CGadget::GetFileFormat()
 			return false;
 			}
 		}
-	m_file.seekg(0, ios_base::beg);
+	m_file.seekg(0, std::ios_base::beg);
 	return true;	
 	}
 
@@ -952,7 +953,7 @@ bool CFOFCatalog::ReadCatalogIDsBin(string filename)
 	{
 	unsigned int nid=0, i=0;
 
-	ifstream ifile(filename.c_str(),ios::in|ios::binary);
+	ifstream ifile(filename.c_str(),std::ios::in|std::ios::binary);
 	if(	ifile.fail())
 		{
 		string mes=string("Can not open file: " );

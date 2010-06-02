@@ -46,6 +46,7 @@ COptions::COptions(int argc, char* argv[]):m_status(0)
 			("eps,e", po::value< float>(&m_eps)->default_value(0.05f, "0.05"), "MSTFOF linking length ")
 			("min-npart,m", po::value< int>(&m_min_npart)->default_value(100), "MSTFOF group minimum length ")			
 			("mst-file,o", po::value< string>(&m_file_out)->default_value(string("mstfof")), "MSTFOF group out file")
+			("OAF", po::value< bool>(&m_OAF)->default_value(0), " dump OAF trace file for the particles")
 			("help,h","print help")
 
 			;

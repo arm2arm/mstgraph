@@ -32,7 +32,15 @@
 #ifdef MYTREE
 #include "tree.h"
 #endif
-using namespace std;
+//using namespace std;
+using std::string;
+using std::cout;
+using std::cerr;
+using std::endl;
+using std::ostream;
+using std::ofstream;
+using std::ifstream;
+using std::vector;
 
 /////////////////////////////////////////////////
 #define  int4bytes int
@@ -205,7 +213,7 @@ class CAsciiReader
 		  
 		};
 		typedef vector<float> dynvector;
-		typedef map<unsigned int,dynvector> TDataMap;
+		typedef std::map<unsigned int,dynvector> TDataMap;
 		TDataMap m_data;
 		bool load(){ return ReadAsciiFile();}
 		bool ReadAsciiFile()
@@ -224,12 +232,12 @@ class CAsciiReader
 				while (getline(ifile,line)) 
 					{
 					 //the following line trims white space from the beginning of the string
-					line.erase(line.begin(), find_if(line.begin(), line.end(), not1(ptr_fun<int, int>(isspace)))); 
+					line.erase(line.begin(), find_if(line.begin(), line.end(), std::not1(std::ptr_fun<int, int>(isspace)))); 
 					if (line[0] != '#')
 						{
 						float a;
 						int snap;
-						stringstream sq(line);
+						std::stringstream sq(line);
 						sq>>snap;
 						for(unsigned int i=0;i<m_nfields;i++)
 							{
@@ -501,7 +509,7 @@ class CGadget : public  CReaders
 			int flag_effmodel;
 			char fill[72];		/* fills to 256 Bytes */
 			}myhead;
-		CGadget(string file, bool readnow=true):m_NBH(0)
+		CGadget(string file="snap_001", bool readnow=true):m_NBH(0)
 			{
 			m_filename=file;
 			if(m_verbose==1)
@@ -511,7 +519,7 @@ class CGadget : public  CReaders
 			//exit(EXIT_FILE_NOT_FOUND);
 				return;
 				};
-			m_file.open(m_filename.c_str(),  ios::in|ios::binary);
+			m_file.open(m_filename.c_str(),  std::ios::in|std::ios::binary);
 
 			m_isgood=GetFileFormat();
 			if(readnow)
@@ -627,9 +635,9 @@ class CGadget : public  CReaders
 /////////////////// Typedefs for Galaxy sorting //////
 class CGalaxy;
 
-typedef pair <vector<CGalaxy*>::iterator, float> Map_Int_Flt_Pair;
+typedef std::pair <vector<CGalaxy*>::iterator, float> Map_Int_Flt_Pair;
 
-typedef pair <int, int> Map_Int_Int_Pair;
+typedef std::pair <int, int> Map_Int_Int_Pair;
 
 ////////////////////CGalaxy class ////////
 class CGalaxy{
