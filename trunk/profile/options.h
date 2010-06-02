@@ -30,6 +30,7 @@ public:
 	int m_NGB;
 	float m_Rmax;
 	bool m_updatelog;
+	bool m_OAF;
 private:
 	bool ParseSnapshotLists(std::vector<string> &strinout);
 	void ReadID(std::string file);

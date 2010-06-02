@@ -197,6 +197,110 @@ T deg2rad(T v){return v*(T)(M_PI/180.0);};
 void jacobi(std::vector<std::vector<double> > &a, int n, std::vector<double> &d, std::vector<std::vector<double> > &v, int *nrot, int ish=1);
 void eigsrt(std::vector<double>  &d, std::vector<std::vector<double> > &v, int n);
 
+//////////////////////////////////////
+using std::vector;
+using std::cout;
+using std::endl;
+template <typename T>
+void dump_xyz(std::vector<T>&x,std::vector<T> &y,vector<T> &z, std::string filename="dum_points.log")
+	{
+	cout<<"dumping";
+	std::string fname=filename;
+	std::ofstream of(fname.c_str());
+	if(of.is_open())
+		for(size_t ip=0;ip<x.size();ip++)
+			{
+			if((ip%10000)==0)
+				cout<<".";
+			cout.flush();
+			of<<std::setw(12)<<std::setprecision(7)<<x[ip]<<" "<<y[ip]<<" "<<z[ip]<<endl;
+
+			}
+		of.close();
+		cout<<"done!"<<endl;
+	}
+
+
+template<class T> 
+std::vector<T> smooth(std::vector<T> &v)
+	{
+
+	if(v.size()<5)return v;
+	int np=v.size();
+	std::vector<T> vsm=v;
+
+	for(int i=2;i<np-2;i++)
+		vsm[i]=(v[i-2]+2*v[i-1]+3*v[i]+2*v[i+1]+v[i+2])/9.0f;
+	vsm[0]=(vsm[0]+vsm[1]+vsm[2])/3.0f;
+	vsm[1]=(vsm[1]+vsm[2]+vsm[3])/3.0f;
+	vsm[np-2]=(vsm[np-2]+vsm[np-3]+vsm[np-4])/3.0f;
+	vsm[np-1]=(vsm[np-1]+vsm[np-2]+vsm[np-3])/3.0f;
+	return vsm;
+	}
+template<class T>
+std::vector< std::vector<T> > GetAB(vector<T> &R,vector<T> &x,vector<T> &y, T profRMAX=10.0, T xStep=0.1)
+	{
+	std::vector<unsigned int> idxR(R.size(), 0);
+	for(size_t ii=0;ii<R.size(); ii++)
+		{
+		idxR[ii]=ii;
+		}
+
+	std::sort(idxR.begin(), idxR.end(), ProxyLess< vector<float> >(R)); //sorting by Radius;
+
+	/////////////////////////////////////////////
+	//GetAB
+	std::vector< vector<T> > result;
+	int fm, ii;
+	int iR20 = std::count_if(R.begin(), R.end(),
+		std::bind2nd(std::less_equal<T>(), profRMAX));
+
+	int nshell = static_cast<int> (profRMAX / xStep) + 1;
+	for (fm = 2; fm < 9; fm += 2) {
+		vector<T> al, al0, al2, bl2, fR;
+		al.resize(nshell);
+		al2.resize(nshell);
+		bl2.resize(nshell);
+		al0.resize(nshell);
+		fR.resize(nshell);
+		std::fill(al.begin(), al.end(), (T)0.0);
+		std::fill(al0.begin(), al0.end(),(T) 0.0);
+		std::fill(al2.begin(), al2.end(), (T)0.0);
+		std::fill(bl2.begin(), bl2.end(), (T)0.0);
+		std::fill(fR.begin(), fR.end(), (T)0.0);
+
+		int ishell = 0;
+		T theta = 0.0;
+		T massp = 1.0;
+
+
+		for (int i = 0; i < iR20; i++) {
+			ii=idxR[i];
+			ishell = static_cast<int> (R[ii] / xStep);
+			theta = atan2(y[ii], x[ii]);
+			al2[ishell] += massp * cos(fm * theta);
+			bl2[ishell] += massp * sin(fm * theta);
+			al0[ishell] += massp;
+			}
+
+		for (int i = 0; i < nshell; i++) {
+			al[i] = sqrt(al2[i] * al2[i] +
+				bl2[i] * bl2[i]);
+			if (al0[i] > 0.0f)
+				al[i] /= al0[i];
+			fR[i] = xStep*i;
+			}
+		double total = std::accumulate(al.begin(), al.end(), 0.0);
+		//string fmFile = fname + string("_Afm") + ToString(fm) + '_' + ToString(TYPE);
+		if(fm == 2)	result.push_back(fR);
+		result.push_back(smooth<float>(al));
+		//result.push_back(al);
+		//result.push_back(al2);
+		//result.push_back(bl2);
+		}
+	return result;
+	}
+
 
 
 #endif

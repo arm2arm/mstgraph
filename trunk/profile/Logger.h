@@ -2,6 +2,7 @@
 #define _LOGGER_
 #include "loader.h"
 #include "utils.h"
+using std::istringstream;
 #include <iterator>
 struct TData
 	{

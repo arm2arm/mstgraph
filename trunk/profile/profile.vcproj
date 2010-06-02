@@ -193,6 +193,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\oaffile.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\OAFHelper.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\options.cpp"
 				>
 			</File>
@@ -232,6 +240,14 @@
 			</File>
 			<File
 				RelativePath=".\MSTree.h"
+				>
+			</File>
+			<File
+				RelativePath=".\oaffile.h"
+				>
+			</File>
+			<File
+				RelativePath=".\OAFHelper.h"
 				>
 			</File>
 			<File
