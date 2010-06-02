@@ -99,22 +99,39 @@ int main(int argc, char* argv[])
 			vector<unsigned int > idxR(pL->m_nelem-1,0);	
 			///////////////////////////////////
 			//cout<<"COM: "<<pL->m_COM[0]<<" "<<pL->m_COM[1]<<" "<<pL->m_COM[2]<<endl;
+<<<<<<< .mine
+			CRange range[3];
+			for(unsigned int i=0, ig=0, ist=0;i<pL->m_nelem-1;i++)// -1 to exclude BH particle
+=======
 	for(unsigned int i=0, ig=0, ist=0;i<pL->m_nelem-1;i++)// -1 to exclude BH particle
+>>>>>>> .r84
 				if( pL->pType[i] == 4 )
 					{
 					x.push_back(pL->pPOS[i*3]/1000.0);
 					y.push_back(pL->pPOS[i*3+1]/1000.0);
 					z.push_back(pL->pPOS[i*3+2]/1000.0);	
+					range[0].getbound(x[ist]);
+					range[1].getbound(y[ist]);
+					range[2].getbound(z[ist]);
+					ist++;
+
 					}
+<<<<<<< .mine
+				dump_xyz(x, y, z);
+				range[0].print("# Range for x coord");
+				range[1].print("# Range for y coord");
+				range[2].print("# Range for z coord");
+				cout<<"#got a :"<<x.size()<<" particles cor determining the center"<<endl;
+=======
 dump_xyz(x, y, z);		
 cout<<"We use mst over: "<<x.size()<<endl;
+>>>>>>> .r84
 				CMSTree mst_tree(x,y,z, opt.m_eps, opt.m_min_npart, opt.m_NGB);
 				pL->MoveToCOM(&mst_tree.m_MSTCatalog[0].wcom[0]);
 				std::transform( x.begin(), x.end(), x.begin(),std::bind2nd( std::minus<float>(), mst_tree.m_MSTCatalog[0].wcom[0]) );
 				std::transform( y.begin(), y.end(), y.begin(),std::bind2nd( std::minus<float>(), mst_tree.m_MSTCatalog[0].wcom[1]) );
 				std::transform( z.begin(), z.end(), z.begin(),std::bind2nd( std::minus<float>(), mst_tree.m_MSTCatalog[0].wcom[2]) );
-				//dump_xyz(x, y, z);
-				//x.clear();y.clear();z.clear();
+			
 				R.clear();
 exit(0);
 				for(unsigned int i=0, ig=0, ist=0;i<pL->m_nelem-1;i++)// -1 to exclude BH particle
