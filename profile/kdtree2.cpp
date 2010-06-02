@@ -274,7 +274,7 @@ void kdtree2:: spread_in_coordinate(int c, int l, int u, interval& interv)
   }
   interv.lower = smin;
   interv.upper = smax;
-  printf("Spread in coordinate %d=[%f,%f]\n",c,smin,smax);
+  //printf("Spread in coordinate %d=[%f,%f]\n",c,smin,smax);
 }
 
 
