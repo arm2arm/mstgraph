@@ -87,6 +87,7 @@ int main(int argc, char* argv[])
 
 		if(log.is_done(isnap))continue;
 		CLoader *pL=new CLoader(opt.m_snapshotList[i],ParticleType);
+                 cout<<"We got Np:"<<pL->size()<<endl;
 		if(opt.m_OAF)
 			opt.m_OAF=pL->ReadID();
 
@@ -98,16 +99,16 @@ int main(int argc, char* argv[])
 			vector<unsigned int > idxR(pL->m_nelem-1,0);	
 			///////////////////////////////////
 			//cout<<"COM: "<<pL->m_COM[0]<<" "<<pL->m_COM[1]<<" "<<pL->m_COM[2]<<endl;
-			for(unsigned int i=0, ig=0, ist=0;i<pL->m_nelem-1;i++)// -1 to exclude BH particle
+	for(unsigned int i=0, ig=0, ist=0;i<pL->m_nelem-1;i++)// -1 to exclude BH particle
 				if( pL->pType[i] == 4 )
 					{
-					x.push_back(pL->pPOS[i*3]);
-					y.push_back(pL->pPOS[i*3+1]);
-					z.push_back(pL->pPOS[i*3+2]);			      
+					x.push_back(pL->pPOS[i*3]/1000.0);
+					y.push_back(pL->pPOS[i*3+1]/1000.0);
+					z.push_back(pL->pPOS[i*3+2]/1000.0);	
 					}
-
+dump_xyz(x, y, z);		
+cout<<"We use mst over: "<<x.size()<<endl;
 				CMSTree mst_tree(x,y,z, opt.m_eps, opt.m_min_npart, opt.m_NGB);
-
 				pL->MoveToCOM(&mst_tree.m_MSTCatalog[0].wcom[0]);
 				std::transform( x.begin(), x.end(), x.begin(),std::bind2nd( std::minus<float>(), mst_tree.m_MSTCatalog[0].wcom[0]) );
 				std::transform( y.begin(), y.end(), y.begin(),std::bind2nd( std::minus<float>(), mst_tree.m_MSTCatalog[0].wcom[1]) );
@@ -115,6 +116,7 @@ int main(int argc, char* argv[])
 				//dump_xyz(x, y, z);
 				//x.clear();y.clear();z.clear();
 				R.clear();
+exit(0);
 				for(unsigned int i=0, ig=0, ist=0;i<pL->m_nelem-1;i++)// -1 to exclude BH particle
 					{
 					float rr=pL->R(i);//

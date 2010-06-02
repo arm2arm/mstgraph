@@ -164,7 +164,7 @@ private:
   // if rearrange is true then this is the rearranged data storage. 
 
 
-  static const int bucketsize = 12;  // global constant. 
+  static const int bucketsize = 64;  // global constant. 
 
 private:
   void set_data(kdtree2_array& din); 

@@ -24,3 +24,6 @@ bool COAFHelper::insert(int id, int snap, unsigned char type, float* pos, float 
 		}
 	return is_id_there;
 	}
+
+
+
