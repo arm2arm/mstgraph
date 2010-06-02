@@ -1,10 +1,13 @@
 #ifndef _CRange_
 #define _CRange_
 #include <iostream>
+#include <fstream>
 #include <algorithm>
 #include <string>
 #include <cassert>
 #include <vector>
+#include <functional>
+#include <numeric>
 
 using std::min;
 using std::max;
