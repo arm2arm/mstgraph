@@ -42,7 +42,7 @@ class CLoader
 		  m_fname(fname),
 			  pSFR(NULL),
 			  pID(NULL), 
-			  pType(NULL),pVEL(NULL),pMASS(NULL),pU(NULL),pRHO(NULL),pZ(NULL),m_ptype(ptype), m_verbose(0)
+			  pType(NULL),pVEL(NULL),pMASS(NULL),pU(NULL),pRHO(NULL),pZ(NULL),pHSML(NULL),m_ptype(ptype), m_verbose(0)
 			  {
 			  CGadget *pG=new CGadget(fname, false);
 			  pG->m_verbose=0;

@@ -68,3 +68,5 @@ class COAFHelper:public COAFFile
 	};
 
 #endif
+
+
