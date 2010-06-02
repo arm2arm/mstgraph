@@ -3,7 +3,9 @@
 #include "MSTree.h"
 #include "MSTGroup.h"
 
-
+using std::copy;
+using std::ofstream;
+using std::ostream_iterator;
 class CPCA
 	{
 	public:
@@ -36,7 +38,7 @@ inline double Phi(){return m_Phi;};
        of.close();
    } ;
 	private:
-		vector<double>  eigenvals;
+		std::vector<double>  eigenvals;
 		std::vector<std::vector<double> > eigenvec;
 		double m_Phi;
 bool verbose;

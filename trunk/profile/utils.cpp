@@ -139,3 +139,9 @@ void eigsrt(std::vector<double>  &d, std::vector<std::vector<double> > &v, int n
 
 /* (C) Copr. 1986-92 Numerical Recipes Software ,2kB. */
 //////////////////////////////////////
+float mydrand48(void)
+{
+float x = rand()/float(RAND_MAX);
+return x;
+
+}

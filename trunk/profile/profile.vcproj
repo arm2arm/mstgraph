@@ -227,6 +227,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\kdtree2.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\loader.h"
 				>
 			</File>

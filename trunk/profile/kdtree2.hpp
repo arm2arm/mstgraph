@@ -18,20 +18,24 @@
 #include <vector>
 #include <algorithm>
 
- #define BOOST_NO_STDC_NAMESPACE
+#define BOOST_NO_STDC_NAMESPACE
 
 #include <boost/multi_array.hpp>
 #include <boost/array.hpp>
-
-using namespace std;
+#include <iostream>
+#include <vector> 
+///using namespace std;
 using namespace boost;
+using std::vector;
+using std::cout;
+using std::endl;
 
-typedef multi_array<float,2>             kdtree2_array;
-typedef const_multi_array_ref<float,2>   kdtree2_ro_array;  // read only ref
+typedef multi_array<double,2>             kdtree2_array;
+typedef const_multi_array_ref<double,2>   kdtree2_ro_array;  // read only ref
 
 
 typedef struct {
-  float lower, upper;
+  double lower, upper;
 } interval;
 
 
@@ -51,7 +55,7 @@ struct kdtree2_result {
   // of these. 
   //
 public:
-  float dis;  // its square Euclidean distance
+  double dis;  // its square Euclidean distance
   int idx;    // which neighbor was found
 }; 
 
@@ -68,9 +72,9 @@ public:
   // via vector<> 
 
   void push_element_and_heapify(kdtree2_result&);
-  float replace_maxpri_elt_return_new_maxpri(kdtree2_result&);
+  double replace_maxpri_elt_return_new_maxpri(kdtree2_result&);
 
-  float max_value(); 
+  double max_value(); 
   // return the distance which has the maximum value of all on list, 
   // assuming that ALL insertions were made by
   // push_element_and_heapify() 
@@ -103,7 +107,7 @@ public:
 
 public:
   //
-  // constructor, passing in a multi_array<float,2> , aka
+  // constructor, passing in a multi_array<double,2> , aka
   // kdtree2_array. 
   //
   // constructor, has optional 'dim_in' feature, to use only
@@ -119,11 +123,11 @@ public:
 public:
   // search routines
 
-  void n_nearest_brute_force(vector<float>& qv, int nn, kdtree2_result_vector& result);
+  void n_nearest_brute_force(vector<double>& qv, int nn, kdtree2_result_vector& result);
   // search for n nearest to a given query vector 'qv' usin
   // exhaustive slow search.  For debugging, usually.
 
-  void n_nearest(vector<float>& qv, int nn, kdtree2_result_vector& result);
+  void n_nearest(vector<double>& qv, int nn, kdtree2_result_vector& result);
   // search for n nearest to a given query vector 'qv'.
 
   void n_nearest_around_point(int idxin, int correltime, int nn,
@@ -131,18 +135,18 @@ public:
   // search for 'nn' nearest to point [idxin] of the input data, excluding
   // neighbors within correltime 
   
-  void r_nearest(vector<float>& qv, float r2,kdtree2_result_vector& result); 
+  void r_nearest(vector<double>& qv, double r2,kdtree2_result_vector& result); 
   // search for all neighbors in ball of size (square Euclidean distance)
   // r2.   Return number of neighbors in 'result.size()', 
 
-  void r_nearest_around_point(int idxin, int correltime, float r2,
+  void r_nearest_around_point(int idxin, int correltime, double r2,
 			      kdtree2_result_vector& result);
   // like 'r_nearest', but around existing point, with decorrelation
   // interval. 
 
-  int r_count(vector<float>& qv, float r2);
+  int r_count(vector<double>& qv, double r2);
   // count number of neighbors within square distance r2.
-  int r_count_around_point(int idxin, int correltime, float r2);
+  int r_count_around_point(int idxin, int correltime, double r2);
   // like r_count, c
 
   friend class kdtree2_node;
@@ -171,7 +175,7 @@ private:
   void build_tree(); // builds the tree.  Used upon construction. 
   kdtree2_node* build_tree_for_range(int l, int u, kdtree2_node* parent);
   void select_on_coordinate(int c, int k, int l, int u); 
-  int select_on_coordinate_value(int c, float alpha, int l, int u); 
+  int select_on_coordinate_value(int c, double alpha, int l, int u); 
   void spread_in_coordinate(int c, int l, int u, interval& interv);
 };
 
@@ -188,8 +192,8 @@ public:
   // constructor
   kdtree2_node(int dim);
   //, int cut_dim_in,
-  // 	       float cut_val_in, float cut_val_left_in, 
-  //	       float cut_val_right_in);
+  // 	       double cut_val_in, double cut_val_left_in, 
+  //	       double cut_val_right_in);
   // destructor
   ~kdtree2_node();
 
@@ -198,10 +202,10 @@ private:
   friend class kdtree2;  // allow kdtree2 to access private 
 
   int cut_dim;                                 // dimension to cut; 
-  float cut_val, cut_val_left, cut_val_right;  //cut value
+  double cut_val, cut_val_left, cut_val_right;  //cut value
   int l,u;  // extents in index array for searching
 
-  vector<interval> box; // [min,max] of the box enclosing all points
+  std::vector<interval> box; // [min,max] of the box enclosing all points
   
   kdtree2_node *left, *right;  // pointers to left and right nodes. 
 

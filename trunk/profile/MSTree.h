@@ -25,7 +25,7 @@ using std::vector;
 #include <boost/graph/filtered_graph.hpp>
 #include "MSTGroup.h"
 ///////////////////
-#define MyFloat float
+#define MyFloat double
 using namespace boost;
 typedef adjacency_list < vecS, vecS, undirectedS,
 no_property, property < edge_weight_t, MyFloat > > Graph;
@@ -168,11 +168,11 @@ class CMSTree
 						if(ngblist[ingb].dis<=m_afof_eps2)
 							add_edge(i,j,graphFOF);
 						}
-					float hsml=sqrt(ngblist[ngblist.size()-1].dis);
+					double hsml=sqrt(ngblist[ngblist.size()-1].dis);
 					for(size_t ingb=0;ingb<ngblist.size();ingb++)
 						{
-						rho[i]+=
-							Wsph<float>(sqrt(ngblist[ingb].dis) , hsml);
+						rho[i]+=(float)
+							Wsph<double>(sqrt(ngblist[ingb].dis) , hsml);
 
 						}
 					if(m_verbose)
@@ -213,8 +213,8 @@ class CMSTree
 			}
 		void dump(int ig)
 			{
-			std::string fname=string("part_ig")+boost::lexical_cast<std::string>(ig)+string(".ascii");
-			ofstream of(fname.c_str());
+			std::string fname=std::string("part_ig")+boost::lexical_cast<std::string>(ig)+std::string(".ascii");
+			std::ofstream of(fname.c_str());
 			if(of.is_open())
 				for(size_t i=0;i<m_MSTCatalog[ig].id.size();i++)
 					{
@@ -240,7 +240,7 @@ class CMSTree
 					{
 					of<<m_MSTCatalog[0]<<endl;
 					std::copy(m_MSTCatalog[0].id.begin(),
-						m_MSTCatalog[0].id.end(), ostream_iterator<double>(ofidx," "));
+						m_MSTCatalog[0].id.end(), std::ostream_iterator<double>(ofidx," "));
 					}
 				}
 
