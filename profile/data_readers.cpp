@@ -272,7 +272,7 @@ if(m_verbose==2)	cout<<"ENDT"<<endl;
 	range1.Reset();
 	for(ip=0;ip<ninreg;ip++)
 		{
-		  m_data[ip].sph.EnDt=log10(abs(pF[indexinreg[ip]])+1)*
+		  m_data[ip].sph.EnDt=log10(std::fabs(pF[indexinreg[ip]])+1)*
 		    log10(m_data[ip].sph.Rho+1);
 		 range.getbound(m_data[ip].sph.EnDt);
 		}

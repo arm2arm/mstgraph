@@ -11,7 +11,7 @@
 #include "Logger.h"
 #include "MSTree.h"
 #include "PCA.h"
-#include "oafhelper.h"
+#include "OAFHelper.h"
 
 using std::string;
 
