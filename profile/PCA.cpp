@@ -388,15 +388,9 @@ void CPCA::GetPCAXYZ(vector<double> &x, vector<double> &y, vector<double> &z)
 			cout<<"Vectors"<<endl;
 			print(eigenvec, 0);
 			cout<<"Values"<<endl;
-<<<<<<< .mine
 			if(verbose)
 				std::copy (eigenvals.begin(), eigenvals.end(),
 				std::ostream_iterator<double>(cout," "));
-=======
-			if(verbose)
-				copy (eigenvals.begin(), eigenvals.end(),
-				ostream_iterator<double>(cout," "));
->>>>>>> .r84
 			m_Phi=rad2deg<double>( atan2(eigenvec[1][2], eigenvec[1][1]) );
 			cout<<"\nPhi="<<m_Phi<<"\n"<<endl;
 			//exit(0); 
@@ -484,15 +478,9 @@ void CPCA::GetPCAXYZVEL(vector<double> &x, vector<double> &y, vector<double> &z,
 			cout<<"Vectors"<<endl;
 			print(eigenvec, 0);
 			cout<<"Values"<<endl;
-<<<<<<< .mine
 			if(verbose)
 				std::copy (eigenvals.begin(), eigenvals.end(),
 				std::ostream_iterator<double>(cout," "));
-=======
-			if(verbose)
-				copy (eigenvals.begin(), eigenvals.end(),
-				ostream_iterator<double>(cout," "));
->>>>>>> .r84
 			m_Phi=rad2deg<double>( atan2(eigenvec[1][2], eigenvec[1][1]) );
 			cout<<"\nPhi="<<m_Phi<<"\n"<<endl;
 	}
