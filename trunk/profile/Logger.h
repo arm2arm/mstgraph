@@ -50,10 +50,13 @@ public:
 			TDataMap::iterator it;
 			for ( it=m_data.begin() ; it != m_data.end(); it++ )
 				{
-				stream << (*it).first << "\t"; 
-				for(size_t i=0;i<(*it).second.size();i++)
-					stream<<(*it).second[i]<<"\t";
-				stream<<endl;
+				if((*it).second.size())
+					{
+					stream << (*it).first << "\t"; 
+					for(size_t i=0;i<(*it).second.size();i++)
+						stream<<(*it).second[i]<<"\t";
+					stream<<endl;
+					}
 				}
 
 			}else{

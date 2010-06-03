@@ -18,9 +18,15 @@ using boost::bad_lexical_cast;
 #include <string>
 #include <set>
 
+#include <boost/algorithm/string.hpp>// for split
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
+#include <boost/filesystem.hpp>
+#include <boost/regex.hpp>  // also functional,iostream,iterator,string
+namespace bfs = boost::filesystem;
 
 
-void COptions::ReadID(std::string file)
+void COptions::ReadID(std::vector< std::string > &filevec)
 	{
 	
 	}
@@ -37,18 +43,17 @@ COptions::COptions(int argc, char* argv[]):m_status(0)
 		commands.add_options()
 			("snapshotList", po::value< vector<string> >(&m_snapshotList)->multitoken(), "Which snapshots to profile: ex. --snapshotList=snap_001 snap_002 snap_003 ")
 			("IDlist",       po::value< vector<TIDlist> >(&IDlist)->multitoken(), "Which IDs to trace: ex. --IDlist=0 1 200 -340")
-			("IDflist",      po::value< vector<string> >(&m_snapshotList)->multitoken(), "Which IDs to trace from file: ex. --IDfile=idFile.txt, where file has a integers inside the file")
+			("IDfilelist",      po::value< vector<string> >(&m_IDfilelist)->multitoken(), "Which IDs to trace from file: ex. --IDfilelist=idFile.txt, where file has a integers inside the file")
 			("out-file", po::value< string>(&m_file_out)->default_value(string("dump.log")), "out file, the result file if it exist the code will update if update=true(default value)")
 			("update", po::value< bool>(&m_updatelog)->default_value(1), " update out file 0/1= No/Yes, if =0 then it will overwrite  out file")
 			("type", po::value< int>(&m_type)->default_value(6), "particle type to track, if 6 then all particles")
-		 ("r-max,r", po::value< float>(&m_Rmax)->default_value(20.0f, "20"), "MSTFOF linking length ")
-		  ("ngb,n", po::value< int>(&m_NGB)->default_value(15), "NGB number for density estimation ")
+			("r-max,r", po::value< float>(&m_Rmax)->default_value(20.0f, "20"), "MSTFOF linking length ")
+			("ngb,n", po::value< int>(&m_NGB)->default_value(15), "NGB number for density estimation ")
 			("eps,e", po::value< float>(&m_eps)->default_value(0.05f, "0.05"), "MSTFOF linking length ")
 			("min-npart,m", po::value< int>(&m_min_npart)->default_value(100), "MSTFOF group minimum length ")			
 			("mst-file,o", po::value< string>(&m_file_out)->default_value(string("mstfof")), "MSTFOF group out file")
 			("OAF", po::value< bool>(&m_OAF)->default_value(0), " dump OAF trace file for the particles")
 			("help,h","print help")
-
 			;
 
 		variables_map vm;
@@ -93,10 +98,18 @@ COptions::COptions(int argc, char* argv[]):m_status(0)
 			cout<<"numID="<<m_IDlist.size()<<" entries.";
 			cout << endl << endl;
 			}
-		if(vm.count("IDflist")) {
+		if(vm.count("IDfilelist")) {
+			//ParseSnapshotLists(m_IDfilelist);
+			std::set<std::string> result;
+			for(TstrvecIT it=m_IDfilelist.begin();it<m_IDfilelist.end(); it++)
+				boost::split(  result,*it,boost::is_any_of("\t ") );
+			//count the entries
+			m_IDfilelist.clear();
+			std::unique_copy(result.begin(),result.end(),std::back_inserter(m_IDfilelist));
+
 			
-			ReadID(m_file_IDlist);
-			cout<<"numID="<<m_IDlist.size()<<" entries.";
+			ReadID(m_IDfilelist);
+			cout<<"numID="<<m_IDlistvec.size()<<" entries.";
 			cout << endl << endl;
 			}
 		if (vm.count("help")) {
@@ -113,12 +126,6 @@ COptions::COptions(int argc, char* argv[]):m_status(0)
 	
 	}
 
-#include <boost/algorithm/string.hpp>// for split
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-#include <boost/filesystem.hpp>
-#include <boost/regex.hpp>  // also functional,iostream,iterator,string
-namespace bfs = boost::filesystem;
 
 
 struct match : public std::unary_function<bfs::directory_entry,bool> {
@@ -154,8 +161,7 @@ private:
 
 bool COptions::ParseSnapshotLists(std::vector<string> &strinout){
 	bool state=true;
-	typedef std::vector<string> Tstrvec;
-	typedef Tstrvec::iterator TstrvecIT;
+	
 	std::set<std::string> result;
 	std::string pat, path;
 	for(TstrvecIT it=strinout.begin();it<strinout.end(); it++)

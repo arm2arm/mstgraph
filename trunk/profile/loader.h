@@ -78,6 +78,7 @@ class CLoader
 					  if(np!=npout){cout<<"error reading SFR"<<endl;exit(0);}
 					  npout=pG->read_full_block<float>(pU, "U   ", np);
 					  npout=pG->read_full_block<float>(pRHO, "RHO ", np);
+					  npout=pG->read_full_block<float>(pHSML, "HSML", np);
 					  np=pG->myhead.npart[0]+pG->myhead.npart[4];
 					  npout=pG->read_full_block<float>(pZ, "Z   ", np);
 					  npout=pG->read_full_block<float>(pMASS, "MASS", np);
