@@ -6,8 +6,12 @@
 #define OAF64 64
 #define strOAF_32 "{32:fPOS3:fVEL3:fRHO:fHSML}"
 #define strOAF_64 "{64:fPOS3:fVEL3:fRHO:fHSML:cPAD}"
+#define strOAF_52 "{32:fPOS3:fVEL3:fMASS:fHSML:fRHO:fU:fZ2:fSFR}"
+
 #define NCACHE 1024*1024
 
+//int id, int snap, unsigned char type, float* pos, float *vel,
+//			float mass, float hsml,float rho, float u, float *z, float sfr)
 class COAFFile :public CGadget
 	{
 

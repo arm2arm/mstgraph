@@ -58,9 +58,14 @@ int main(int argc, char* argv[])
 	///////////////////////// We will move to another directory
 	typedef boost::ptr_vector<COAFHelper> TOAFHelper_vec;
 	TOAFHelper_vec vecOAFABC;
-	vecOAFABC.push_back(new COAFHelper("bulge"));
-	vecOAFABC.push_back(new COAFHelper("disk"));
-	vecOAFABC.push_back(new COAFHelper("halo"));
+	if(opt.m_OAF)
+		{
+		vecOAFABC.push_back(new COAFHelper("bulge"));
+		vecOAFABC.push_back(new COAFHelper("disk"));
+		vecOAFABC.push_back(new COAFHelper("halo"));
+		for(size_t i=0;i<opt.m_IDlistvec.size();i++)
+			vecOAFABC[0].SetID(opt.m_IDlistvec[i]);
+		}
 /////////////////////////
 	if(opt.is_bad())
 		return EXIT_FAILURE;
@@ -89,8 +94,10 @@ int main(int argc, char* argv[])
 		CLoader *pL=new CLoader(opt.m_snapshotList[i],ParticleType);
                  cout<<"We got Np:"<<pL->size()<<endl;
 		if(opt.m_OAF)
+			{
 			opt.m_OAF=pL->ReadID();
-
+			
+			}
 		if(true)
 			{
 			///////////////////////////////
@@ -117,10 +124,12 @@ int main(int argc, char* argv[])
 				cout<<"# got a :"<<x.size()<<" particles for determining the center"<<endl;
 				
 				CMSTree mst_tree(x,y,z, opt.m_eps, opt.m_min_npart, opt.m_NGB);
-				pL->MoveToCOM(&mst_tree.m_MSTCatalog[0].wcom[0]);
-				std::transform( x.begin(), x.end(), x.begin(),std::bind2nd( std::minus<float>(), mst_tree.m_MSTCatalog[0].wcom[0]) );
-				std::transform( y.begin(), y.end(), y.begin(),std::bind2nd( std::minus<float>(), mst_tree.m_MSTCatalog[0].wcom[1]) );
-				std::transform( z.begin(), z.end(), z.begin(),std::bind2nd( std::minus<float>(), mst_tree.m_MSTCatalog[0].wcom[2]) );
+				//mst_tree.m_MSTCatalog[0].wcom[0];
+			    float com[]={ 19289.00659f,          26536.94112f,          24105.424500f};
+				pL->MoveToCOM(&com[0]);
+				std::transform( x.begin(), x.end(), x.begin(),std::bind2nd( std::minus<float>(), com[0]) );
+				std::transform( y.begin(), y.end(), y.begin(),std::bind2nd( std::minus<float>(), com[1]) );
+				std::transform( z.begin(), z.end(), z.begin(),std::bind2nd( std::minus<float>(), com[2]) );
 			
 				R.clear();
 				for(unsigned int i=0, ig=0, ist=0;i<pL->m_nelem-1;i++)// -1 to exclude BH particle
@@ -142,15 +151,17 @@ int main(int argc, char* argv[])
 								{
 								float mass, sfr, hsml, rho, u, zm[2];
 								unsigned char type=pL->pType[i];
+								
 								sfr=pL->pSFR[ig-1];
 								hsml=pL->pHSML[ig-1];
 								rho=pL->pRHO[ig-1];
-								mass=pL->pMASS[ig-1+ist-1];
+								
+								mass=pL->pMASS[ig-1+ist-1-1];
 								u=pL->pU[ig-1];
 								if(type==0)zm[0]=pL->pZ[ig-1];
 								else
 									zm[1]=pL->pZ[ig-1+ist-1-1];
-								
+							
 //3Pos, 3Vel, MASS, HSML, RHO, U, Z, SFR							
 								if(vecOAFABC[iv].insert(
 									pL->pID[i],isnap,type, 

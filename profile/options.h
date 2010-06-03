@@ -21,9 +21,10 @@ public:
 //////////////////////////////////////////
 	std::vector<string> m_snapshotList;
 	std::vector<std::string>  m_ApFilelist;
+	std::vector<std::vector<int> >  m_IDlistvec;
 	std::vector<int>  m_IDlist;
 	string m_file_out;
-	string m_file_IDlist;
+	std::vector<std::string> m_IDfilelist;
 	int m_type;
 	float m_eps;
 	int  m_min_npart;
@@ -33,8 +34,11 @@ public:
 	bool m_OAF;
 private:
 	bool ParseSnapshotLists(std::vector<string> &strinout);
-	void ReadID(std::string file);
+	void ReadID(std::vector<std::string > &filevec);
 	int m_status;
+
+	typedef std::vector<string> Tstrvec;
+	typedef Tstrvec::iterator TstrvecIT;
 	};
 
 #endif
