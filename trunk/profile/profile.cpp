@@ -12,7 +12,7 @@
 #include "MSTree.h"
 #include "PCA.h"
 #include "OAFHelper.h"
-
+#include "Sigma.h"
 using std::string;
 
 //////////////////////
@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
 		vecOAFABC.push_back(new COAFHelper("disk"));
 		vecOAFABC.push_back(new COAFHelper("halo"));
 		for(size_t i=0;i<opt.m_IDlistvec.size();i++)
-			vecOAFABC[0].SetID(opt.m_IDlistvec[i]);
+			vecOAFABC[i].SetID(opt.m_IDlistvec[i]);
 		}
 /////////////////////////
 	if(opt.is_bad())
@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
 		if(!is_file_exist(opt.m_snapshotList[i])){cout<<"skipping...isnap="<<isnap<<endl;continue;}
 
 		if(log.is_done(isnap))continue;
-		CLoader *pL=new CLoader(opt.m_snapshotList[i],ParticleType);
+		CLoader *pL=new CLoader(opt.m_snapshotList[i],ParticleType, true);
                  cout<<"We got Np:"<<pL->size()<<endl;
 		if(opt.m_OAF)
 			{
@@ -186,7 +186,10 @@ int main(int argc, char* argv[])
 
 					}
 				///////////////////////////////////
-
+					{
+					CSigma<double> sigma( &pL->pType[0],&pL->pPOS[0], &pL->pVEL[0],pL->size());
+					}
+///////////////////////////////////////////////////////
 				TLogData result=GetAB<float>(R,x,y, 8, 0.1f);//opt.m_Rmax);
 				std::vector<float> AmRad=getAmMaxMeanR(result);//format R1, Am1, R2,  Am2, R3, Am3
 
