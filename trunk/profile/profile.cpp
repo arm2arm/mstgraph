@@ -125,7 +125,11 @@ int main(int argc, char* argv[])
 				
 				CMSTree mst_tree(x,y,z, opt.m_eps, opt.m_min_npart, opt.m_NGB);
 				//mst_tree.m_MSTCatalog[0].wcom[0];
-			    float com[]={ 19289.00659f,          26536.94112f,          24105.424500f};
+			    float com[]={ 19289.00659f, 26536.94112f, 24105.424500f};
+				com[0]=(float)mst_tree.m_MSTCatalog[0].wcom[0];
+				com[1]=(float)mst_tree.m_MSTCatalog[0].wcom[1];
+				com[2]=(float)mst_tree.m_MSTCatalog[0].wcom[2];
+				
 				pL->MoveToCOM(&com[0]);
 				std::transform( x.begin(), x.end(), x.begin(),std::bind2nd( std::minus<float>(), com[0]) );
 				std::transform( y.begin(), y.end(), y.begin(),std::bind2nd( std::minus<float>(), com[1]) );
@@ -188,6 +192,7 @@ int main(int argc, char* argv[])
 				///////////////////////////////////
 					{
 					CSigma<double> sigma( &pL->pType[0],&pL->pPOS[0], &pL->pVEL[0],pL->size());
+					sigma.m_fname="sigma_"+boost::lexical_cast<std::string>(isnap)+string("_4.txt");
 					}
 ///////////////////////////////////////////////////////
 				TLogData result=GetAB<float>(R,x,y, 8, 0.1f);//opt.m_Rmax);

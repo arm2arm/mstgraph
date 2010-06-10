@@ -85,7 +85,7 @@ public:
 		GetSigma<double>(&data, 6, sigma, rr, 10);
 		};
 	~CSigma(){
-		m_fname="sigma.txt";
+		
 		save();
 		}
 	template <class Tvec, class Tconst, typename TOpbin>
@@ -142,7 +142,7 @@ public:
 			};
 		};
 
-	template <typename T>
+	template <class T>
 	valarray<T> get(vector<int> &ib,vector<T> &v)
 		{
 		valarray<T> tmp(ib.size());
