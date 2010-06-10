@@ -82,7 +82,7 @@ public:
 			{
 			data.insert(i,pType[i],&pX[i*3],&pV[i*3]);
 			}
-		GetSigma<double>(&data, 6, sigma, rr, 10);
+		GetSigma(&data, 6, sigma, rr, 10);
 		};
 	~CSigma(){
 		
@@ -142,10 +142,10 @@ public:
 			};
 		};
 
-	template <class T>
-	valarray<T> get(vector<int> &ib,vector<T> &v)
+	template <class Tg>
+	valarray<Tg> get(vector<int> &ib,vector<Tg> &v)
 		{
-		valarray<T> tmp(ib.size());
+		valarray<Tg> tmp(ib.size());
 		vector<int>::iterator it=ib.begin();
 		for(int i=0;it!=ib.end();it++)
 		 {
@@ -164,30 +164,30 @@ public:
 		}
 
 
-	template <class T>
-	void GetSigma(CData *pL,int type, vector<T> &sigma, vector<T> &rr,T Rc=5.0)
+	
+	void GetSigma(CData *pL,int type, vector<double> &sigma, vector<double> &rr, double Rc=5.0)
 		{
 
 		size_t Nsigbin=150, Nbins=100;
-		T dr=Rc/(T)Nsigbin;
-		T slw=Rc;
+		double dr=Rc/(double)Nsigbin;
+		double slw=Rc;
 		vector<int> ids,ib;
-		sigma.resize(Nsigbin, (T)0.0);
+		sigma.resize(Nsigbin, (double)0.0);
 		rr=sigma;
 
-		vector<T> dist;
+		vector<double> dist;
 		for(size_t i=0;i<pL->size(); i++)
 			dist.push_back(pL->R(i));
 
 		TWhereIs whereib;
 		//check (x> -rc && x<rc && abs(y)< slw)
-		vector<bool> ans=make_bool_vec<T, T>(pL->x, -Rc, std::greater_equal<T>()); 
+		vector<bool> ans=make_bool_vec<double, double>(pL->x, -Rc, std::greater_equal<double>()); 
 		whereib.push(ans);
-		ans=make_bool_vec<T, T>(pL->x, Rc, std::less<T>()); 
+		ans=make_bool_vec<double, double>(pL->x, Rc, std::less<double>()); 
 		whereib.push(ans);
-		ans=make_bool_vec<T, T>(pL->y, -Rc, std::greater_equal<T>()); 
+		ans=make_bool_vec<double, double>(pL->y, -Rc, std::greater_equal<double>()); 
 		whereib.push(ans);
-		ans=make_bool_vec<T, T>(pL->y, Rc, std::less<T>()); 
+		ans=make_bool_vec<double, double>(pL->y, Rc, std::less<double>()); 
 		whereib.push(ans);
 
 		ans=make_bool_vec<int, int>(pL->type, 4, std::less<int>()); 
@@ -198,24 +198,24 @@ public:
 		TWhereIs whereis;	
 		for(size_t i=0;i<Nsigbin;i++)
 			{
-			T r=i*dr;
+			double r=i*dr;
 			whereis.reset();
 			whereis.push(
-				make_bool_vec<T, T>(dist, r, std::greater_equal<T>())
+				make_bool_vec<double, double>(dist, r, std::greater_equal<double>())
 				);
 			whereis.push(
-				make_bool_vec<T, T>(dist, r+dr, std::less<T>())
+				make_bool_vec<double, double>(dist, r+dr, std::less<double>())
 				);
 			cout<<r<<endl;
 			ids=whereis.get();
 			if(ids.size() > 0)
 				{
-				valarray<T> vz=get(ib,pL->vz);
-				T meanvelz=vz.sum()/(T)vz.size();
+				valarray<double> vz=get(ib,pL->vz);
+				double meanvelz=vz.sum()/(double)vz.size();
 				vz=get(ids, pL->vz);
 				vz-=meanvelz;
-				vz=std::pow(vz,(T)2.0);
-				sigma[i]=sqrt(vz.sum()/(T)ids.size());
+				vz=std::pow(vz,(double)2.0);
+				sigma[i]=sqrt(vz.sum()/(double)ids.size());
 				rr[i]=r;
 				}
 			}
