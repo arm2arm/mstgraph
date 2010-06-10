@@ -89,11 +89,11 @@ public:
 		save();
 		}
 	template <class Tvec, class Tconst, typename TOpbin>
-	vector<bool> make_bool_vec(vector<Tvec> vec, Tconst value, TOpbin op, int *np=NULL)
+	vector<bool> make_bool_vec(vector<Tvec> &vec, Tconst value, TOpbin op, int *np=NULL)
 		{
 		vector<bool> myanswer(vec.size(), false);	
-		vector<Tvec>::iterator ie=vec.end();
-		vector<Tvec>::iterator ib=vec.begin();
+		typename vector<Tvec>::iterator ie=vec.end();
+		typename vector<Tvec>::iterator ib=vec.begin();
 		size_t i=0;
 		for(i=0;i<vec.size();i++)
 			{
