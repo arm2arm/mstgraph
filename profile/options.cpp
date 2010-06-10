@@ -17,6 +17,7 @@ using boost::bad_lexical_cast;
 #include <fstream>
 #include <string>
 #include <set>
+#include <iterator>
 
 #include <boost/algorithm/string.hpp>// for split
 #include "boost/filesystem/operations.hpp"
@@ -28,7 +29,27 @@ namespace bfs = boost::filesystem;
 
 void COptions::ReadID(std::vector< std::string > &filevec)
 	{
-	
+
+	for(size_t i=0;i<filevec.size();i++)
+		{
+		std::string filename=filevec[i];
+		std::ifstream stream(filename.c_str());
+		std::string oneline;
+		
+		if(stream.is_open())
+			{
+			int ix;
+			std::vector<int> vec;
+			while (stream >> ix) {
+				vec.push_back(ix);
+				}
+			m_IDlistvec.push_back(vec);
+
+			}else 
+				cout<<"# WARNING: Cannot find file: "<<filename<<endl;
+
+		}
+
 	}
 
 COptions::COptions(int argc, char* argv[]):m_status(0)
@@ -53,6 +74,7 @@ COptions::COptions(int argc, char* argv[]):m_status(0)
 			("min-npart,m", po::value< int>(&m_min_npart)->default_value(100), "MSTFOF group minimum length ")			
 			("mst-file,o", po::value< string>(&m_file_out)->default_value(string("mstfof")), "MSTFOF group out file")
 			("OAF", po::value< bool>(&m_OAF)->default_value(0), " dump OAF trace file for the particles")
+			("cosmo,c", po::value< bool>(&m_cosmo)->default_value(0), " Start analysis in physical units, v=v*sqrt(a), x=x/a")
 			("help,h","print help")
 			;
 
@@ -110,6 +132,12 @@ COptions::COptions(int argc, char* argv[]):m_status(0)
 			
 			ReadID(m_IDfilelist);
 			cout<<"numID="<<m_IDlistvec.size()<<" entries.";
+
+			for(size_t i=0;i<m_IDlistvec.size();i++)
+				{
+				if(i==0)cout<<"with: ";
+				cout<<m_IDlistvec[i].size()<<"  ";
+				}
 			cout << endl << endl;
 			}
 		if (vm.count("help")) {

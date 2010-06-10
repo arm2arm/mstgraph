@@ -32,6 +32,7 @@ public:
 	float m_Rmax;
 	bool m_updatelog;
 	bool m_OAF;
+	bool m_cosmo;
 private:
 	bool ParseSnapshotLists(std::vector<string> &strinout);
 	void ReadID(std::vector<std::string > &filevec);

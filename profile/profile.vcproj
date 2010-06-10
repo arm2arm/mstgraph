@@ -267,6 +267,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Sigma.h"
+				>
+			</File>
+			<File
 				RelativePath=".\utils.h"
 				>
 			</File>
