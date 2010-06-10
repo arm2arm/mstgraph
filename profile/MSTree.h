@@ -56,7 +56,6 @@ class CMSTree
 				//if(!update && !load())
 					{
 					cout<<"geting NGB:"<<m_maxNGB<<endl;
-					return;
 					FillData();
 					BuildKDTree();
 					BuildGraph();

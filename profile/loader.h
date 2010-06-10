@@ -38,11 +38,11 @@ class strMover
 class CLoader
 	{
 	public:
-		CLoader(std::string fname, unsigned int ptype=0, bool velflag=false):
+		CLoader(std::string fname, unsigned int ptype=0, bool velflag=false, bool cosflag=false):
 		  m_fname(fname),
 			  pSFR(NULL),
 			  pID(NULL), 
-			  pType(NULL),pVEL(NULL),pMASS(NULL),pU(NULL),pRHO(NULL),pZ(NULL),pHSML(NULL),m_ptype(ptype), m_verbose(0)
+			  pType(NULL),pVEL(NULL),pMASS(NULL),pU(NULL),pRHO(NULL),pZ(NULL),pHSML(NULL),m_ptype(ptype), m_verbose(0), m_cos(cosflag)
 			  {
 			  CGadget *pG=new CGadget(fname, false);
 			  pG->m_verbose=0;
@@ -86,6 +86,13 @@ class CLoader
 				  }
 			  memcpy(&m_npart[0], &pG->myhead.npart[0], 6*sizeof(unsigned int));
 			  
+			  
+			  if(m_cos)//let us put the comoving coordinaes to physical.
+				  {
+				  float a=(float)pG->myhead.time;
+				  std::transform(pPOS, pPOS+size()*3, pPOS, std::bind2nd (std::multiplies<float>(), 1.0f/a)  );
+				  std::transform(pVEL, pVEL+size()*3, pVEL, std::bind2nd (std::multiplies<float>(), sqrt(a)) );
+				  }
 			  delete pG;
 			  }
 		  inline 		float R(unsigned int i){
@@ -94,7 +101,7 @@ class CLoader
 				  pPOS[i*3+2]*pPOS[i*3+2];
 			  return sqrt(val);
 			  }
-		  inline 		float Get3DVel(unsigned int i){
+		  inline float Get3DVel(unsigned int i){
 			  float val=pVEL[i*3+0]*pVEL[i*3+0]+
 				  pVEL[i*3+1]*pVEL[i*3+1]+
 				  pVEL[i*3+2]*pVEL[i*3+2];
@@ -225,6 +232,7 @@ class CLoader
 		  float m_COM[6];
 		  float m_BHDATA[2];//Mbh, DOTMbh
 		  int m_verbose;
+		  bool m_cos;// this is changing the Velocity from comooving to physical.
 	};
 
 
