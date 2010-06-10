@@ -8,6 +8,8 @@
 #include <algorithm>   // for adjacent_find, find
 #include <functional>  // for bind1st, equal_to
 #include <iostream>    // for cout, endl
+#include <fstream>    // for file IO
+
 #include <cmath>    // for sqrt
 #include <cstring>    // for string
 #include <string>    // for string
