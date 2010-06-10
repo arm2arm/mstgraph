@@ -1,3 +1,77 @@
+pro plot_bh_arrow, epsfile
+set_teck_eps, epsfile, 12, 8
+!P.thick=6
+!P.charthick=4
+!P.charsize=2
+
+ff='/dnas01/arm2arm/DATA/LIA/SPHBAR/NFW/MODEL8_BH_EXPLORE/BH/tg1_all.txt'
+data1=read_ascii(ff, comment_symbol='#')
+data1=data1.field1
+
+ff='/dnas01/arm2arm/DATA/LIA/SPHBAR/NFW/MODEL8_BH_EXPLORE/BH/tg2_all.txt'
+data2=read_ascii(ff, comment_symbol='#')
+data2=data2.field1
+namevec=strarr(16)
+cols=fltarr(16)
+loadct, 0
+plot_io, [0], [0], /xs, /ys, xrange=[0, 6000],  yrange=[0.5, 20], xtitle='Mgas', ytitle='Mbh/Mbhinit'
+loadct, 39
+init=4
+;final=4
+for imodel=0, 15 do begin
+    cols[imodel]=imodel/15.0*240+10
+    ARROW, data1[1,imodel], data1[init,imodel]/data1[3,imodel],$
+      data2[1,imodel], data2[init,imodel]/data2[3,imodel],$
+      /data, thick=6, /solid, hthick=2, color=cols[imodel]
+    namevec[imodel]='ISOLMODEL'+flt2str(imodel)
+
+endfor
+
+
+old=!p.charthick
+!p.charthick=3
+!P.charsize=1
+tx=2
+
+legend, namevec, /right, color=cols,textcolors=cols
+!p.charthick=old
+unset_eps
+
+end
+
+pro plot_dump, epsfile, column, yname, yr
+set_teck_eps, epsfile, 12, 8
+!P.thick=6
+!P.charthick=4
+!P.charsize=2
+namevec=strarr(17)
+cols=intarr(17)
+loadct, 0
+plot , [0], [0], /nodata, xrange=[100,1000], yrange=yr,/xs, /ys, xtitle='Time', Ytitle='N '+yname
+loadct, 39
+for imodel=0, 15 do begin
+LogBase='/dnas01/arm2arm/DATA/LIA/SPHBAR/NFW/MODEL8_BH_EXPLORE/BH/ISOLMODEL'+flt2str(imodel)+'/'
+f=logbase+'/dump.log'
+print, f
+data=read_ascii(f, comment_symbol='#')
+data=data.field01
+
+oplot, data[0, *], smooth(data[column, *], 4), color=imodel/15.0*255,LINESTYLE=0
+
+cols[imodel]=imodel/15.0*240+10
+namevec[imodel]='ISOLMODEL'+flt2str(imodel)
+
+endfor
+
+old=!p.charthick
+!p.charthick=3
+!P.charsize=1
+tx=2
+
+legend, namevec, /right, color=cols,textcolors=cols
+!p.charthick=old
+unset_eps
+end
 pro get_eig, eig , file
 eig={eig_str, eigval:fltarr(3), e1:fltarr(3), e2:fltarr(3), e3:fltarr(3)}
 data=read_ascii(file)
@@ -20,11 +94,16 @@ SnapName='snap_gal_sfr_0450'
 ;;;;;;;;;;;;;;;;;;;;;
 ;;Linux Models....
 model='04'
+ImageBase='./'
 SnapName='snap_m8_gal_sfr_bh_450'
 SnapBase='/dnas01/arm2arm/DATA/LIA/SPHBAR/NFW/MODEL8_BH_EXPLORE/BH/ISOLMODEL'+model+'/SNAPS/'
 LogBase='/dnas01/arm2arm/DATA/LIA/SPHBAR/NFW/MODEL8_BH_EXPLORE/BH/ISOLMODEL'+model+'/'
 
+fAmrad=LogBase+'AmRad.log'
+Amrad=read_ascii(fAmrad, comment_symbol='#')
+
 file=SnapBase+snapname
+if( FILE_TEST(file))then begin
 readnew, file, pos, "POS", parttype=4
 if( FILE_TEST(file+'_rho_4')) then $
 readnew, file+'_rho_4', rhoin, "RHO4" else rhoin=pos(0,*)*0+1.0
@@ -101,15 +180,17 @@ xx=scale_vector(findgen(11), -1, 1)
 ;oplot, eig.e2[0]*xx*eig.eigval[1], eig.e2[1]*xx*eig.eigval[1], color=fsc_color("magenta")
 tvellipse,abs(scx),abs(scy),0,0,PhiBar,thick=10, /MAJOR, /MINOR, /DATA,  color=fsc_color("cyan")
 
-fAmrad=LogBase+'AmRad.log'
+
+
 !P.thick=10
-Amrad=read_ascii(fAmrad, comment_symbol='#')
 mycircle, 0,0,Amrad.field1[1], fsc_color("red")
 mycircle, 0,0,Amrad.field1[3], fsc_color("green")
 mycircle, 0,0,Amrad.field1[5], fsc_color("blue")
 unset_eps
+endif
+
 ;; Plot the second image
-set_teck_eps, ImageBase+'Rm2_m7_0450.eps',  8, 8
+set_teck_eps, ImageBase+'Rm2_m8_0450.eps',  8, 8
 fProf=LogBase+'Amf.log'
 print, 'Reading: ', fProf
 Am2=read_ascii(fProf, comment_symbol='#')
@@ -124,6 +205,11 @@ oplot, [0,0]+Amrad.field1[5], [0,1], color=fsc_color("blue")
 
 unset_eps
 
+;;;;;;;;;;;;;;;;;;; plot BH/gas part ;;;;;;;;;;;;;;;
+plot_bh_arrow, 'BH_init_final.eps'
+;;;;;;;;;;;;;;;;;
+; plot_dump, 'Gas-all.eps', 1, 'Gas', [0,7000]
+; plot_dump, 'Stars-all.eps', 6, 'Stars', [0,20000]
 
 
 print, "...done..."

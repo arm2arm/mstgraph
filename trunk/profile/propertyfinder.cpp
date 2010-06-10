@@ -13,7 +13,14 @@
 #include <functional>
 using std::string;
 ///////////////////////
+void GetSigmaSlit(CLoader *pL)
+{
+  vector<double> slSigma, slR;
+  double dx=1, dy=10;
+  double nbins=100.0, nsigbin=150.0;
 
+}
+///////////////////////
 int main(int argc, char* argv[])
 	{
     scoped_timer timemme("Main program PropertyFinder :.....");
@@ -87,6 +94,9 @@ int main(int argc, char* argv[])
 		    <<ig1<<" "<<ig2<<" "
 		    <<pLBHINIT->GetBHMass()<<" "<<pLBH->GetBHMass()<<" "
 		    <<sigV[2]<<" "<<sigV[4]<<endl;		
+		///////////////////////////////
+		
+		
 		///////////////////////////////
 		delete pL;
 		delete pLBH;
