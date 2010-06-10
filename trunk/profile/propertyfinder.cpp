@@ -11,16 +11,10 @@
 #include <numeric>
 #include <valarray>
 #include <functional>
+#include "Sigma.h"
 using std::string;
 ///////////////////////
-void GetSigmaSlit(CLoader *pL)
-{
-  vector<double> slSigma, slR;
-  double dx=1, dy=10;
-  double nbins=100.0, nsigbin=150.0;
 
-}
-///////////////////////
 int main(int argc, char* argv[])
 	{
     scoped_timer timemme("Main program PropertyFinder :.....");
@@ -90,14 +84,18 @@ int main(int argc, char* argv[])
 		    sigV[isig]/=double(itype[isig]);
 		///////////////////////////////
 		cout.precision(10);
-		cout<<std::setw(12)<<std::fixed<<GetISnap(pL->m_fname)<<" "
+		int isnap=GetISnap(pL->m_fname);
+		cout<<std::setw(12)<<std::fixed<<isnap<<" "
 		    <<ig1<<" "<<ig2<<" "
 		    <<pLBHINIT->GetBHMass()<<" "<<pLBH->GetBHMass()<<" "
 		    <<sigV[2]<<" "<<sigV[4]<<endl;		
 		///////////////////////////////
-		
-		
-		///////////////////////////////
+			{
+			CSigma<double> sigma( &pL->pType[0],&pL->pPOS[0], &pL->pVEL[0],pL->size());
+			sigma.m_fname="sigma_"+boost::lexical_cast<std::string>(isnap)+string("_4.txt");
+			}
+///////////////////////////////////
+
 		delete pL;
 		delete pLBH;
 		delete pLBHINIT;
@@ -106,7 +104,4 @@ int main(int argc, char* argv[])
 
 	return 0;
 	}
-
-
-
 
