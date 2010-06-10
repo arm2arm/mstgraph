@@ -41,7 +41,7 @@ struct TWhereIs{
 				idx.push_back(i);
 		};
 	void reset(){hash.clear();idx.clear();};
-	void push(vector<bool> &bv){
+	void push(vector<bool> bv){
 		if(hash.size()==0){
 			hash=bv;			
 			}else{
