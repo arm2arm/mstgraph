@@ -24,6 +24,69 @@ using std::cerr;
 using std::endl;
 using std::string;
 
+
+/////////////// UTILS for some mnipulation
+struct TWhereIs{
+	vector<int> idx;
+	vector<bool> hash;
+	TWhereIs(vector<bool> bv){
+		hash=bv;	
+		};
+	TWhereIs(){};
+	vector<int> get(){return idx;};
+	void update(){
+		idx.clear();
+		for(size_t i=0;i<hash.size();i++)
+			if(hash[i])
+				idx.push_back(i);
+		};
+	void reset(){hash.clear();idx.clear();};
+	void push(vector<bool> &bv){
+		if(hash.size()==0){
+			hash=bv;			
+			}else{
+				if(bv.size() != hash.size())
+					cerr<<"# Error in TWhereIs the vectors are not equal."<<endl;
+				typedef vector<bool> BV;
+				BV::iterator ibhash=hash.begin(), iehash=hash.end();
+				for(int i=0;iehash!=ibhash;ibhash++){
+					(*ibhash) = (*ibhash) && bv[i++];
+					}
+			}
+		update();
+		};
+	inline size_t size(){
+		return (int)std::count(hash.begin(), hash.end(), true);
+		};
+	};
+
+template <class Tg>
+valarray<Tg> get(vector<int> &ib,vector<Tg> &v)
+	{
+	valarray<Tg> tmp(ib.size());
+	vector<int>::iterator it=ib.begin();
+	for(int i=0;it!=ib.end();it++)
+		{
+		tmp[i]= v[(*it)];
+		i++;
+		}
+	return tmp;
+	};
+
+
+void mma(vector<double> &data, std::string msg="Stat ")
+	{
+
+	std::cout<<msg+string(" min=")<<(*std::min_element(data.begin(), data.end())) <<endl;
+	std::cout<<msg+string(" max=") << *std::max_element(data.begin(), data.end())<<endl;
+	};
+
+
+
+////////////////////////////////////////////
+
+
+
 template <class T>
 class CSigma{
 public:
@@ -34,10 +97,10 @@ public:
 		{
 		std::ofstream stream(m_fname.c_str());
 		if(stream.is_open())
-		for(size_t i=0;i<rr.size();i++)
-			{
-			 stream<<rr[i]<<" "<<sigma[i]<<endl;
-			}
+			for(size_t i=0;i<rr.size();i++)
+				{
+				stream<<rr[i]<<" "<<sigma[i]<<endl;
+				}
 		}
 	struct CData
 		{
@@ -58,24 +121,24 @@ public:
 			vz.resize(np);
 			type.resize(np);
 			};
-	 void insert(size_t i,int type_,float *pX, float *pV)
+		void insert(size_t i,int type_,float *pX, float *pV)
 			{
-			 if(i<m_np)
-				 {
-				  x[i]=pX[0];
-				  y[i]=pX[1];
-				  z[i]=pX[2];
-				  vx[i]=pV[0];
-				  vy[i]=pV[1];
-				  vz[i]=pV[2];
-				  type[i]=type_;
-				 }
+			if(i<m_np)
+				{
+				x[i]=pX[0];
+				y[i]=pX[1];
+				z[i]=pX[2];
+				vx[i]=pV[0];
+				vy[i]=pV[1];
+				vz[i]=pV[2];
+				type[i]=type_;
+				}
 			}
 		size_t m_np;
 		vector<T> x,y,z,vx, vy, vz;
 		vector<int> type;
 		}data;
-	
+
 	CSigma(int *pType, float *pX, float *pV,size_t np)
 		{
 		m_fname="sigma.txt";
@@ -87,7 +150,7 @@ public:
 		GetSigma(&data, 6, sigma, rr, 10);
 		};
 	~CSigma(){
-		
+
 		save();
 		}
 	template <class Tvec, class Tconst, typename TOpbin>
@@ -110,63 +173,7 @@ public:
 		return myanswer;
 		};
 
-	struct TWhereIs{
-		vector<int> idx;
-		vector<bool> hash;
-		TWhereIs(vector<bool> bv){
-			hash=bv;	
-			};
-		TWhereIs(){};
-		vector<int> get(){return idx;};
-		void update(){
-			idx.clear();
-			for(size_t i=0;i<hash.size();i++)
-				if(hash[i])
-					idx.push_back(i);
-			};
-		void reset(){hash.clear();idx.clear();};
-		void push(vector<bool> &bv){
-			if(hash.size()==0){
-				hash=bv;			
-				}else{
-					if(bv.size() != hash.size())
-						cerr<<"# Error in TWhereIs the vectors are not equal."<<endl;
-					typedef vector<bool> BV;
-					BV::iterator ibhash=hash.begin(), iehash=hash.end();
-					for(int i=0;iehash!=ibhash;ibhash++){
-						(*ibhash) = (*ibhash) && bv[i++];
-						}
-				}
-			update();
-			};
-		inline size_t size(){
-			return (int)std::count(hash.begin(), hash.end(), true);
-			};
-		};
 
-	template <class Tg>
-	valarray<Tg> get(vector<int> &ib,vector<Tg> &v)
-		{
-		valarray<Tg> tmp(ib.size());
-		vector<int>::iterator it=ib.begin();
-		for(int i=0;it!=ib.end();it++)
-		 {
-		 tmp[i]= v[(*it)];
-		 i++;
-		 }
-		return tmp;
-		}
-
-
-	void mma(vector<double> &data, std::string msg="Stat ")
-		{
-
-		std::cout<<msg+string(" min=")<<(*std::min_element(data.begin(), data.end())) <<endl;
-		std::cout<<msg+string(" max=") << *std::max_element(data.begin(), data.end())<<endl;
-		}
-
-
-	
 	void GetSigma(CData *pL,int type, vector<double> &sigma, vector<double> &rr, double Rc=5.0)
 		{
 
