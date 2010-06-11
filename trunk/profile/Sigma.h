@@ -9,7 +9,7 @@
 #include <functional>  // for bind1st, equal_to
 #include <iostream>    // for cout, endl
 #include <fstream>    // for file IO
-
+#include <stdlib.h>
 #include <cmath>    // for sqrt
 #include <cstring>    // for string
 #include <string>    // for string
@@ -136,13 +136,27 @@ public:
 		vector<int> type;
 		}data;
 
-	CSigma(int *pType, float *pX, float *pV,size_t np)
+	CSigma(std::string strType,int *pType, float *pX, float *pV,size_t np)
 		{
 		m_fname="sigma.txt";
-		//data.reserve(np);	
+		enum eTYPE{T0,T1,T2,T3,T4,T5,numtypes};
+		string  names[]={"T0","T1","T2","T3","T4","T5"};
+		std::bitset<numtypes> userTypes;
+		std::string::iterator its=strType.begin();
+		while( its!=strType.end() )
+			{
+			char ch=*its;
+			int val=atoi(&ch);
+			if(val > -1 && val<numtypes+1)
+				userTypes.set(val);
+			cout<<*its<<endl;
+			its++;
+			}
+
+	    if (userTypes.any()) 
 		for(size_t i=0;i<np;i++)
 			{
-				if(pType[i]==4)
+			    if (userTypes[(eTYPE)pType[i]])
 					data.insert(i,pType[i],&pX[i*3],&pV[i*3]);
 			}
 		cout<<"# Sigma over the "<<data.size()<<" particles"<<endl;

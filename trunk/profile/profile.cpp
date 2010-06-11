@@ -191,7 +191,7 @@ int main(int argc, char* argv[])
 					}
 				///////////////////////////////////
 				if(true)	{
-					CSigma<double> sigma( &pL->pType[0],&pL->pPOS[0], &pL->pVEL[0],pL->size());
+					CSigma<double> sigma( "234", &pL->pType[0],&pL->pPOS[0], &pL->pVEL[0],pL->size());
 					sigma.m_fname="sigma_"+boost::lexical_cast<std::string>(isnap)+string("_4.txt");
 					}
 ///////////////////////////////////////////////////////
