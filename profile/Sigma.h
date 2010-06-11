@@ -221,15 +221,16 @@ public:
                 cout<<dist.size()<<endl;
 		TWhereIs whereib;
 		//check (x> -rc && x<rc && abs(y)< slw)
-		vector<bool> ans=make_bool_vec<double, double>(pL->x, -Rc, std::greater_equal<double>()); 
+		vector<bool> ans=make_bool_vec<double, double>(dist, Rc, std::less_equal<double>()); 
+		whereib.push(ans);
+		/*vector<bool> ans=make_bool_vec<double, double>(pL->x, -Rc, std::greater_equal<double>()); 
 		whereib.push(ans);
 		ans=make_bool_vec<double, double>(pL->x, Rc, std::less<double>()); 
 		whereib.push(ans);
 		ans=make_bool_vec<double, double>(pL->y, -Rc, std::greater_equal<double>()); 
 		whereib.push(ans);
 		ans=make_bool_vec<double, double>(pL->y, Rc, std::less<double>()); 
-		whereib.push(ans);
-
+		whereib.push(ans);*/
 
 		ib=whereib.get();
 		mma(dist, "Dist: ");
