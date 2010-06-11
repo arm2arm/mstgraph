@@ -38,6 +38,29 @@ void print(const char *str){
 };
 };
 
+// function object to process the mean value
+class MeanValue {
+  private:
+    long num;    // number of elements
+    long sum;    // sum of all element values
+  public:
+    // constructor
+    MeanValue () : num(0), sum(0) {
+    }
+
+    // ''function call''
+    // - process one more element of the sequence
+    void operator() (int elem) {
+        num++;          // increment count
+        sum += elem;    // add value
+    }
+
+    // return mean value
+    double value () {
+        return static_cast<double>(sum) / static_cast<double>(num);
+    }
+};
+
 
 std::string intToString(int i);
 #define printOpenGLError() printOglError(__FILE__, __LINE__)

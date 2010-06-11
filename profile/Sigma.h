@@ -18,6 +18,7 @@
 #include <valarray> //vallaray
 #include <boost/lambda/lambda.hpp>
 #include <boost/lambda/bind.hpp>
+#include "utils.h"
 using std::vector;
 using std::valarray;
 using std::cout;
@@ -65,7 +66,7 @@ template <class Tg>
 valarray<Tg> get(vector<int> &ib,vector<Tg> &v)
 	{
 	valarray<Tg> tmp(ib.size());
-	for(int i=0;i<ib.size();i++)
+	for(size_t i=0;i<ib.size();i++)
 		{
 		tmp[i]= v[ib[i]];
 		}
@@ -135,10 +136,19 @@ public:
 		size_t m_np;
 		vector<T> x,y,z,vx, vy, vz;
 		vector<int> type;
+		inline SubstractMean(vector<T> &x)
+			{
+			MeanValue mv = for_each (x.begin(), x.end(),  // range
+				MeanValue());              // operation
+			std::transform(x.begin(), x.end(), x.begin(), std::bind2nd(std::plus<T>(), -mv.value()));
+			};
 		void PutInCom(void)
 		{
-		 std::accumulate(x.begin(), x.)
-		}
+			
+		SubstractMean(x);SubstractMean(y);SubstractMean(z);
+		SubstractMean(vx);SubstractMean(vy);SubstractMean(vz);
+
+		};
 		}data;
 
 	CSigma(std::string strType,int *pType, float *pX, float *pV,size_t np)
@@ -158,15 +168,18 @@ public:
 			its++;
 			}
 
-	    if (userTypes.any()) 
-		for(size_t i=0;i<np;i++)
+		if (userTypes.any())
 			{
-			    if (userTypes[(eTYPE)pType[i]])
+			PutInCom();
+			for(size_t i=0;i<np;i++)
+				{
+				if (userTypes[(eTYPE)pType[i]])
 					data.insert(i,pType[i],&pX[i*3],&pV[i*3]);
+				}
+			data.PutInCom();
+			cout<<"# Sigma over the "<<data.size()<<" particles"<<endl;
+			GetSigma(&data,  sigma, rr, 4);
 			}
-	        data.PutInCom();
-		cout<<"# Sigma over the "<<data.size()<<" particles"<<endl;
-		GetSigma(&data,  sigma, rr, 4);
 		};
 	~CSigma(){
 
