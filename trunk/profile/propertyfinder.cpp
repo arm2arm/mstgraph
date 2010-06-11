@@ -84,7 +84,6 @@ int main(int argc, char* argv[])
 		    sigV[isig]/=double(itype[isig]);
 		///////////////////////////////
 		cout.precision(10);
-		int isnap=GetISnap(pL->m_fname);
 		cout<<std::setw(12)<<std::fixed<<isnap<<" "
 		    <<ig1<<" "<<ig2<<" "
 		    <<pLBHINIT->GetBHMass()<<" "<<pLBH->GetBHMass()<<" "
