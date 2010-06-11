@@ -217,7 +217,7 @@ public:
 
 		vector<double> dist;
 		for(size_t i=0;i<pL->size(); i++)
-			dist.push_back(pL->R(i));
+			dist.push_back(sqrt(pL->x[i]*pL->x[i]+pL->y[i]*pL->y[i]));
                 cout<<dist.size()<<endl;
 		TWhereIs whereib;
 		//check (x> -rc && x<rc && abs(y)< slw)
@@ -231,9 +231,11 @@ public:
 		whereib.push(ans);
 		ans=make_bool_vec<double, double>(pL->y, Rc, std::less<double>()); 
 		whereib.push(ans);*/
-
 		ib=whereib.get();
 		mma(dist, "Dist: ");
+		valarray<double> vzb=get(ib,pL->vz);
+		double meanvelz=vzb.sum()/(double)vzb.size();
+
 		for(size_t i=0;i<Nsigbin;i++)
 			{
 			double r=i*dr;
@@ -241,19 +243,15 @@ public:
 			whereis.push(
 				make_bool_vec<double, double>(dist, r, std::greater_equal<double>())
 				);
-		
 			whereis.push(
 				make_bool_vec<double, double>(dist, r+dr, std::less<double>())
 				);
 			ids=whereis.get();
 			if(ids.size() > 0 )
 				{
-				valarray<double> vzb=get(ib,pL->vz);
-				double meanvelz=vzb.sum()/(double)vzb.size();
-				valarray<double> vz=get(ids, pL->vz);
-				vz-=meanvelz;
-				vz=std::pow(vz,(double)2.0);
-				sigma[i]=sqrt(vz.sum()/(double)ids.size());
+				valarray<double> vzb=get(ids,pL->vz);
+				vzb=std::pow(vzb-meanvelz,(double)2.0);
+				sigma[i]=sqrt(vzb.sum()/(double)ids.size());
 				rr[i]=r;
 				}
 			}
