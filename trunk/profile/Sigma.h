@@ -13,6 +13,7 @@
 #include <cmath>    // for sqrt
 #include <cstring>    // for string
 #include <string>    // for string
+#include <bitset> //bitsets
 
 #include <valarray> //vallaray
 #include <boost/lambda/lambda.hpp>
@@ -134,6 +135,10 @@ public:
 		size_t m_np;
 		vector<T> x,y,z,vx, vy, vz;
 		vector<int> type;
+		void PutInCom(void)
+		{
+		 std::accumulate(x.begin(), x.)
+		}
 		}data;
 
 	CSigma(std::string strType,int *pType, float *pX, float *pV,size_t np)
@@ -159,6 +164,7 @@ public:
 			    if (userTypes[(eTYPE)pType[i]])
 					data.insert(i,pType[i],&pX[i*3],&pV[i*3]);
 			}
+	        data.PutInCom();
 		cout<<"# Sigma over the "<<data.size()<<" particles"<<endl;
 		GetSigma(&data,  sigma, rr, 4);
 		};
