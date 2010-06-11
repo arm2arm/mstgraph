@@ -191,8 +191,10 @@ int main(int argc, char* argv[])
 					}
 				///////////////////////////////////
 				if(true)	{
-					CSigma<double> sigma( "234", &pL->pType[0],&pL->pPOS[0], &pL->pVEL[0],pL->size());
-					sigma.m_fname="sigma_"+boost::lexical_cast<std::string>(isnap)+string("_4.txt");
+					std::string strType="234";
+
+					CSigma<double> sigma( strType, &pL->pType[0],&pL->pPOS[0], &pL->pVEL[0],pL->size());
+					sigma.m_fname="sigma_"+boost::lexical_cast<std::string>(isnap)+"_"+strType+".txt";
 					}
 ///////////////////////////////////////////////////////
 				TLogData result=GetAB<float>(R,x,y, 8, 0.1f);//opt.m_Rmax);
