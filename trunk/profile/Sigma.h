@@ -178,7 +178,7 @@ public:
 				}
 			data.PutInCom();
 			cout<<"# Sigma over the "<<data.size()<<" particles"<<endl;
-			GetSigma(&data,  sigma, rr, 4);
+			GetSigma(&data,  sigma, rr, 4.0);
 			}
 		};
 	~CSigma(){
@@ -249,9 +249,9 @@ public:
 			ids=whereis.get();
 			if(ids.size() > 0 )
 				{
-				valarray<double> vzb=get(ids,pL->vz);
-				vzb=std::pow(vzb-meanvelz,(double)2.0);
-				sigma[i]=sqrt(vzb.sum()/(double)ids.size());
+				valarray<double> vzslice=get(ids,pL->vz);
+				vzslice=std::pow(vzslice-meanvelz,(double)2.0);
+				sigma[i]=sqrt(vzslice.sum()/(double)ids.size());
 				rr[i]=r;
 				}
 			}
