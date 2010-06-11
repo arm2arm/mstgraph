@@ -142,9 +142,10 @@ public:
 		//data.reserve(np);	
 		for(size_t i=0;i<np;i++)
 			{
-				if(pType[i]==4|| pType[i]==2 ||pType[i]==3)
+				if(pType[i]==4)
 					data.insert(i,pType[i],&pX[i*3],&pV[i*3]);
 			}
+		cout<<"# Sigma over the "<<data.size()<<" particles"<<endl;
 		GetSigma(&data,  sigma, rr, 4);
 		};
 	~CSigma(){
