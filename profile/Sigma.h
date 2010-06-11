@@ -136,7 +136,7 @@ public:
 		size_t m_np;
 		vector<T> x,y,z,vx, vy, vz;
 		vector<int> type;
-		inline SubstractMean(vector<T> &x)
+		void SubstractMean(vector<T> &x)
 			{
 			MeanValue mv = for_each (x.begin(), x.end(),  // range
 				MeanValue());              // operation
@@ -170,7 +170,7 @@ public:
 
 		if (userTypes.any())
 			{
-			PutInCom();
+			data.PutInCom();
 			for(size_t i=0;i<np;i++)
 				{
 				if (userTypes[(eTYPE)pType[i]])
