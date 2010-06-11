@@ -64,11 +64,9 @@ template <class Tg>
 valarray<Tg> get(vector<int> &ib,vector<Tg> &v)
 	{
 	valarray<Tg> tmp(ib.size());
-	vector<int>::iterator it=ib.begin();
-	for(int i=0;it!=ib.end();it++)
+	for(int i=0;i<ib.size();i++)
 		{
-		tmp[i]= v[(*it)];
-		i++;
+		tmp[i]= v[ib[i]];
 		}
 	return tmp;
 	};
@@ -123,15 +121,14 @@ public:
 			};
 		void insert(size_t i,int type_,float *pX, float *pV)
 			{
-			if(i<m_np)
 				{
-				x[i]=pX[0];
-				y[i]=pX[1];
-				z[i]=pX[2];
-				vx[i]=pV[0];
-				vy[i]=pV[1];
-				vz[i]=pV[2];
-				type[i]=type_;
+				x.push_back(pX[0]);
+				y.push_back(pX[1]);
+				z.push_back(pX[2]);
+				vx.push_back(pV[0]);
+				vy.push_back(pV[1]);
+				vz.push_back(pV[2]);
+				type.push_back(type_);
 				}
 			}
 		size_t m_np;
@@ -142,12 +139,13 @@ public:
 	CSigma(int *pType, float *pX, float *pV,size_t np)
 		{
 		m_fname="sigma.txt";
-		data.reserve(np);	
+		//data.reserve(np);	
 		for(size_t i=0;i<np;i++)
 			{
-			data.insert(i,pType[i],&pX[i*3],&pV[i*3]);
+				if(pType[i]==4|| pType[i]==2 ||pType[i]==3)
+					data.insert(i,pType[i],&pX[i*3],&pV[i*3]);
 			}
-		GetSigma(&data, 6, sigma, rr, 10);
+		GetSigma(&data,  sigma, rr, 4);
 		};
 	~CSigma(){
 
@@ -174,10 +172,9 @@ public:
 		};
 
 
-	void GetSigma(CData *pL,int type, vector<double> &sigma, vector<double> &rr, double Rc=5.0)
+	void GetSigma(CData *pL, vector<double> &sigma, vector<double> &rr, double Rc=5.0)
 		{
-
-		size_t Nsigbin=150, Nbins=100;
+		size_t Nsigbin=250, Nbins=200;
 		double dr=Rc/(double)Nsigbin;
 		double slw=Rc;
 		vector<int> ids,ib;
@@ -187,7 +184,7 @@ public:
 		vector<double> dist;
 		for(size_t i=0;i<pL->size(); i++)
 			dist.push_back(pL->R(i));
-
+                cout<<dist.size()<<endl;
 		TWhereIs whereib;
 		//check (x> -rc && x<rc && abs(y)< slw)
 		vector<bool> ans=make_bool_vec<double, double>(pL->x, -Rc, std::greater_equal<double>()); 
@@ -199,29 +196,26 @@ public:
 		ans=make_bool_vec<double, double>(pL->y, Rc, std::less<double>()); 
 		whereib.push(ans);
 
-		ans=make_bool_vec<int, int>(pL->type, 4, std::less<int>()); 
-		whereib.push(ans);
 
 		ib=whereib.get();
 		mma(dist, "Dist: ");
-		TWhereIs whereis;	
 		for(size_t i=0;i<Nsigbin;i++)
 			{
 			double r=i*dr;
-			whereis.reset();
+			TWhereIs whereis;	
 			whereis.push(
 				make_bool_vec<double, double>(dist, r, std::greater_equal<double>())
 				);
+		
 			whereis.push(
 				make_bool_vec<double, double>(dist, r+dr, std::less<double>())
 				);
-			cout<<r<<endl;
 			ids=whereis.get();
-			if(ids.size() > 0)
+			if(ids.size() > 0 )
 				{
-				valarray<double> vz=get(ib,pL->vz);
-				double meanvelz=vz.sum()/(double)vz.size();
-				vz=get(ids, pL->vz);
+				valarray<double> vzb=get(ib,pL->vz);
+				double meanvelz=vzb.sum()/(double)vzb.size();
+				valarray<double> vz=get(ids, pL->vz);
 				vz-=meanvelz;
 				vz=std::pow(vz,(double)2.0);
 				sigma[i]=sqrt(vz.sum()/(double)ids.size());
