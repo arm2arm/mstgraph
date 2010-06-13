@@ -151,7 +151,7 @@ public:
 		};
 		}data;
 
-	CSigma(std::string strType,int *pType, float *pX, float *pV,size_t np)
+	CSigma(float Rc, std::string strType,int *pType, float *pX, float *pV,size_t np)
 		{
 		m_fname="sigma.txt";
 		enum eTYPE{T0,T1,T2,T3,T4,T5,numtypes};
@@ -178,7 +178,7 @@ public:
 				}
 			data.PutInCom();
 			cout<<"# Sigma over the "<<data.size()<<" particles"<<endl;
-			GetSigma(&data,  sigma, rr, 4.0);
+			GetSigma(&data,  sigma, rr, Rc);
 			}
 		};
 	~CSigma(){
