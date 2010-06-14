@@ -228,7 +228,7 @@ public:
 		for(size_t i=0l;i<Nbins;i++)
 			{
 			r=dr*i;
-			cout<<i<<") "<<r<<" ";
+			//cout<<i<<") "<<r<<" ";
 			for(size_t itype=0;itype<types.size();itype++)
 				{
 				valarray<bool> ids = (dist < r+dr) && (dist > r) && (type==types[itype]);
@@ -240,7 +240,7 @@ public:
 					sigma[itype][i]= sqrt(d.sum()/(double)d.size());
 					rr[i]=r;
 					}
-				cout<<sigma[itype][i]<<"\t";
+				//cout<<sigma[itype][i]<<"\t";
 				}
 			cout<<endl;
 			}
