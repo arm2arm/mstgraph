@@ -218,6 +218,8 @@ public:
 		sigma[i].resize(Nbins);
 		rr.resize(Nbins);
 		valarray<double> vz(&data.vz[0], data.vz.size());
+		valarray<double> z(&data.z[0], data.z.size());
+		z=abs(z);
 		valarray<int>    type(&data.type[0], data.type.size());
 
 		double mvel=vz.sum()/(double)vz.size();
@@ -227,7 +229,7 @@ public:
 			cout<<i<<") "<<r<<" ";
 			for(size_t itype=0;itype<types.size();itype++)
 				{
-				valarray<bool> ids = (dist < r+dr) && (dist > r) && (type==types[itype]);
+				valarray<bool> ids = (z < 3.0) &&(dist < r+dr) && (dist > r) && (type==types[itype]);
 				if(ids.max())
 					{
 					valarray<double> d=vz[ids];
