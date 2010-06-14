@@ -179,7 +179,7 @@ public:
 				}
 			};
 
-	CSigma(float Rc, std::string strType,int *pType, float *pX, float *pV,size_t np)
+	CSigma(std::string strType,int *pType, float *pX, float *pV,size_t np)
 		{
 		m_fname="sigma.txt";
 		GetTypes(strType);
