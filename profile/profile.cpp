@@ -141,9 +141,9 @@ int main(int argc, char* argv[])
 
 				if(true)	{
 					std::string strType="01234";
-					CSigma<double> sigma( 15.0f,strType, &pL->pType[0],&pL->pPOS[0], &pL->pVEL[0],pL->size());
+					CSigma<double> sigma( strType, &pL->pType[0],&pL->pPOS[0], &pL->pVEL[0],pL->size());
 					sigma.GetSigma(150, 15);
-					sigma.m_fname="sigma_"+boost::lexical_cast<std::string>(isnap)+"_"+strType+".txt";
+					sigma.m_fname="sigma_"+boost::lexical_cast<std::string>(isnap)+".txt";
 					}
 				R.clear();
 				for(unsigned int i=0, ig=0, ist=0;i<pL->m_nelem-1;i++)// -1 to exclude BH particle
