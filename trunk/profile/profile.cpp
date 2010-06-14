@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
 		for(size_t i=0;i<opt.m_IDlistvec.size();i++)
 			vecOAFABC[i].SetID(opt.m_IDlistvec[i]);
 		}
-/////////////////////////
+	/////////////////////////
 	if(opt.is_bad())
 		return EXIT_FAILURE;
 	unsigned int ParticleType=opt.m_type;
@@ -92,11 +92,12 @@ int main(int argc, char* argv[])
 
 		if(log.is_done(isnap))continue;
 		CLoader *pL=new CLoader(opt.m_snapshotList[i],ParticleType, true);
-                 cout<<"We got Np:"<<pL->size()<<endl;
+		cout<<"We got Np:"<<pL->size()<<endl;
+			
 		if(opt.m_OAF)
 			{
 			opt.m_OAF=pL->ReadID();
-			
+
 			}
 		if(true)
 			{
@@ -125,16 +126,25 @@ int main(int argc, char* argv[])
 				
 				CMSTree mst_tree(x,y,z, opt.m_eps, opt.m_min_npart, opt.m_NGB);
 				//mst_tree.m_MSTCatalog[0].wcom[0];
-			    float com[]={ 19289.00659f, 26536.94112f, 24105.424500f};
-				com[0]=(float)mst_tree.m_MSTCatalog[0].wcom[0];
-				com[1]=(float)mst_tree.m_MSTCatalog[0].wcom[1];
-				com[2]=(float)mst_tree.m_MSTCatalog[0].wcom[2];
-				
+				float com[]={0.12564f,-0.67488f,1.43077f};//{ 19289.00659f, 26536.94112f, 24105.424500f};
+				if(false)
+					{
+					mst_tree.compile();
+					com[0]=(float)mst_tree.m_MSTCatalog[0].wcom[0];
+					com[1]=(float)mst_tree.m_MSTCatalog[0].wcom[1];
+					com[2]=(float)mst_tree.m_MSTCatalog[0].wcom[2];
+					}
 				pL->MoveToCOM(&com[0]);
 				std::transform( x.begin(), x.end(), x.begin(),std::bind2nd( std::minus<float>(), com[0]) );
 				std::transform( y.begin(), y.end(), y.begin(),std::bind2nd( std::minus<float>(), com[1]) );
 				std::transform( z.begin(), z.end(), z.begin(),std::bind2nd( std::minus<float>(), com[2]) );
-			
+
+				if(true)	{
+					std::string strType="2";
+					CSigma<double> sigma( 15.0f,strType, &pL->pType[0],&pL->pPOS[0], &pL->pVEL[0],pL->size());
+					sigma.GetSigma(150, 15);
+					sigma.m_fname="sigma_"+boost::lexical_cast<std::string>(isnap)+"_"+strType+".txt";
+					}
 				R.clear();
 				for(unsigned int i=0, ig=0, ist=0;i<pL->m_nelem-1;i++)// -1 to exclude BH particle
 					{
@@ -148,54 +158,50 @@ int main(int argc, char* argv[])
 						}
 
 					if(opt.m_OAF)
-					if(pL->pType[i]==0 || pL->pType[i]==4)
-						{
+						if(pL->pType[i]==0 || pL->pType[i]==4)
 							{
-							for(size_t iv=0;iv<vecOAFABC.size();iv++)
 								{
-								float mass, sfr, hsml, rho, u, zm[2];
-								unsigned char type=pL->pType[i];
-								
-								sfr=pL->pSFR[ig-1];
-								hsml=pL->pHSML[ig-1];
-								rho=pL->pRHO[ig-1];
-								
-								mass=pL->pMASS[ig-1+ist-1-1];
-								u=pL->pU[ig-1];
-								if(type==0)zm[0]=pL->pZ[ig-1];
-								else
-									zm[1]=pL->pZ[ig-1+ist-1-1];
-							
-//3Pos, 3Vel, MASS, HSML, RHO, U, Z, SFR							
-								if(vecOAFABC[iv].insert(
-									pL->pID[i],isnap,type, 
-									&pL->pPOS[i*3], 
-									&pL->pVEL[i*3],
-									mass,hsml, rho, u, &zm[0], sfr)
-									)
-									break;
+								for(size_t iv=0;iv<vecOAFABC.size();iv++)
+									{
+									float mass, sfr, hsml, rho, u, zm[2];
+									unsigned char type=pL->pType[i];
+
+									sfr=pL->pSFR[ig-1];
+									hsml=pL->pHSML[ig-1];
+									rho=pL->pRHO[ig-1];
+
+									mass=pL->pMASS[ig-1+ist-1-1];
+									u=pL->pU[ig-1];
+									if(type==0)zm[0]=pL->pZ[ig-1];
+									else
+										zm[1]=pL->pZ[ig-1+ist-1-1];
+
+									//3Pos, 3Vel, MASS, HSML, RHO, U, Z, SFR							
+									if(vecOAFABC[iv].insert(
+										pL->pID[i],isnap,type, 
+										&pL->pPOS[i*3], 
+										&pL->pVEL[i*3],
+										mass,hsml, rho, u, &zm[0], sfr)
+										)
+										break;
+									}
 								}
+
 							}
 
-						}
 
-
-					for(ir=0;ir<2;ir++)
-						if(rr<rvec[ir]){
-							fVec[ir*5+pL->pType[i]]+=1.0;
-							if(pL->pType[i]==0){
-								fVec[10+ir]+=pL->pSFR[ig];
+						for(ir=0;ir<2;ir++)
+							if(rr<rvec[ir]){
+								fVec[ir*5+pL->pType[i]]+=1.0;
+								if(pL->pType[i]==0){
+									fVec[10+ir]+=pL->pSFR[ig];
+									}
 								}
-							}
 
 					}
 				///////////////////////////////////
-				if(true)	{
-					std::string strType="234";
-					CSigma<double> sigma( 4.0f,strType, &pL->pType[0],&pL->pPOS[0], &pL->pVEL[0],pL->size());
-					sigma.m_fname="sigma_"+boost::lexical_cast<std::string>(isnap)+"_"+strType+".txt";
-					}
-///////////////////////////////////////////////////////
+
+				///////////////////////////////////////////////////////
 				TLogData result=GetAB<float>(R,x,y, 8, 0.1f);//opt.m_Rmax);
 				std::vector<float> AmRad=getAmMaxMeanR(result);//format R1, Am1, R2,  Am2, R3, Am3
 
