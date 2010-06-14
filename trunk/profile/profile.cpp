@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
 				CMSTree mst_tree(x,y,z, opt.m_eps, opt.m_min_npart, opt.m_NGB);
 				//mst_tree.m_MSTCatalog[0].wcom[0];
 				float com[]={0.12564f,-0.67488f,1.43077f};//{ 19289.00659f, 26536.94112f, 24105.424500f};
-				if(false)
+				if(true)
 					{
 					mst_tree.compile();
 					com[0]=(float)mst_tree.m_MSTCatalog[0].wcom[0];
