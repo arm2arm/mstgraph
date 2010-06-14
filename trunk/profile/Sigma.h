@@ -90,17 +90,26 @@ void mma(vector<double> &data, std::string msg="Stat ")
 template <class T>
 class CSigma{
 public:
-	vector<double> sigma; 
+	vector< vector<double> > sigma; 
 	vector<double> rr;
 	string m_fname;
 	void save()
 		{
 		std::ofstream stream(m_fname.c_str());
 		if(stream.is_open())
+			{
+			stream<<"# Rad \t";
+			for(size_t ity=0;ity<types.size();ity++)
+				stream<<"sigma_T"<<types[ity]<<"\t";
+			stream<<endl;
 			for(size_t i=0;i<rr.size();i++)
 				{
-				stream<<rr[i]<<" "<<sigma[i]<<endl;
+				stream<<rr[i]<<"\t";
+				for(size_t ity=0;ity<types.size();ity++)
+					stream<<sigma[ity][i]<<"\t";
+				stream<<endl;
 				}
+			}
 		}
 	struct CData
 		{
@@ -150,35 +159,42 @@ public:
 
 		};
 		}data;
+		enum eTYPE{T0,T1,T2,T3,T4,T5,numtypes};
+		std::bitset<numtypes> userTypes;
+		vector<int> types;
+		void GetTypes(std::string &strType){
+			string  names[]={"T0","T1","T2","T3","T4","T5"};
+			std::string::iterator its=strType.begin();
+			while( its!=strType.end() )
+				{
+				char ch=*its;
+				int val=atoi(&ch);
+				if(val > -1 && val<numtypes+1)
+					{
+					userTypes.set(val);
+					types.push_back(val);
+					}
+				cout<<*its<<endl;
+				its++;
+				}
+			};
 
 	CSigma(float Rc, std::string strType,int *pType, float *pX, float *pV,size_t np)
 		{
 		m_fname="sigma.txt";
-		enum eTYPE{T0,T1,T2,T3,T4,T5,numtypes};
-		string  names[]={"T0","T1","T2","T3","T4","T5"};
-		std::bitset<numtypes> userTypes;
-		std::string::iterator its=strType.begin();
-		while( its!=strType.end() )
-			{
-			char ch=*its;
-			int val=atoi(&ch);
-			if(val > -1 && val<numtypes+1)
-				userTypes.set(val);
-			cout<<*its<<endl;
-			its++;
-			}
-
+		GetTypes(strType);
 		if (userTypes.any())
 			{
 			for(size_t i=0;i<np;i++)
 				{
 				if (userTypes[(eTYPE)pType[i]])
+					{
 					data.insert(i,pType[i],&pX[i*3],&pV[i*3]);
+					}
 				}
-			//data.PutInCom();
+			
 			cout<<"# Sigma over the "<<data.size()<<" particles"<<endl;
 
-			//			GetSigma(&data,  sigma, rr, Rc);
 			}
 		};
 	~CSigma(){
@@ -186,6 +202,10 @@ public:
 		save();
 		}
 	void GetSigma(size_t Nbins=150, double Rc=4.0){
+
+		int typeCount=userTypes.count();
+		if(!typeCount)return;
+
 		valarray<double> dist(0.0,data.size());
 		for(size_t i=0;i<data.size();i++)
 			{
@@ -193,23 +213,32 @@ public:
 			}
 		
 		double dr=Rc/(double)Nbins, r;
-		sigma.resize(Nbins);
-		rr=sigma;
+		sigma.resize(6);
+		for(size_t i=0;i<6;i++)
+		sigma[i].resize(Nbins);
+		rr.resize(Nbins);
 		valarray<double> vz(&data.vz[0], data.vz.size());
+		valarray<int>    type(&data.type[0], data.type.size());
+
 		double mvel=vz.sum()/(double)vz.size();
 		for(size_t i=0l;i<Nbins;i++)
 			{
 			r=dr*i;
-			valarray<bool> ids = (dist < r+dr) && (dist > r);
-			if(ids.max())
+			cout<<i<<") "<<r<<" ";
+			for(size_t itype=0;itype<types.size();itype++)
 				{
-				valarray<double> d=vz[ids];
-				d-=mvel;
-				d=pow(d,2.0);
-				sigma[i]= sqrt(d.sum()/(double)d.size());
-				rr[i]=r;
-				cout<<i<<") "<<r<<" "<<sigma[i]<<endl;
+				valarray<bool> ids = (dist < r+dr) && (dist > r) && (type==types[itype]);
+				if(ids.max())
+					{
+					valarray<double> d=vz[ids];
+					d-=mvel;
+					d=pow(d,2.0);
+					sigma[itype][i]= sqrt(d.sum()/(double)d.size());
+					rr[i]=r;
+					}
+				cout<<sigma[itype][i]<<"\t";
 				}
+			cout<<endl;
 			}
 		};
 	template <class Tvec, class Tconst, typename TOpbin>

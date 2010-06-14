@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
 				std::transform( z.begin(), z.end(), z.begin(),std::bind2nd( std::minus<float>(), com[2]) );
 
 				if(true)	{
-					std::string strType="2";
+					std::string strType="01234";
 					CSigma<double> sigma( 15.0f,strType, &pL->pType[0],&pL->pPOS[0], &pL->pVEL[0],pL->size());
 					sigma.GetSigma(150, 15);
 					sigma.m_fname="sigma_"+boost::lexical_cast<std::string>(isnap)+"_"+strType+".txt";
