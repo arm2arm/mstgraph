@@ -240,6 +240,9 @@ public:
 				}
 			cout<<endl;
 			}
+		for(size_t i=0;i<6;i++)
+			smooth(sigma[i]);
+
 		};
 	template <class Tvec, class Tconst, typename TOpbin>
 	vector<bool> make_bool_vec(vector<Tvec> &vec, Tconst value, TOpbin op, int *np=NULL)
