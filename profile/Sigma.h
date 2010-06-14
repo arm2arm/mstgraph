@@ -242,7 +242,7 @@ public:
 					}
 				//cout<<sigma[itype][i]<<"\t";
 				}
-			cout<<endl;
+			//cout<<endl;
 			}
 		for(size_t i=0;i<6;i++)
 			smooth(sigma[i]);
