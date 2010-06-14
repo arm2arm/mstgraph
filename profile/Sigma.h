@@ -18,7 +18,7 @@
 #include <valarray> //vallaray
 #include <boost/lambda/lambda.hpp>
 #include <boost/lambda/bind.hpp>
-#include "utils.h"
+//#include "utils.h"
 using std::vector;
 using std::valarray;
 using std::cout;
@@ -170,21 +170,48 @@ public:
 
 		if (userTypes.any())
 			{
-			data.PutInCom();
 			for(size_t i=0;i<np;i++)
 				{
 				if (userTypes[(eTYPE)pType[i]])
 					data.insert(i,pType[i],&pX[i*3],&pV[i*3]);
 				}
-			data.PutInCom();
+			//data.PutInCom();
 			cout<<"# Sigma over the "<<data.size()<<" particles"<<endl;
-			GetSigma(&data,  sigma, rr, Rc);
+
+			//			GetSigma(&data,  sigma, rr, Rc);
 			}
 		};
 	~CSigma(){
 
 		save();
 		}
+	void GetSigma(size_t Nbins=150, double Rc=4.0){
+		valarray<double> dist(0.0,data.size());
+		for(size_t i=0;i<data.size();i++)
+			{
+			dist[i]=sqrt(data.x[i]*data.x[i]+data.y[i]*data.y[i]);
+			}
+		
+		double dr=Rc/(double)Nbins, r;
+		sigma.resize(Nbins);
+		rr=sigma;
+		valarray<double> vz(&data.vz[0], data.vz.size());
+		double mvel=vz.sum()/(double)vz.size();
+		for(size_t i=0l;i<Nbins;i++)
+			{
+			r=dr*i;
+			valarray<bool> ids = (dist < r+dr) && (dist > r);
+			if(ids.max())
+				{
+				valarray<double> d=vz[ids];
+				d-=mvel;
+				d=pow(d,2.0);
+				sigma[i]= sqrt(d.sum()/(double)d.size());
+				rr[i]=r;
+				cout<<i<<") "<<r<<" "<<sigma[i]<<endl;
+				}
+			}
+		};
 	template <class Tvec, class Tconst, typename TOpbin>
 	vector<bool> make_bool_vec(vector<Tvec> &vec, Tconst value, TOpbin op, int *np=NULL)
 		{

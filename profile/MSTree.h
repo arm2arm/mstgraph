@@ -55,15 +55,18 @@ class CMSTree
 				fname+=".grp.txt";
 				//if(!update && !load())
 					{
-					cout<<"geting NGB:"<<m_maxNGB<<endl;
+					
+					
+					}
+			};
+		~CMSTree(void);
+		void compile(){
+			cout<<"geting NGB:"<<m_maxNGB<<endl;
 					FillData();
 					BuildKDTree();
 					BuildGraph();
 					GetMST();
-					//CompileCATS();
-					}
 			};
-		~CMSTree(void);
 		void GetMST()
 			{
 			scoped_timer timemme("Get MSTGraph:.....");
