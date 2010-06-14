@@ -212,7 +212,7 @@ public:
 			dist[i]=sqrt(data.x[i]*data.x[i]+data.y[i]*data.y[i]);
 			}
 		
-		double dr=0.05;
+		double dr=0.1;
 		Nbins=(size_t)(Rc/dr);
 		double r;
 		sigma.resize(6);
