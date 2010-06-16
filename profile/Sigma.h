@@ -229,7 +229,7 @@ public:
 		
 		cout<<"# Sigma in the X and Y slits...";
 		cout.flush();
-		GetSigmaInSlit();
+		GetSigmaInSlit(Nbins, Rc);
 		cout<<"..done"<<endl;
 		
 		
@@ -278,7 +278,7 @@ public:
 			smooth(sigma[i]);
 		
 		};
-///////////////////////////////
+/////////////////////////////// 
 	vector<vector<double> > sigmaSlitX, sigmaSlitY;
 	void GetSigmaInSlit(size_t Nbins=150, double Rc=4.0, double slw=0.5, double dr=0.1){
 		CData slitdataX, slitdataY;
