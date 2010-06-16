@@ -218,7 +218,7 @@ class CMSTree
 			{
 			std::string fname=std::string("part_ig")+boost::lexical_cast<std::string>(ig)+std::string(".ascii");
 			std::ofstream of(fname.c_str());
-			if(of.is_open())
+			if(of.is_open()&&m_MSTCatalog.size())
 				for(size_t i=0;i<m_MSTCatalog[ig].id.size();i++)
 					{
 					int ip=m_MSTCatalog[ig].id[i];

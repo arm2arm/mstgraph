@@ -139,12 +139,7 @@ int main(int argc, char* argv[])
 				std::transform( y.begin(), y.end(), y.begin(),std::bind2nd( std::minus<float>(), com[1]) );
 				std::transform( z.begin(), z.end(), z.begin(),std::bind2nd( std::minus<float>(), com[2]) );
 
-				if(true)	{
-					std::string strType="01234";
-					CSigma<double> sigma( strType, &pL->pType[0],&pL->pPOS[0], &pL->pVEL[0],pL->size());
-					sigma.GetSigma(500, 10);
-					sigma.m_fname="sigma_"+boost::lexical_cast<std::string>(isnap)+".txt";
-					}
+				
 				R.clear();
 				for(unsigned int i=0, ig=0, ist=0;i<pL->m_nelem-1;i++)// -1 to exclude BH particle
 					{
@@ -205,9 +200,22 @@ int main(int argc, char* argv[])
 				TLogData result=GetAB<float>(R,x,y, 8, 0.1f);//opt.m_Rmax);
 				std::vector<float> AmRad=getAmMaxMeanR(result);//format R1, Am1, R2,  Am2, R3, Am3
 
-				/////////////////////////////////		     
+				///////////////PCA analysis//////////////////		     
 				CPCA pca;
 				double phi=pca.GetCovarMatrix(mst_tree, 0);
+
+				/////////////USE PCA for orientate////////////////////
+
+
+				//////////////////////Make a dispersion analysis///////////////////////////////
+				if(true)        {   
+					std::string strType="01234";
+					CSigma<double> sigma( strType, &pL->pType[0],&pL->pPOS[0], &pL->pVEL[0],pL->size());
+					sigma.GetSigma(200, 10);
+					sigma.m_fname="sigma_"+boost::lexical_cast<std::string>(isnap)+".txt";
+					}   
+
+				/////////////////////////////////////////////////////
 				fVec[14]=(float)phi;
 				mst_tree.dump(0);
 				logAm.insert(isnap, result);		
