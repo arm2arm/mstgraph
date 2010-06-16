@@ -84,29 +84,26 @@ void mma(vector<double> &data, std::string msg="Stat ")
 
 
 ////////////////////////////////////////////
-
-
-
 template <class T>
 class CSigma{
 public:
 	vector< vector<double> > sigma; 
-	vector<double> rr;
+	vector<double> rr, rrslw;
 	string m_fname;
-	void save()
+	void save(vector<double> &rr_, vector< vector<double> > &sig, string fname)
 		{
-		std::ofstream stream(m_fname.c_str());
+		std::ofstream stream(fname.c_str());
 		if(stream.is_open())
 			{
 			stream<<"# Rad \t";
 			for(size_t ity=0;ity<types.size();ity++)
 				stream<<"sigma_T"<<types[ity]<<"\t";
 			stream<<endl;
-			for(size_t i=0;i<rr.size();i++)
+			for(size_t i=0;i<rr_.size();i++)
 				{
-				stream<<rr[i]<<"\t";
+				stream<<rr_[i]<<"\t";
 				for(size_t ity=0;ity<types.size();ity++)
-					stream<<sigma[ity][i]<<"\t";
+					stream<<sig[ity][i]<<"\t";
 				stream<<endl;
 				}
 			}
@@ -130,9 +127,10 @@ public:
 			vz.resize(np);
 			type.resize(np);
 			};
-		void insert(size_t i,int type_,float *pX, float *pV)
+		void insert(int type_,float *pX, float *pV)
 			{
-				if(abs(pX[2])<3.0 && abs(pV[2])<400.0 ){
+			//	if(abs(pX[2])<3.0 && abs(pV[2])<400.0 )
+					{
 				x.push_back(pX[0]);
 				y.push_back(pX[1]);
 				z.push_back(pX[2]);
@@ -142,6 +140,26 @@ public:
 				type.push_back(type_);
 				}
 			}
+		void insert(int type_,T x_, T y_,T  z_, T vx_, T vy_, T vz_)
+			{
+				x.push_back(x_);
+				y.push_back(y_);
+				z.push_back(z_);
+				vx.push_back(vx_);
+				vy.push_back(vy_);
+				vz.push_back(vz_);
+				type.push_back(type_);
+			}
+		valarray<double> GetDistXY()
+			{
+			valarray<double> dist(this->size());
+			for(size_t i=0;i<this->size();i++)
+				{
+				dist[i]=sqrt(x[i]*x[i]+y[i]*y[i]);
+				}
+			return  dist;
+			}
+		
 		size_t m_np;
 		vector<T> x,y,z,vx, vy, vz;
 		vector<int> type;
@@ -189,23 +207,34 @@ public:
 				{
 				if (userTypes[(eTYPE)pType[i]])
 					{
-					data.insert(i,pType[i],&pX[i*3],&pV[i*3]);
+					data.insert(pType[i],&pX[i*3],&pV[i*3]);
 					}
 				}
 			
-			cout<<"# Sigma over the "<<data.size()<<" particles"<<endl;
+			cout<<"# Prepare for sigma over the "<<data.size()<<" particles"<<endl;
 
 			}
 		};
 	~CSigma(){
 
-		save();
+		save(rr,sigma, m_fname);
+		save(rrslw, sigmaSlitX, m_fname+".slitX");
+		save(rrslw, sigmaSlitY, m_fname+".slitY");
 		}
 	void GetSigma(size_t Nbins=150, double Rc=4.0){
+		
 
 		int typeCount=userTypes.count();
 		if(!typeCount)return;
-
+		
+		cout<<"# Sigma in the X and Y slits...";
+		cout.flush();
+		GetSigmaInSlit();
+		cout<<"..done"<<endl;
+		
+		
+		cout<<"# Sigma within circular rings ..";
+		cout.flush();
 		valarray<double> dist(0.0,data.size());
 		for(size_t i=0;i<data.size();i++)
 			{
@@ -228,6 +257,7 @@ public:
 		for(size_t i=0l;i<Nbins;i++)
 			{
 			r=dr*i;
+			rr[i]=r;
 			//cout<<i<<") "<<r<<" ";
 			for(size_t itype=0;itype<types.size();itype++)
 				{
@@ -238,88 +268,95 @@ public:
 					d-=mvel;
 					d=pow(d,2.0);
 					sigma[itype][i]= sqrt(d.sum()/(double)d.size());
-					rr[i]=r;
 					}
 				//cout<<sigma[itype][i]<<"\t";
 				}
 			//cout<<endl;
 			}
+		cout<<"..done"<<endl;
 		for(size_t i=0;i<6;i++)
 			smooth(sigma[i]);
-
+		
 		};
-	template <class Tvec, class Tconst, typename TOpbin>
-	vector<bool> make_bool_vec(vector<Tvec> &vec, Tconst value, TOpbin op, int *np=NULL)
-		{
-		vector<bool> myanswer(vec.size(), false);	
-		typename vector<Tvec>::iterator ie=vec.end();
-		typename vector<Tvec>::iterator ib=vec.begin();
-		size_t i=0;
-		for(i=0;i<vec.size();i++)
+///////////////////////////////
+	vector<vector<double> > sigmaSlitX, sigmaSlitY;
+	void GetSigmaInSlit(size_t Nbins=150, double Rc=4.0, double slw=0.5, double dr=0.1){
+		CData slitdataX, slitdataY;
+		std::ofstream stream("test.txt"),streamy("test2.txt");
+		if(stream.is_open())
+		for(size_t i=0;i<data.size();i++)
 			{
-			if( op((*ib), value))
+			if(abs(data.y[i])<slw && abs(data.x[i])<Rc)
 				{
-				myanswer[i].flip();
+				slitdataX.insert(data.type[i], 
+				data.x[i], data.y[i],  data.z[i],  data.vx[i],  data.vy[i],  data.vz[i] );
+				stream<<data.x[i]<<" "<<data.y[i]<<endl;
 				}
-			ib++;
-			}
-		int nc=(int)std::count(myanswer.begin(), myanswer.end(), true);
-		if(np!=NULL)(*np)=i;
-		return myanswer;
-		};
-
-
-	void GetSigma(CData *pL, vector<double> &sigma, vector<double> &rr, double Rc=5.0)
-		{
-		size_t Nsigbin=250, Nbins=200;
-		double dr=Rc/(double)Nsigbin;
-		double slw=Rc;
-		vector<int> ids,ib;
-		sigma.resize(Nsigbin, (double)0.0);
-		rr=sigma;
-
-		vector<double> dist;
-		for(size_t i=0;i<pL->size(); i++)
-			dist.push_back(sqrt(pL->x[i]*pL->x[i]+pL->y[i]*pL->y[i]));
-                cout<<dist.size()<<endl;
-		TWhereIs whereib;
-		//check (x> -rc && x<rc && abs(y)< slw)
-		vector<bool> ans=make_bool_vec<double, double>(dist, Rc, std::less_equal<double>()); 
-		whereib.push(ans);
-		/*vector<bool> ans=make_bool_vec<double, double>(pL->x, -Rc, std::greater_equal<double>()); 
-		whereib.push(ans);
-		ans=make_bool_vec<double, double>(pL->x, Rc, std::less<double>()); 
-		whereib.push(ans);
-		ans=make_bool_vec<double, double>(pL->y, -Rc, std::greater_equal<double>()); 
-		whereib.push(ans);
-		ans=make_bool_vec<double, double>(pL->y, Rc, std::less<double>()); 
-		whereib.push(ans);*/
-		ib=whereib.get();
-		mma(dist, "Dist: ");
-		valarray<double> vzb=get(ib,pL->vz);
-		double meanvelz=vzb.sum()/(double)vzb.size();
-
-		for(size_t i=0;i<Nsigbin;i++)
-			{
-			double r=i*dr;
-			TWhereIs whereis;	
-			whereis.push(
-				make_bool_vec<double, double>(dist, r, std::greater_equal<double>())
-				);
-			whereis.push(
-				make_bool_vec<double, double>(dist, r+dr, std::less<double>())
-				);
-			ids=whereis.get();
-			if(ids.size() > 0 )
-				{
-				valarray<double> vzslice=get(ids,pL->vz);
-				vzslice=std::pow(vzslice-meanvelz,(double)2.0);
-				sigma[i]=sqrt(vzslice.sum()/(double)ids.size());
-				rr[i]=r;
+			if(abs(data.x[i])<slw && abs(data.y[i])<Rc)
+				{slitdataY.insert(data.type[i], 
+				data.x[i], data.y[i],  data.z[i],  data.vx[i],  data.vy[i],  data.vz[i] );
+			streamy<<data.x[i]<<" "<<data.y[i]<<endl;
 				}
 			}
+		stream.close();streamy.close();
+		exit(0);
 
+		dr=(2.0*Rc)/static_cast<double>(Nbins);
+		cout<<"Nbins="<<Nbins<<endl;
+		double r;
+		sigmaSlitX.resize(6);
+		for(size_t i=0;i<6;i++)
+		sigmaSlitX[i].resize(Nbins);
+		sigmaSlitY=sigmaSlitX;
+		rrslw.resize(Nbins);
+		valarray<double> slitXvz(&slitdataX.vz[0], slitdataX.vz.size());
+		valarray<int>    typeX(&slitdataX.type[0], slitdataX.type.size());
+		valarray<double> slitYvz(&slitdataY.vz[0], slitdataY.vz.size());
+		valarray<int>    typeY(&slitdataY.type[0], slitdataY.type.size());
+
+		double mvelX=slitXvz.sum()/(double)slitXvz.size();
+		double mvelY=slitYvz.sum()/(double)slitYvz.size();
+
+		valarray<double> slwX(&slitdataX.x[0], slitdataX.x.size());		
+		valarray<double> slwY(&slitdataY.y[0], slitdataX.y.size());		
+
+		for(size_t i=0l;i<Nbins;i++)
+			{
+			r=dr*i-Rc;
+			rrslw[i]=r;
+			cout<<i<<" "<<r<<endl;
+			for(size_t itype=0;itype<types.size();itype++)
+				{
+				valarray<bool> idsX = (slwX < r+dr) && (slwX > r) && (typeX==types[itype]);
+				valarray<bool> idsY = (slwY < r+dr) && (slwY > r) && (typeY==types[itype]);	
+				if(idsX.max())
+					sigmaSlitX[itype][i]=check_and_get(idsX, mvelX,slitXvz);
+				//if(idsY.max())
+				//	sigmaSlitY[itype][i]=check_and_get(idsY, mvelY,slitYvz);
+				}
+			}
+		for(size_t i=0;i<6;i++)
+			{
+			smooth(sigmaSlitX[i]);
+			smooth(sigmaSlitY[i]);
+			}
+
+		};
+///////////////////////////////
+	double check_and_get(valarray<bool> &ids, double mvel/*meanvalue of the velociti in the whole region*/, 
+		valarray<double> &vz)
+		{
+		double sig=0.0;
+		if(ids.max())
+			{
+			valarray<double> d=vz[ids];
+			d-=mvel;
+			d=pow(d,2.0);
+			sig = sqrt(d.sum()/(double)d.size());
+			}
+		return sig;
 		}
+
 	};
 
 #endif

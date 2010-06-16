@@ -327,6 +327,25 @@ std::vector< std::vector<T> > GetAB(vector<T> &R,vector<T> &x,vector<T> &y, T pr
 	return result;
 	}
 
+	template <class Tvec, class Tconst, typename TOpbin>
+	vector<bool> make_bool_vec(vector<Tvec> &vec, Tconst value, TOpbin op, int *np=NULL)
+		{
+		vector<bool> myanswer(vec.size(), false);	
+		typename vector<Tvec>::iterator ie=vec.end();
+		typename vector<Tvec>::iterator ib=vec.begin();
+		size_t i=0;
+		for(i=0;i<vec.size();i++)
+			{
+			if( op((*ib), value))
+				{
+				myanswer[i].flip();
+				}
+			ib++;
+			}
+		int nc=(int)std::count(myanswer.begin(), myanswer.end(), true);
+		if(np!=NULL)(*np)=i;
+		return myanswer;
+		};
 
 
 #endif
