@@ -299,26 +299,31 @@ public:
 				}
 			}
 		stream.close();streamy.close();
-		exit(0);
+		
 
 		dr=(2.0*Rc)/static_cast<double>(Nbins);
 		cout<<"Nbins="<<Nbins<<endl;
 		double r;
 		sigmaSlitX.resize(6);
+		sigmaSlitY.resize(6);
 		for(size_t i=0;i<6;i++)
-		sigmaSlitX[i].resize(Nbins);
-		sigmaSlitY=sigmaSlitX;
+			{
+			sigmaSlitX[i].resize(Nbins);
+			sigmaSlitY[i].resize(Nbins);
+			}
 		rrslw.resize(Nbins);
+		
 		valarray<double> slitXvz(&slitdataX.vz[0], slitdataX.vz.size());
 		valarray<int>    typeX(&slitdataX.type[0], slitdataX.type.size());
+		
 		valarray<double> slitYvz(&slitdataY.vz[0], slitdataY.vz.size());
 		valarray<int>    typeY(&slitdataY.type[0], slitdataY.type.size());
 
-		double mvelX=slitXvz.sum()/(double)slitXvz.size();
-		double mvelY=slitYvz.sum()/(double)slitYvz.size();
+		double mvelX=slitXvz.sum()/static_cast<double>(slitXvz.size());
+		double mvelY=slitYvz.sum()/static_cast<double>(slitYvz.size());
 
 		valarray<double> slwX(&slitdataX.x[0], slitdataX.x.size());		
-		valarray<double> slwY(&slitdataY.y[0], slitdataX.y.size());		
+		valarray<double> slwY(&slitdataY.y[0], slitdataY.y.size());		
 
 		for(size_t i=0l;i<Nbins;i++)
 			{
@@ -331,8 +336,8 @@ public:
 				valarray<bool> idsY = (slwY < r+dr) && (slwY > r) && (typeY==types[itype]);	
 				if(idsX.max())
 					sigmaSlitX[itype][i]=check_and_get(idsX, mvelX,slitXvz);
-				//if(idsY.max())
-				//	sigmaSlitY[itype][i]=check_and_get(idsY, mvelY,slitYvz);
+				if(idsY.max())
+					sigmaSlitY[itype][i]=check_and_get(idsY, mvelY,slitYvz);
 				}
 			}
 		for(size_t i=0;i<6;i++)
@@ -340,16 +345,18 @@ public:
 			smooth(sigmaSlitX[i]);
 			smooth(sigmaSlitY[i]);
 			}
-
+		//save(rrslw, sigmaSlitX, m_fname+".slitX");
+		//save(rrslw, sigmaSlitY, m_fname+".slitY");
+		
 		};
 ///////////////////////////////
-	double check_and_get(valarray<bool> &ids, double mvel/*meanvalue of the velociti in the whole region*/, 
-		valarray<double> &vz)
+	double check_and_get(valarray<bool> &ids_, double mvel/*meanvalue of the velociti in the whole region*/, 
+		valarray<double> &vz_)
 		{
 		double sig=0.0;
-		if(ids.max())
+		if(ids_.max())
 			{
-			valarray<double> d=vz[ids];
+			valarray<double> d=vz_[ids_];
 			d-=mvel;
 			d=pow(d,2.0);
 			sig = sqrt(d.sum()/(double)d.size());
