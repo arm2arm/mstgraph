@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
 	typedef std::vector<CLoader*> TLoader;
 	TLoader Lvec;
 	std::vector<float> rvec;
-	const int NFields=5+5+4+1;
+	const int NFields=5+5+4+1+3;//GasProfile1kpc[1:5], GasProfile2kpc[1:5], 
 	CLogger log(opt.m_file_out,opt.m_updatelog, NFields);
 	CLogger logAmRR("AmRad.log", opt.m_updatelog);
 	logAmRR.SetComment("Am R1 R2 R3");
@@ -203,20 +203,23 @@ int main(int argc, char* argv[])
 				///////////////PCA analysis//////////////////		     
 				CPCA pca;
 				double phi=pca.GetCovarMatrix(mst_tree, 0);
-
+				
 				/////////////USE PCA for orientate////////////////////
 				
 
 				//////////////////////Make a dispersion analysis///////////////////////////////
+				vector<double> Jv;
 				if(true)        {   
 					std::string strType="01234";
 					CSigma<double> sigma( strType, &pL->pType[0],&pL->pPOS[0], &pL->pVEL[0],pL->size());
 					sigma.GetSigma(200, 10);
+					Jv=sigma.GetJv();
 					sigma.m_fname="sigma_"+boost::lexical_cast<std::string>(isnap)+".txt";
 					}   
 
 				/////////////////////////////////////////////////////
 				fVec[14]=(float)phi;
+				fVec[15]=(float)Jv[0];(float)fVec[16]=(float)Jv[1];fVec[17]=(float)Jv[2];
 				mst_tree.dump(0);
 				logAm.insert(isnap, result);		
 				logAmRR.insert(isnap, AmRad);
