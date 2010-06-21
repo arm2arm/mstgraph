@@ -219,7 +219,7 @@ int main(int argc, char* argv[])
 
 				/////////////////////////////////////////////////////
 				fVec[14]=(float)phi;
-				fVec[15]=(float)Jv[0];(float)fVec[16]=(float)Jv[1];fVec[17]=(float)Jv[2];
+				fVec[15]=(float)Jv[0];fVec[16]=(float)Jv[1];fVec[17]=(float)Jv[2];
 				mst_tree.dump(0);
 				logAm.insert(isnap, result);		
 				logAmRR.insert(isnap, AmRad);
