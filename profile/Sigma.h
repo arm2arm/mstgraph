@@ -303,23 +303,25 @@ public:
 	vector<vector<double> > sigmaSlitX, sigmaSlitY;
 	void GetSigmaInSlit(size_t Nbins=150, double Rc=4.0, double slw=0.5, double dr=0.1){
 		CData slitdataX, slitdataY;
-		std::ofstream stream("test.txt"),streamy("test2.txt");
-		if(stream.is_open())
+		if(false)
+			{std::ofstream stream("test.txt"),streamy("test2.txt");
+		if(stream.is_open());
+			}
 		for(size_t i=0;i<data.size();i++)
 			{
 			if(abs(data.y[i])<slw && abs(data.x[i])<Rc)
 				{
 				slitdataX.insert(data.type[i], 
 				data.x[i], data.y[i],  data.z[i],  data.vx[i],  data.vy[i],  data.vz[i] );
-				stream<<data.x[i]<<" "<<data.y[i]<<endl;
+		if(false)		stream<<data.x[i]<<" "<<data.y[i]<<endl;
 				}
 			if(abs(data.x[i])<slw && abs(data.y[i])<Rc)
 				{slitdataY.insert(data.type[i], 
 				data.x[i], data.y[i],  data.z[i],  data.vx[i],  data.vy[i],  data.vz[i] );
-			streamy<<data.x[i]<<" "<<data.y[i]<<endl;
+			if(false)streamy<<data.x[i]<<" "<<data.y[i]<<endl;
 				}
 			}
-		stream.close();streamy.close();
+		if(false){stream.close();streamy.close()};
 		
 
 		dr=(2.0*Rc)/static_cast<double>(Nbins);
@@ -350,7 +352,7 @@ public:
 			{
 			r=dr*i-Rc;
 			rrslw[i]=r;
-			cout<<i<<" "<<r<<endl;
+			if(false)cout<<i<<" "<<r<<endl;
 			for(size_t itype=0;itype<types.size();itype++)
 				{
 				valarray<bool> idsX = (slwX < r+dr) && (slwX > r) && (typeX==types[itype]);
