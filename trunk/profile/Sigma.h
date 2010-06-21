@@ -221,6 +221,27 @@ public:
 		save(rrslw, sigmaSlitX, m_fname+".slitX");
 		save(rrslw, sigmaSlitY, m_fname+".slitY");
 		}
+
+	vector<double> Jv;
+	vector<double> GetJv(void)
+		{
+		Jv.resize(3);
+		size_t np=0;
+		for(size_t i =0; i<data.vz.size();i++)
+			{
+			if(data.type[i]==4 && data.R(i)<40.0)
+				{
+				Jv[0] += (data.y[i]*data.vz[i]-data.z[i]*data.vy[i]);
+				Jv[1] += (data.z[i]*data.vx[i]-data.x[i]*data.vz[i]);
+				Jv[2] += (data.x[i]*data.vy[i]-data.y[i]*data.vx[i]);
+				np++;
+				}
+			}
+		Jv[0]/=static_cast<double>(np);
+		Jv[1]/=static_cast<double>(np);
+		Jv[2]/=static_cast<double>(np);
+		return Jv;
+		}
 	void GetSigma(size_t Nbins=150, double Rc=4.0){
 		
 
