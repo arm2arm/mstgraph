@@ -214,7 +214,7 @@ int main(int argc, char* argv[])
 					CSigma<double> sigma( strType, &pL->pType[0],&pL->pPOS[0], &pL->pVEL[0],pL->size());
 					sigma.GetSigma(200, 10);
 					Jv=sigma.GetJv();
-					sigma.m_fname="sigma_"+boost::lexical_cast<std::string>(isnap)+".txt";
+					sigma.m_fname=opt.m_file_sigma+"_"+boost::lexical_cast<std::string>(isnap)+".txt";
 					}   
 
 				/////////////////////////////////////////////////////
