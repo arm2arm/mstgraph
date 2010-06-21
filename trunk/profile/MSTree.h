@@ -41,7 +41,7 @@ typedef std::pair<int, int> E;
 
 class CMSTree
 	{
-	typedef boost::multi_array<MyFloat,2> array2dfloat;
+	//typedef boost::multi_array<MyFloat,2> array2dfloat;
 	public:
 		//CMSTree(void);
 		CMSTree(vector<float> &x, vector<float> &y,vector<float>  &z,
@@ -280,7 +280,7 @@ class CMSTree
 		/////////////////////////
 		int m_maxNGB;
 		kdtree2_result_vector ngblist, ngblistbrut;
-		array2dfloat realdata; 
+		kdtree2_array realdata; 
 		size_t N;
 		size_t dim;
 		float m_afof_eps;
