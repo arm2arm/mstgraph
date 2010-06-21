@@ -321,7 +321,7 @@ public:
 			if(false)streamy<<data.x[i]<<" "<<data.y[i]<<endl;
 				}
 			}
-		if(false){stream.close();streamy.close()};
+		if(false){stream.close();streamy.close();};
 		
 
 		dr=(2.0*Rc)/static_cast<double>(Nbins);
