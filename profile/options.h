@@ -23,7 +23,8 @@ public:
 	std::vector<std::string>  m_ApFilelist;
 	std::vector<std::vector<int> >  m_IDlistvec;
 	std::vector<int>  m_IDlist;
-	string m_file_out;
+	std::string m_file_out;
+	std::string m_file_sigma;
 	std::vector<std::string> m_IDfilelist;
 	int m_type;
 	float m_eps;
