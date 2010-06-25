@@ -306,14 +306,23 @@ void MultMat(std::vector<std::vector<double> >& m1, std::vector<std::vector<doub
 
 double CPCA::GetCovarMatrix( CMSTree &mst, int ID)
 	{
-
-	if(mst.m_MSTCatalog.size() ==0)return 0.0;	
-	size_t np=mst.m_MSTCatalog[ID].size();
+	bool get_all_flag=false;
+	if(mst.m_MSTCatalog.size() ==0){
+		get_all_flag=true;
+		}
+	size_t np=0;
+	if(get_all_flag)
+		np=mst.m_x.size();
+	else
+		np=mst.m_MSTCatalog[ID].size();
 	// lets us get mean
 	vector<double> x, y, z, eigen, eigenvalue;
 	for(size_t ip=0,i;ip</**/np;ip++)
 		{
-		i=mst.m_MSTCatalog[ID].id[ip];
+		if(!get_all_flag)
+			i=mst.m_MSTCatalog[ID].id[ip];
+		else
+			i=ip;
 		x.push_back(mst.m_x[i]);
 		y.push_back(mst.m_y[i]);
 		z.push_back(mst.m_z[i]);

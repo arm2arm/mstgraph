@@ -109,6 +109,31 @@ class CLoader
 			  }
 		  inline 		float GetBHMass(int i=0){return m_BHDATA[i*2];}
 		  inline 		float GetBHDOTMass(int i=0){return m_BHDATA[i*2+1];}
+		  vector<double> Jv;
+	vector<double> GetJv(void)
+		{
+		Jv.resize(3);
+		size_t np=0;
+		for(size_t i =0; i<size();i++)
+			{
+			if(pType[i]==4 && R(i)<40.0)
+				{
+				Jv[0] += (pPOS[i*3]*pVEL[i*3+2]-pPOS[i*3+2]*pVEL[i*3+1]);
+				Jv[1] += (pPOS[i*3+2]*pPOS[i*3]-pPOS[i*3]*pVEL[i*3+2]);
+				Jv[2] += (pPOS[i*3]*pVEL[i*3+1]-pPOS[i*3+1]*pVEL[i*3]);
+				np++;
+				}
+			}
+		Jv[0]/=static_cast<double>(np);
+		Jv[1]/=static_cast<double>(np);
+		Jv[2]/=static_cast<double>(np);
+		double len=sqrt(Jv[0]*Jv[0]+Jv[1]*Jv[1]+Jv[2]*Jv[2]);
+		Jv[0]/=len;
+		Jv[1]/=len;
+		Jv[2]/=len;
+		
+		return Jv;
+		}
 		  void get_com_bypot(CGadget *pG)
 			  {
 			  float *pP;

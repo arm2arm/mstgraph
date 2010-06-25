@@ -37,7 +37,7 @@ inline double Phi(){return m_Phi;};
 	 }
        of.close();
    } ;
-	private:
+	public:
 		std::vector<double>  eigenvals;
 		std::vector<std::vector<double> > eigenvec;
 		double m_Phi;

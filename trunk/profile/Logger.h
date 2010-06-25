@@ -93,7 +93,8 @@ class CLoggerAm{
 public:
 	CLoggerAm(std::string file, bool update=false):m_filename(file), m_update(update)
 		{
-		  load();
+		  if(update)
+			  load();
 		}
 	~CLoggerAm(){save();}
 	void flush(){save();};
