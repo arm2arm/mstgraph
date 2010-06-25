@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
 				CMSTree mst_tree(x,y,z, opt.m_eps, opt.m_min_npart, opt.m_NGB);
 				//mst_tree.m_MSTCatalog[0].wcom[0];
 				float com[]={0.12564f,-0.67488f,1.43077f};//{ 19289.00659f, 26536.94112f, 24105.424500f};
-				if(true)
+				if(false)
 					{
 					mst_tree.compile();
 					com[0]=(float)mst_tree.m_MSTCatalog[0].wcom[0];
@@ -141,6 +141,7 @@ int main(int argc, char* argv[])
 
 				
 				R.clear();
+				if(false)
 				for(unsigned int i=0, ig=0, ist=0;i<pL->m_nelem-1;i++)// -1 to exclude BH particle
 					{
 					float rr=pL->R(i);//
@@ -205,11 +206,26 @@ int main(int argc, char* argv[])
 				double phi=pca.GetCovarMatrix(mst_tree, 0);
 				
 				/////////////USE PCA for orientate////////////////////
-				
-
-				//////////////////////Make a dispersion analysis///////////////////////////////
 				vector<double> Jv;
-				if(true)        {   
+				Jv=pL->GetJv();
+				
+				//pca.eigenvec[3][1]=Jv[0];pca.eigenvec[3][2]=Jv[1];pca.eigenvec[3][3]=Jv[2];
+				
+				vector<double> e1(pca.eigenvec[1]), 
+					e2(pca.eigenvec[2]), 
+					e3(pca.eigenvec[3]);
+				vector<double> xr(x.size(), 0.0),yr(x.size(), 0.0),zr(x.size(), 0.0); 
+//////////// DO multiplication;
+				for(size_t ip=0;ip<x.size();ip++)
+					{
+					 xr[ip]=x[ip]*e1[1]+y[ip]*e1[2]+z[ip]*e1[3];
+					 yr[ip]=x[ip]*e2[1]+y[ip]*e2[2]+z[ip]*e2[3];
+					 zr[ip]=x[ip]*e3[1]+y[ip]*e3[2]+z[ip]*e3[3];
+					}
+				dump_xyz(xr, yr, zr, "dump_rot.log");
+				//////////////////////Make a dispersion analysis///////////////////////////////
+				
+				if(false)        {   
 					std::string strType="01234";
 					CSigma<double> sigma( strType, &pL->pType[0],&pL->pPOS[0], &pL->pVEL[0],pL->size());
 					sigma.GetSigma(200, 10);
