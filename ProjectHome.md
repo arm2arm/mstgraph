@@ -1,0 +1,1 @@
+Kruskal minimum spanning tree algorithm from the BOOST library used to analyse the phasespace density in the N-Body simulations.
